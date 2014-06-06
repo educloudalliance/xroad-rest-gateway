@@ -1,5 +1,8 @@
 X-Road REST-SOAP adapter
+Authors:
+- Jarkko Moilanen (initial author)
 =================
+
 
 REST SOAP adapter implementation for X-Road
 
