@@ -23,7 +23,7 @@ Servers](http://x-road.ee/docs/eng/x-road_service_protocol.pdf)
 ### SOAP-REST Hack
 X-Road is SOAP based and rising amount of webservices are now build on top of REST(ful) APIs. This raises the need to SOA adapter. This does require some extra work but at the moment there is no option. 
 
-Process is as follows
+#### Process is as follows
 ![rough process] (https://raw.githubusercontent.com/koulutuksenpilvivayla/rest-soap-adapter/master/images/rest-soap.png)
 
 Below is paper/theory version of the adaptation. Practise might raise some more issues for example in usability of API. That said, our first aim is to get data moving. Making solution pretty is the next step. 
