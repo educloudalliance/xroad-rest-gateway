@@ -1,4 +1,4 @@
-rest-soap-adapter
+X-Road REST-SOAP adapter
 =================
 
 REST SOAP adapter implementation for X-Road
