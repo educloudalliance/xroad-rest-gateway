@@ -31,6 +31,7 @@ Below is paper/theory version of the adaptation. Practise might raise some more 
 Principle is to use SOAP as container for 
 * JSON and 
 * XML response. 
+
 Contemporary API's are capable of producing outputs in above given formats
 
 #### REST/SOAP with JSON
