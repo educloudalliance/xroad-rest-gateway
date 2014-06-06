@@ -32,7 +32,12 @@ Principle is to use SOAP as container for
 * JSON and 
 * XML response. 
 
-Contemporary API's are capable of producing outputs in above given formats
+Contemporary API's are capable of producing outputs in above given formats. 
+
+All we need to do is:
+* Define how we embed REST requests to X-Road SOAP message
+* Define how we embed REST response to X-Road SOAP message
+* Implement light-weight adapter for example with Python
 
 #### REST/SOAP with JSON
 When using REST API via SOAP, the wanted API request url is in **request** element.  
