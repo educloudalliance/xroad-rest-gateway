@@ -96,3 +96,17 @@ In response the easiest approach is to package REST response (XML) inside SOAP m
 </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 ```
+
+### Pros and cons
+
+* The suggested solution is not ideal, it's more or less a hack. 
+* This solution will enable REST API development as usual. 
+* In fact we can attach any REST API to X-Road with this method. 
+* At the moment we have no explicit means to identify whether SOAP message is "original, not REST adapted" without parsing XML and doing some low level content analysis of **request** element. 
+* Authorization management has not been thought or discussed; how we manage rights to use REST APIs? Can the current solution be utilized? 
+ 
+
+
+
+
+
