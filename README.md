@@ -1,10 +1,8 @@
+## REST SOAP adapter implementation for X-Road
+
 Authors:
 - Jarkko Moilanen (initial author)
 
-=================
-
-
-REST SOAP adapter implementation for X-Road
 
 ### Data Exchange Layer X-Road
 
