@@ -1,4 +1,3 @@
-X-Road REST-SOAP adapter
 Authors:
 - Jarkko Moilanen (initial author)
 
