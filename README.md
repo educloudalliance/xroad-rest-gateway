@@ -3,10 +3,10 @@
 This repository will be the home for REST/JSON support solutions in X-Road. The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation. 
 
 People involved starting from 18.12.2014:
-* Andres Kütt (Estonian Information System Authority, RIA)
-* Alar Jõeste (Cybernetica)
-* Petteri Kivimäki (Population Register Centre)
-* Jarkko Moilanen (Ministry of Education and Culture)
+* Andres Kütt (Estonian Information System Authority, RIA, Estonia)
+* Alar Jõeste (Cybernetica, Estonia)
+* Petteri Kivimäki (Population Register Centre, Finland)
+* Jarkko Moilanen (Ministry of Education and Culture, Finland)
 
 ## Aim 2015
 In this repository you will find (2015) Proof of Concept level code for service that will enable REST support in X-Road version 6. The solution will not be part of Security Server, but more like a "REST Proxy". The solution could be included to Secutiry Server in the future, but that remains to be seen. No plans for that has been made. 
