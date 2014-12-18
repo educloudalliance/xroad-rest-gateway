@@ -1,4 +1,6 @@
-# REWRITE COMING
+# Joint X-Road REST/JSON support development 
+
+This repository will be the home for REST/JSON support solutions in X-Road. The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation. 
 
 People involved starting from 18.12.2014:
 * Andres Kütt (Estonian Information System Authority, RIA)
@@ -6,8 +8,13 @@ People involved starting from 18.12.2014:
 * Petteri Kivimäki (Population Register Centre)
 * Jarkko Moilanen (Ministry of Education and Culture)
 
+## Aim 2015
+In this repository you will find (2015) Proof of Concept level code for service that will enable REST support in X-Road version 6. The solution will not be part of Secutiry Server, but more like a "REST Proxy". The solution could be included to Secutiry Server in the future, but that remains to be seen. No plans for that has been made. 
 
-### Data Exchange Layer X-Road
+First aim is to get first practical REST API integrated to X-Road, document the process and open the code. In parallel with the technical development we will collect more use cases from Finland about REST/JSON APIs that need to be integrated with X-Road. Aim is not to make automated solution which covers 100% of cases. We will cheer loudly if 80% coverage is achieved. 
+
+
+## Data Exchange Layer X-Road
 
 The X-Road was launched in 2001. The data exchange layer X-Road is a technical and organisational environment, which enables secure Internet-based data exchange between the state’s information systems.
 
