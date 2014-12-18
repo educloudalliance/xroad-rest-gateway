@@ -5,6 +5,7 @@ This repository will be the home for REST/JSON support solutions in X-Road. The 
 People involved in initiation of co-operation:
 * Andres Kütt (Estonian Information System Authority, RIA, Estonia)
 * Alar Jõeste (Cybernetica, Estonia)
+* Margus Freudenthal (Cybernetica, Estonia)
 * Petteri Kivimäki (Population Register Centre, Finland)
 * Jarkko Moilanen (Ministry of Education and Culture, Finland)
 
