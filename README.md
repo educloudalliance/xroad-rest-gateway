@@ -11,7 +11,9 @@ People involved in initiation of co-operation:
 ## Aim 2015
 In this repository you will find (2015) Proof of Concept level code for service that will enable REST support in X-Road version 6. The solution will not be part of Security Server, but more like a "REST Proxy". The solution could be included to Secutiry Server in the future, but that remains to be seen. No plans for that has been made. 
 
-First aim is to get first practical REST API integrated to X-Road, document the process and open the code. In parallel with the technical development we will collect more use cases from Finland about REST/JSON APIs that need to be integrated with X-Road. Aim is not to make automated solution which covers 100% of cases. We will cheer loudly if 80% coverage is achieved. 
+First aim is to get first practical REST API integrated to X-Road, document the process and open the code. We also need to test and evaluate the toolchain for example for WSDL-RAML conversions and other things. 
+
+In parallel with the technical development we will collect more use cases from Finland about REST/JSON APIs that need to be integrated with X-Road. Aim is not to make automated solution which covers 100% of cases. We will cheer loudly if 80% coverage is achieved. 
 
 
 ## Data Exchange Layer X-Road
