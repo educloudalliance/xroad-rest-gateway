@@ -1,7 +1,10 @@
-## REST SOAP adapter implementation for X-Road
+# REWRITE COMING
 
-Authors:
-- Jarkko Moilanen (initial author)
+People involved starting from 18.12.2014:
+* Andres Kütt (Estonian Information System Authority, RIA)
+* Alar Jõeste (Cybernetica)
+* Petteri Kivimäki (Population Register Centre)
+* Jarkko Moilanen (Ministry of Education and Culture)
 
 
 ### Data Exchange Layer X-Road
@@ -20,94 +23,4 @@ Public and private sector enterprises and institutions can connect their informa
 * [Palveluväylä kehitysympäristö (Finnish only)](http://palveluvayla.fi)
 * [Requirements for Information Systems and Adapter
 Servers](http://x-road.ee/docs/eng/x-road_service_protocol.pdf)
-
-### SOAP-REST Hack
-X-Road is SOAP based and rising amount of webservices are now build on top of REST(ful) APIs. This raises the need to SOA adapter. This does require some extra work but at the moment there is no option. 
-
-#### Process is as follows
-![rough process] (https://raw.githubusercontent.com/koulutuksenpilvivayla/rest-soap-adapter/master/images/rest-soap.png)
-
-Below is paper/theory version of the adaptation. Practise might raise some more issues for example in usability of API. That said, our first aim is to get data moving. Making solution pretty is the next step. 
-
-Principle is to use SOAP as container for 
-* JSON and 
-* XML response. 
-
-Contemporary API's are capable of producing outputs in above given formats. 
-
-All we need to do is:
-* Define how we embed REST requests to X-Road SOAP message
-* Define how we embed REST response to X-Road SOAP message
-* Implement light-weight adapter for example with Python
-
-#### REST/SOAP with JSON
-When using REST API via SOAP, the wanted API request url is in **request** element.  
-```xml
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
- <SOAP-ENV:Header>
- Header content
- </SOAP-ENV:Header>
- <SOAP-ENV:Body>
- <m:service xmlns:m=”URI”>
- <request>REST API call here</request>
- </m:service>
- </SOAP-ENV:Body>
- </SOAP-ENV:Envelope>
-```
-
-In response the easiest approach is to package REST response (JSON) inside SOAP message inside **response** element. It is most likely needed to use **CDATA** [unparsed data](http://www.w3schools.com/xml/xml_cdata.asp) wrapper around JSON content.  
-```xml
-<SOAP-ENV:Header>Header content</SOAP-ENV:Header>
-<SOAP-ENV:Body>
-<m:service Response xmlns:m=”URI”>
-<request>REST API call here</request>
-<response><![CDATA[ JSON response here]]></response>
-</m:serviceResponse>
-</SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
-```
-
-#### REST/SOAP with XML
-When using REST API via SOAP, the wanted API request url is in **request** element.  
-```xml
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
- <SOAP-ENV:Header>
- Header content
- </SOAP-ENV:Header>
- <SOAP-ENV:Body>
- <m:service xmlns:m=”URI”>
- <request>REST API call here</request>
- </m:service>
- </SOAP-ENV:Body>
- </SOAP-ENV:Envelope>
-```
-
-In response the easiest approach is to package REST response (XML) inside SOAP message inside **response** element without root element - just plain content in well-formed XML format. 
-```xml
-<SOAP-ENV:Header>Header content</SOAP-ENV:Header>
-<SOAP-ENV:Body>
-<m:service Response xmlns:m=”URI”>
-<request>REST API call here</request>
-<response>
-<list>
-<item>Item content</item>
-</list>
-</response>
-</m:serviceResponse>
-</SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
-```
-
-### Pros and cons
-
-* The suggested solution is not ideal, it's more or less a hack. 
-* This solution will enable REST API development as usual. 
-* In fact we can attach any REST API to X-Road with this method. 
-* At the moment we have no explicit means to identify whether SOAP message is "original, not REST adapted" without parsing XML and doing some low level content analysis of **request** element. 
-* Authorization management has not been thought or discussed; how we manage rights to use REST APIs? Can the current solution be utilized? 
- 
-
-
-
-
 
