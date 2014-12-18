@@ -1,8 +1,8 @@
 # Joint X-Road REST/JSON support development 
 
-This repository will be the home for REST/JSON support solutions in X-Road. The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation. 
+This repository will be the home for REST/JSON support solutions in X-Road. The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation in Skype meeting which was held 18.12.2014. 
 
-People involved starting from 18.12.2014:
+People involved in initiation of co-operation:
 * Andres Kütt (Estonian Information System Authority, RIA, Estonia)
 * Alar Jõeste (Cybernetica, Estonia)
 * Petteri Kivimäki (Population Register Centre, Finland)
