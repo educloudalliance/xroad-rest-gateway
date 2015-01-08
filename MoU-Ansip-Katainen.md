@@ -7,6 +7,8 @@ ON COOPERATION IN THE FIELD OF INFORMATION
 AND COMMUNICATIONS TECHNOLOGY**
 </center>
 
+
+
 The Prime Minister of Estonia acting on behalf of the Government of the Republic of Estonia and the Prime Minister of Finland acting on behalf of the Government of the Republic of Finland (here-inafter referred to as the Participants)
 
 recognising the value that Estonia and Finland can give to each other if they join forces and under-take cooperative measures to develop digital society, economy and government together for mutual benefit,
