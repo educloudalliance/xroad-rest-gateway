@@ -46,7 +46,9 @@ The Participants are interested in developing cross-border cooperation e.g. by e
 The Participants will share experiences, insights and ideas concerning functional organisa-tional models, recommended courses of action, regulatory matters and other matters relevant to designing, developing and implementing successful and practical ICT solutions within society, economy and government.
 
 ## Paragraph 3
-Coordinating representatives of Participants
+
+**Coordinating representatives of Participants**
+
 The Participants designate the following ministries as their coordinating representatives, responsible for the arrangement and implementation of co-operation:
 
 * Republic of Estonia: Ministry of Economic Affairs and Communications,
@@ -74,7 +76,7 @@ This Memorandum of Understanding may be terminated by either Participant giving 
 
 ## Paragraph 6
 
-** Entry into effect** 
+**Entry into effect** 
 
 This Memorandum will come into effect on the date of signature thereof by the Participants.
 
