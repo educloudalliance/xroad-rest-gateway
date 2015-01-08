@@ -94,3 +94,6 @@ Name: Andrus Ansip
 
 PRIME MINISTER OF FINLAND, ACT-ING ON BEHALF OF THE GOVERN-MENT OF THE REPUBLIC OF FINLAND
 Name: Jyrki Katainen
+
+
+http://valtioneuvosto.fi/ajankohtaista/kolumnit/kolumni/sv.jsp?oid=401988
