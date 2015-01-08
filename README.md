@@ -1,6 +1,6 @@
 # Joint X-Road REST Gateway development 
 
-This repository will be the home for REST/JSON support solutions in X-Road. The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation in Skype meeting which was held 18.12.2014. 
+This repository will be the home for REST/JSON support solutions in X-Road. Mandate for joint development is based on [MoU which was signed by Katainen and Ansip](https://github.com/educloudalliance/xroad-rest-gateway/blob/master/MoU-Ansip-Katainen.md). The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation in Skype meeting which was held 18.12.2014. 
 
 People involved in initiation of co-operation:
 * Andres Kütt (Estonian Information System Authority, RIA, Estonia)
