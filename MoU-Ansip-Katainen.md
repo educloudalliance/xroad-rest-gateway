@@ -1,9 +1,11 @@
+<center>
 **MEMORANDUM OF UNDERSTANDING
 BETWEEN THE PRIME MINISTER OF ESTONIA ACTING ON BEHALF OF THE
 GOVERNMENT OF THE REPUBLIC OF ESTONIA
 AND THE PRIME MINISTER OF FINLAND ACTING ON BEHALF OF THE GOVERN-MENT OF THE REPUBLIC OF FINLAND
 ON COOPERATION IN THE FIELD OF INFORMATION
 AND COMMUNICATIONS TECHNOLOGY**
+</center>
 
 The Prime Minister of Estonia acting on behalf of the Government of the Republic of Estonia and the Prime Minister of Finland acting on behalf of the Government of the Republic of Finland (here-inafter referred to as the Participants)
 
