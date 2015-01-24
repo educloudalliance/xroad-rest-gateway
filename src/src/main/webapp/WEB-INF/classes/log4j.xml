@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} %-5p %c{1} : %m%n"/>
+        </layout>
+    </appender>
+    <appender name="file" class="org.apache.log4j.FileAppender">
+        <param name="File" value="${catalina.base}/logs/rest-gateway.log"/>
+        <param name="Append" value="false"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} %-5p %c{1} : %m%n"/>
+        </layout>
+    </appender>
+    <logger name="com.pkrete.xrd4j.tools.rest_gateway" additivity="false">
+        <level value="ALL"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <root>
+        <priority value="ALL" />
+        <appender-ref ref="console" />
+    </root>
+</log4j:configuration>

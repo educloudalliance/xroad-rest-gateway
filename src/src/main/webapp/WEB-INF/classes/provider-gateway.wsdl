@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" xmlns:tns="http://vrk-test.x-road.fi/producer" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://vrk-test.x-road.fi/producer">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://vrk-test.x-road.fi/producer">
+            <xsd:import namespace="http://x-road.ee/xsd/x-road.xsd" schemaLocation="http://x-road.ee/xsd/x-road.xsd"/>
+            <xsd:element name="getOrganizationList" nillable="true" />
+            <xsd:element name="getOrganizationListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request" />
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="faultCode" type="xrd:faultCode" nillable="true"/>
+                                    <xsd:element name="faultString" type="xrd:faultString" nillable="true"/>
+                                    <xsd:element name="results">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true" type="tns:organization" />
+                                            </xsd:sequence>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getOrganization">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" type="xsd:int" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getOrganizationResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" nillable="true" type="xsd:int"/>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="faultCode" type="xrd:faultCode" nillable="true"/>
+                                    <xsd:element name="faultString" type="xrd:faultString" nillable="true"/>
+                                    <xsd:element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true" type="tns:organization" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getWeather">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="q" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getWeatherResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="q" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="searchCompany">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="totalResults" type="xsd:boolean" />
+                                    <xsd:element name="maxResults" type="xsd:string" />
+                                    <xsd:element name="resultsFrom" type="xsd:string" />
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="registeredOffice" type="xsd:string" />
+                                    <xsd:element name="businessLine" type="xsd:string" />
+                                    <xsd:element name="businessLineCode" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationFrom" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationTo" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="searchCompanyResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="totalResults" type="xsd:boolean" />
+                                    <xsd:element name="maxResults" type="xsd:string" />
+                                    <xsd:element name="resultsFrom" type="xsd:string" />
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="registeredOffice" type="xsd:string" />
+                                    <xsd:element name="businessLine" type="xsd:string" />
+                                    <xsd:element name="businessLineCode" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationFrom" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationTo" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getCompany">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="businessId" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getCompanyResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="businessId" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="fintoService">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="vocab" type="xsd:string" />
+                                    <xsd:element name="query" type="xsd:string" />
+                                    <xsd:element name="lang" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="fintoServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="vocab" type="xsd:string" />
+                                    <xsd:element name="query" type="xsd:string" />
+                                    <xsd:element name="lang" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="faultCode" type="xrd:faultCode" nillable="true"/>
+                                    <xsd:element name="faultString" type="xrd:faultString" nillable="true"/>
+                                    <xsd:element name="data" type="xsd:string">
+                                        <xsd:annotation>
+                                            <xsd:appinfo>
+                                                <xrd:title>Service response</xrd:title>
+                                            </xsd:appinfo>
+                                        </xsd:annotation>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <complexType name="ogranization">
+                <all>
+                    <element name="id" type="xsd:int" />
+                    <element name="name_fi" type="xsd:string" />
+                    <element name="name_sv" type="xsd:string" />
+                    <element name="name_en" type="xsd:string" />
+                    <element name="data_source_url" type="xsd:string" />
+                </all>
+            </complexType>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="standardheader">
+        <wsdl:part name="consumer" element="xrd:consumer"/>
+        <wsdl:part name="producer" element="xrd:producer"/>
+        <wsdl:part name="userId" element="xrd:userId"/>
+        <wsdl:part name="service" element="xrd:service"/>
+        <wsdl:part name="id" element="xrd:id"/>
+    </wsdl:message>
+
+    <wsdl:message name="getOrganizationList">
+        <wsdl:part name="body" element="tns:getOrganizationList"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganizationListResponse">
+        <wsdl:part name="body" element="tns:getOrganizationListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganization">
+        <wsdl:part name="body" element="tns:getOrganization"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganizationResponse">
+        <wsdl:part name="body" element="tns:getOrganizationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getWeather">
+        <wsdl:part name="body" element="tns:getWeather"/>
+    </wsdl:message>
+    <wsdl:message name="getWeatherResponse">
+        <wsdl:part name="body" element="tns:getWeatherResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCompany">
+        <wsdl:part name="body" element="tns:getCompany"/>
+    </wsdl:message>
+    <wsdl:message name="getCompanyResponse">
+        <wsdl:part name="body" element="tns:getCompanyResponse"/>
+    </wsdl:message>
+    <wsdl:message name="fintoService">
+        <wsdl:part name="body" element="tns:fintoService"/>
+    </wsdl:message>
+    <wsdl:message name="fintoServiceResponse">
+        <wsdl:part name="body" element="tns:fintoServiceResponse"/>
+    </wsdl:message>
+
+
+    <wsdl:portType name="sdsbPortType">
+        <wsdl:operation name="getOrganizationList">
+            <wsdl:input message="tns:getOrganizationList"/>
+            <wsdl:output message="tns:getOrganizationListResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getOrganization">
+            <wsdl:input message="tns:getOrganization"/>
+            <wsdl:output message="tns:getOrganizationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getWeather">
+            <wsdl:input message="tns:getWeather"/>
+            <wsdl:output message="tns:getWeatherResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="searchCompany">
+            <wsdl:input message="tns:searchCompany"/>
+            <wsdl:output message="tns:searchCompanyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCompany">
+            <wsdl:input message="tns:getCompany"/>
+            <wsdl:output message="tns:getCompanyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="fintoService">
+            <wsdl:input message="tns:fintoService"/>
+            <wsdl:output message="tns:fintoServiceResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="sdsbBinding" type="tns:sdsbPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getOrganizationList">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOrganization">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getWeather">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="searchCompany">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCompany">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="fintoService">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:standardheader" part="consumer" use="literal"/>
+                <soap:header message="tns:standardheader" part="producer" use="literal"/>
+                <soap:header message="tns:standardheader" part="userId" use="literal"/>
+                <soap:header message="tns:standardheader" part="id" use="literal"/>
+                <soap:header message="tns:standardheader" part="service" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="vrk-testService">
+        <wsdl:port binding="tns:sdsbBinding" name="sdsbServicePort">
+            <soap:address location="http://localhost:8080/RESTGateway/Provider"/>
+            <xrd:address producer="vrk-test"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

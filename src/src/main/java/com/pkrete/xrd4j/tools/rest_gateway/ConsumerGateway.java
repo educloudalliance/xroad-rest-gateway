@@ -1,0 +1,381 @@
+package com.pkrete.xrd4j.tools.rest_gateway;
+
+import com.pkrete.xrd4j.client.SOAPClient;
+import com.pkrete.xrd4j.client.SOAPClientImpl;
+import com.pkrete.xrd4j.client.deserializer.AbstractResponseDeserializer;
+import com.pkrete.xrd4j.client.deserializer.ServiceResponseDeserializer;
+import com.pkrete.xrd4j.client.serializer.AbstractServiceRequestSerializer;
+import com.pkrete.xrd4j.client.serializer.ServiceRequestSerializer;
+import com.pkrete.xrd4j.common.message.ErrorMessage;
+import com.pkrete.xrd4j.common.message.ServiceRequest;
+import com.pkrete.xrd4j.common.message.ServiceResponse;
+import com.pkrete.xrd4j.common.util.MessageHelper;
+import com.pkrete.xrd4j.common.util.PropertiesUtil;
+import com.pkrete.xrd4j.common.util.SOAPHelper;
+import com.pkrete.xrd4j.rest.converter.JSONToXMLConverter;
+import com.pkrete.xrd4j.rest.converter.XMLToJSONConverter;
+import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
+import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
+import com.pkrete.xrd4j.tools.rest_gateway.util.ConsumerGatewayUtil;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+import java.util.Properties;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.Node;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * This class implements a Servlet which functionality can be configured through
+ * external properties files. This class implements a REST consumer gateway by
+ * forwarding incoming requests to configured X-Road security server, and
+ * returning the responses to the requesters. Requests and responses can be
+ * converted from JSON to XML.
+ *
+ * @author Petteri Kivimäki
+ */
+public class ConsumerGateway extends HttpServlet {
+
+    private Properties props;
+    private Map<String, ConsumerEndpoint> endpoints;
+    private final static Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        logger.debug("Starting to initialize Consumer REST Gateway.");
+        this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
+        logger.debug("Security server URL : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
+        logger.debug("Default client id : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT));
+        logger.debug("Default namespace for incoming ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+        logger.debug("Default namespace for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+        logger.debug("Default namespace prefix for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+        Properties endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
+        this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
+        logger.debug("Consumer REST Gateway initialized.");
+    }
+
+    /**
+     * Processes requests for HTTP <code>GET</code>, <code>POST</code>,
+     * <code>PUT</code> and <code>DELETE</code> methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String responseStr = "";
+        boolean omitNamespace = false;
+        String resourcePath = (String) request.getAttribute("resourcePath");
+        String userId = request.getHeader(Constants.XRD_HEADER_USER_ID);
+        String messageId = request.getHeader(Constants.XRD_HEADER_MESSAGE_ID);
+        String accept = request.getHeader("Accept") == null ? "text/xml" : request.getHeader("Accept");
+        logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
+
+        // Accept header must be "text/xml" or "application/json"
+        logger.debug("Incoming accept header value : \"{}\"", accept);
+        if (!accept.startsWith("text/xml") && !accept.startsWith("application/json")) {
+            accept = "text/xml; charset=utf-8";
+            logger.trace("Accept header value set to \"text/xml\".");
+        }
+        // Character set must be added to the accept header, if it's missing
+        if (!accept.endsWith("8")) {
+            accept += "; charset=utf-8";
+        }
+        // Set reponse content type according the accept header
+        response.setContentType(accept);
+
+        // Set userId if null
+        if (userId == null) {
+            logger.debug("\"{}\" header is null. Use \"anonymous\" as userId.", Constants.XRD_HEADER_USER_ID);
+            userId = "anonymous";
+        }
+        // Set messageId if null
+        if (messageId == null) {
+            messageId = MessageHelper.generateId();
+            logger.debug("\"{}\" header is null. Use auto-generated id \"{}\" instead.", Constants.XRD_HEADER_MESSAGE_ID, messageId);
+        }
+
+        // Omit response namespace, if response is wanted in JSON
+        if (accept.startsWith("application/json")) {
+            omitNamespace = true;
+        }
+
+        // Set userId and messageId to response
+        response.addHeader(Constants.XRD_HEADER_USER_ID, userId);
+        response.addHeader(Constants.XRD_HEADER_MESSAGE_ID, messageId);
+
+        if (resourcePath != null) {
+            // Build the service id for the incoming request
+            String serviceId = request.getMethod() + " " + resourcePath;
+            logger.debug("Incoming service id to be looked for : \"{}\"", serviceId);
+            // Try to find a configured endpoint matching the request's
+            // service id
+            ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
+            // If endpoint was found, process it; otherwise return an error
+            if (endpoint != null) {
+                logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+                try {
+                    // Create ServiceRequest object
+                    ServiceRequest<Map<String, String[]>> serviceRequest = new ServiceRequest<Map<String, String[]>>(endpoint.getConsumer(), endpoint.getProducer(), messageId);
+                    // Set userId
+                    serviceRequest.setUserId(userId);
+                    // Set HTTP request parameters as request data
+                    serviceRequest.setRequestData(request.getParameterMap());
+                    // Serializer that converts the request to SOAP
+                    ServiceRequestSerializer serializer = new GetRequestSerializer(endpoint.getResourceId());
+                    // Deserializer that converts the response from SOAP to XML string
+                    ServiceResponseDeserializer deserializer = new GetResponseDeserializer(omitNamespace);
+                    // SOAP client that makes the service call
+                    SOAPClient client = new SOAPClientImpl();
+                    logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
+                    // Make the service call that returns the service response
+                    ServiceResponse serviceResponse = client.send(serviceRequest, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL), serializer, deserializer);
+                    logger.info("Received response ({}) from the security server.", messageId);
+                    // Check that response doesn't contain SOAP fault
+                    if (!serviceResponse.hasError()) {
+                        // Get the response that's now XML string
+                        responseStr = (String) serviceResponse.getResponseData();
+                    } else {
+                        // Error message detected
+                        logger.debug("Received response contains SOAP fault.");
+                        responseStr = this.generateFault(serviceResponse.getErrorMessage());
+                    }
+                    // If content type is JSON and the SOAP message doesn't have
+                    // attachments, the response must be converted
+                    if (response.getContentType().startsWith("application/json") && !SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+                        logger.debug("Convert response from XML to JSON.");
+                        responseStr = new XMLToJSONConverter().convert(responseStr);
+                    } else if (SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+                        // SOAP message has attachments. Use attachment's
+                        // content type
+                        String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
+                        response.setContentType(attContentType);
+                        logger.debug("Use SOAP attachment as response message.");
+                    }
+                    // Check if the URLs in the response should be rewritten
+                    // to point this servlet
+                    if (endpoint.isModifyUrl()) {
+                        logger.debug("Rewrite URLs in the response to point Consumer Gateway.");
+                        // Get ConsumerGateway URL
+                        String servletUrl = this.getServletUrl(request);
+                        logger.debug("Consumer Gateway URL : \"{}\".", servletUrl);
+                        // Remove {resourceId} from resource path, and omit
+                        // first and last slash ('/') character
+                        resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("\\{resourceId\\}", "");
+                        logger.debug("Resourse URL that's replaced with Consumer Gateway URL : \"http(s)://{}\".", resourcePath);
+                        logger.debug("New resource URL : \"{}{}\".", servletUrl, resourcePath);
+                        // Modify the response
+                        responseStr = responseStr.replaceAll("http(s|):\\/\\/" + resourcePath, servletUrl + resourcePath);
+                    }
+                    logger.info("Processing \"{}\" service succesfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage(), ex);
+                    logger.error("Processing \"{}\" service failed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+                    // Internal server error -> return 500
+                    responseStr = this.generateError(Constants.ERROR_500, accept);
+                    response.setStatus(500);
+                }
+            } else {
+                // No endpoint was found -> return 404
+                responseStr = this.generateError(Constants.ERROR_404, accept);
+                response.setStatus(404);
+            }
+        } else {
+            // No resource path was defined -> return 404
+            responseStr = this.generateError(Constants.ERROR_404, accept);
+            response.setStatus(404);
+        }
+
+        PrintWriter out = null;
+        try {
+            logger.debug("Send response.");
+
+            logger.debug("Response content type : \"{}\".", response.getContentType());
+            // Get writer
+            out = response.getWriter();
+            // Send response
+            out.println(responseStr);
+            logger.trace("Consumer Gateway response : \"{}\"", responseStr);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            logger.debug("Request was succesfully processed.");
+        }
+    }
+
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>PUT</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>DELETE</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    private String generateError(String errorMsg, String contentType) {
+        StringBuilder builder = new StringBuilder();
+        if (contentType.startsWith("application/json")) {
+            builder.append("{\"error\":\"").append(errorMsg).append("\"}");
+        } else {
+            builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+            builder.append("<error>").append(errorMsg).append("</error>");
+        }
+        return builder.toString();
+    }
+
+    private String generateFault(ErrorMessage err) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        builder.append("<error>");
+        builder.append("<code>").append(err.getFaultCode()).append("</code>");
+        builder.append("<string>").append(err.getFaultString()).append("</string>");
+        if (err.getFaultActor() != null) {
+            builder.append("<actor>").append(err.getFaultActor()).append("</actor>");
+        } else {
+            builder.append("<actor/>");
+        }
+        if (err.getDetail() != null) {
+            builder.append("<detail>").append(err.getDetail()).append("</detail>");
+        } else {
+            builder.append("<detail/>");
+        }
+        builder.append("</error>");
+        return builder.toString();
+    }
+
+    /**
+     * Return the URL of this servlet.
+     *
+     * @param request HTTP servlet request
+     * @return URL of this servlet
+     */
+    private String getServletUrl(HttpServletRequest request) {
+        return request.getScheme() + "://" + // "http" + "://
+                request.getServerName() + // "myhost"
+                ":" + // ":"
+                request.getServerPort() + // "8080"
+                request.getContextPath()
+                + "/Consumer/";
+    }
+
+    /**
+     * Serializes GET requests.
+     */
+    private class GetRequestSerializer extends AbstractServiceRequestSerializer {
+
+        private String resourceId;
+
+        public GetRequestSerializer(String resourceId) {
+            this.resourceId = resourceId;
+        }
+
+        @Override
+        protected void serializeRequest(ServiceRequest request, SOAPElement soapRequest, SOAPEnvelope envelope) throws SOAPException {
+            if (this.resourceId != null && !this.resourceId.isEmpty()) {
+                logger.debug("Add resourceId : \"{}\".", this.resourceId);
+                soapRequest.addChildElement("resourceId").addTextNode(this.resourceId);
+            }
+            Map<String, String[]> params = (Map<String, String[]>) request.getRequestData();
+            for (String key : params.keySet()) {
+                String[] arr = params.get(key);
+                for (String value : arr) {
+                    logger.debug("Add parameter : \"{}\" -> \"{}\".", key, value);
+                    soapRequest.addChildElement(key).addTextNode(value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Deserializes responses to GET requests.
+     */
+    private class GetResponseDeserializer extends AbstractResponseDeserializer<Map, String> {
+
+        private boolean omitNamespace;
+
+        public GetResponseDeserializer(boolean omitNamespace) {
+            this.omitNamespace = omitNamespace;
+        }
+
+        @Override
+        protected Map deserializeRequestData(Node requestNode) throws SOAPException {
+            return null;
+        }
+
+        @Override
+        protected String deserializeResponseData(Node responseNode, SOAPMessage message) throws SOAPException {
+            if (this.omitNamespace) {
+                logger.debug("Remove namespaces from response.");
+                SOAPHelper.removeNamespace(responseNode);
+            }
+            // If message has attachments, return the first attachment
+            if (message.countAttachments() > 0) {
+                logger.debug("SOAP attachment detected. Use attachment as response data.");
+                return SOAPHelper.toString((AttachmentPart) message.getAttachments().next());
+            }
+            return SOAPHelper.toString((Node) responseNode.getFirstChild());
+        }
+    }
+}
