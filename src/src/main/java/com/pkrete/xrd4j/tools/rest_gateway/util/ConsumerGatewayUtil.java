@@ -178,6 +178,33 @@ public class ConsumerGatewayUtil {
     }
 
     /**
+     * Rewrites all the URLs in the responseStr that are matching the
+     * resourcePath to point the Consumer Gateway servlet.
+     * @param servletUrl URL of Consumer Gateway serlvet
+     * @param resourcePath path that's rewritten to point the Consumer
+     * Gateway
+     * @param responseStr response to be modified
+     * @return modified response
+     */
+    public static String rewriteUrl(String servletUrl, String resourcePath, String responseStr) {
+        logger.debug("Rewrite URLs in the response to point Consumer Gateway.");
+        logger.debug("Consumer Gateway URL : \"{}\".", servletUrl);
+        try {
+            // Remove "/{resourceId}" from resource path, and omit
+            // first and last slash ('/') character
+            resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("/\\{resourceId\\}", "");
+            logger.debug("Resourse URL that's replaced with Consumer Gateway URL : \"http(s)://{}\".", resourcePath);
+            logger.debug("New resource URL : \"{}{}\".", servletUrl, resourcePath);
+            // Modify the response
+            return responseStr.replaceAll("http(s|):\\/\\/" + resourcePath, servletUrl + resourcePath);
+        } catch (Exception ex) {
+            logger.error("Reqriting the URLs failed!");
+            logger.error(ex.getMessage(), ex);
+            return responseStr;
+        }
+    }
+
+    /**
      * Copies the client id string into an array. [0] = instance,
      * [1] = memberClass, [2] = memberCode, [3] = subsystem. If the structure
      * of the string is not correct, null is returned.

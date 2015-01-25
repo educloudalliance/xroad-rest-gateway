@@ -17,6 +17,7 @@ import junit.framework.TestCase;
  */
 public class ConsumerGatewayUtilTest extends TestCase {
 
+    private String servletUrl;
     private Properties props;
     private Properties endpoints;
     private Map<String, ConsumerEndpoint> map;
@@ -28,6 +29,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        this.servletUrl = "http://localhost:8080/RESTGateway/Consumer/";
         this.props = new Properties();
         this.endpoints = new Properties();
         // Set up default properties
@@ -141,5 +143,101 @@ public class ConsumerGatewayUtilTest extends TestCase {
     public void testExtractConsumer5() throws XRd4JException {
         ConsumerEndpoint temp = ConsumerGatewayUtil.findMatch("GET /example.com/api/", map);
         assertEquals(true, temp == null);
+    }
+
+    /**
+     * Modify JSON string containing URLs beginning with http. No resourceId.
+     */
+    public void testModifyUrl1() {
+        String responseCorrect = "{\"urls\":[\"http://localhost:8080/RESTGateway/Consumer/example.com/second\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1\"]}";
+        String resourcePath = "/example.com/second/";
+        String responseStr = "{\"urls\":[\"http://example.com/second\", \"http://example.com/second/\", \"http://example.com/second?param1=value1\", \"http://example.com/second/?param1=value1\", \"http://example.com/second/12345\", \"http://example.com/second/12345?param1=value1\", \"http://example.com/second/12345/\", \"http://example.com/second/12345/?param1=value1\"]}";
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify JSON string containing URLs beginning with http. ResourceId is
+     * defined.
+     */
+    public void testModifyUrl2() {
+        String responseCorrect = "{\"urls\":[\"http://localhost:8080/RESTGateway/Consumer/example.com/second\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/\", \"http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1\"]}";
+        String resourcePath = "/example.com/second/{resourceId}/";
+        String responseStr = "{\"urls\":[\"http://example.com/second\", \"http://example.com/second/\", \"http://example.com/second?param1=value1\", \"http://example.com/second/?param1=value1\", \"http://example.com/second/12345\", \"http://example.com/second/12345?param1=value1\", \"http://example.com/second/12345/\", \"http://example.com/second/12345/?param1=value1\"]}";
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify JSON string containing URLs beginning with https.
+     */
+    public void testModifyUrl3() {
+        String responseCorrect = "{\"urls\":[\"https://localhost:8080/RESTGateway/Consumer/example.com/second\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1\"]}";
+        String resourcePath = "/example.com/second/";
+        String responseStr = "{\"urls\":[\"https://example.com/second\", \"https://example.com/second/\", \"https://example.com/second?param1=value1\", \"https://example.com/second/?param1=value1\", \"https://example.com/second/12345\", \"https://example.com/second/12345?param1=value1\", \"https://example.com/second/12345/\", \"https://example.com/second/12345/?param1=value1\"]}";
+        this.servletUrl = this.servletUrl.replace("http", "https");
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify JSON string containing URLs beginning with https. ResourceId is
+     * defined.
+     */
+    public void testModifyUrl4() {
+        String responseCorrect = "{\"urls\":[\"https://localhost:8080/RESTGateway/Consumer/example.com/second\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/\", \"https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1\"]}";
+        String resourcePath = "/example.com/second/{resourceId}/";
+        String responseStr = "{\"urls\":[\"https://example.com/second\", \"https://example.com/second/\", \"https://example.com/second?param1=value1\", \"https://example.com/second/?param1=value1\", \"https://example.com/second/12345\", \"https://example.com/second/12345?param1=value1\", \"https://example.com/second/12345/\", \"https://example.com/second/12345/?param1=value1\"]}";
+        this.servletUrl = this.servletUrl.replace("http", "https");
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify XML string containing URLs beginning with http. No resourceId.
+     */
+    public void testModifyUrl5() {
+        String responseCorrect = "<urls><url>http://localhost:8080/RESTGateway/Consumer/example.com/second</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1</url></urls>";
+        String resourcePath = "/example.com/second/";
+        String responseStr = "<urls><url>http://example.com/second</url><url>http://example.com/second/</url><url>http://example.com/second?param1=value1</url><url>http://example.com/second/?param1=value1</url><url>http://example.com/second/12345</url><url>http://example.com/second/12345?param1=value1</url><url>http://example.com/second/12345/</url><url>http://example.com/second/12345/?param1=value1</url></urls>";
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify XML string containing URLs beginning with http. ResourceId is
+     * defined.
+     */
+    public void testModifyUrl6() {
+        String responseCorrect = "<urls><url>http://localhost:8080/RESTGateway/Consumer/example.com/second</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/</url><url>http://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1</url></urls>";
+        String resourcePath = "/example.com/second/{resourceId}/";
+        String responseStr = "<urls><url>http://example.com/second</url><url>http://example.com/second/</url><url>http://example.com/second?param1=value1</url><url>http://example.com/second/?param1=value1</url><url>http://example.com/second/12345</url><url>http://example.com/second/12345?param1=value1</url><url>http://example.com/second/12345/</url><url>http://example.com/second/12345/?param1=value1</url></urls>";
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify XML string containing URLs beginning with https.
+     */
+    public void testModifyUrl7() {
+        String responseCorrect = "<urls><url>https://localhost:8080/RESTGateway/Consumer/example.com/second</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1</url></urls>";
+        String resourcePath = "/example.com/second/";
+        String responseStr = "<urls><url>https://example.com/second</url><url>https://example.com/second/</url><url>https://example.com/second?param1=value1</url><url>https://example.com/second/?param1=value1</url><url>https://example.com/second/12345</url><url>https://example.com/second/12345?param1=value1</url><url>https://example.com/second/12345/</url><url>https://example.com/second/12345/?param1=value1</url></urls>";
+        this.servletUrl = this.servletUrl.replace("http", "https");
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Modify XML string containing URLs beginning with https. ResourceId is
+     * defined.
+     */
+    public void testModifyUrl8() {
+        String responseCorrect = "<urls><url>https://localhost:8080/RESTGateway/Consumer/example.com/second</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345?param1=value1</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/</url><url>https://localhost:8080/RESTGateway/Consumer/example.com/second/12345/?param1=value1</url></urls>";
+        String resourcePath = "/example.com/second/{resourceId}/";
+        String responseStr = "<urls><url>https://example.com/second</url><url>https://example.com/second/</url><url>https://example.com/second?param1=value1</url><url>https://example.com/second/?param1=value1</url><url>https://example.com/second/12345</url><url>https://example.com/second/12345?param1=value1</url><url>https://example.com/second/12345/</url><url>https://example.com/second/12345/?param1=value1</url></urls>";
+        this.servletUrl = this.servletUrl.replace("http", "https");
+        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+        assertEquals(responseCorrect, responseStr);
     }
 }

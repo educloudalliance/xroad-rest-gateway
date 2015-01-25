@@ -35,11 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements a Servlet which functionality can be configured through
- * external properties files. This class implements a REST consumer gateway by
- * forwarding incoming requests to configured X-Road security server, and
- * returning the responses to the requesters. Requests and responses can be
- * converted from JSON to XML.
+ * This class implements a Servlet which functionality can be configured
+ * through external properties files. This class implements a REST consumer
+ * gateway by forwarding incoming requests to configured X-Road security
+ * server, and returning the responses to the requesters. Requests and responses
+ * can be converted from JSON to XML.
  *
  * @author Petteri Kivimäki
  */
@@ -67,7 +67,6 @@ public class ConsumerGateway extends HttpServlet {
     /**
      * Processes requests for HTTP <code>GET</code>, <code>POST</code>,
      * <code>PUT</code> and <code>DELETE</code> methods.
-     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -167,17 +166,10 @@ public class ConsumerGateway extends HttpServlet {
                     // Check if the URLs in the response should be rewritten
                     // to point this servlet
                     if (endpoint.isModifyUrl()) {
-                        logger.debug("Rewrite URLs in the response to point Consumer Gateway.");
                         // Get ConsumerGateway URL
                         String servletUrl = this.getServletUrl(request);
-                        logger.debug("Consumer Gateway URL : \"{}\".", servletUrl);
-                        // Remove {resourceId} from resource path, and omit
-                        // first and last slash ('/') character
-                        resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("\\{resourceId\\}", "");
-                        logger.debug("Resourse URL that's replaced with Consumer Gateway URL : \"http(s)://{}\".", resourcePath);
-                        logger.debug("New resource URL : \"{}{}\".", servletUrl, resourcePath);
                         // Modify the response
-                        responseStr = responseStr.replaceAll("http(s|):\\/\\/" + resourcePath, servletUrl + resourcePath);
+                        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
                     }
                     logger.info("Processing \"{}\" service succesfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 } catch (Exception ex) {
@@ -307,7 +299,6 @@ public class ConsumerGateway extends HttpServlet {
 
     /**
      * Return the URL of this servlet.
-     *
      * @param request HTTP servlet request
      * @return URL of this servlet
      */
