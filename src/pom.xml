@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.pkrete.xrd4j.tools</groupId>
     <artifactId>rest-gateway</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>XRd4J :: Tools :: REST Gateway</name>
     <packaging>war</packaging>
     <properties>
-	    <slf4j.version>1.7.7</slf4j.version>
+        <slf4j.version>1.7.7</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,14 +61,14 @@
             <version>${log4j.version}</version>
         </dependency>
 		
-		<dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-	<licenses>
+    <licenses>
         <license>
             <name>EUPL</name>
             <url>https://joinup.ec.europa.eu/system/files/EN/EUPL%20v.1.1%20-%20Licence.pdf</url>
@@ -77,7 +77,7 @@
     <developers>
         <developer>
             <id>petkivim</id>
-            <name>Petteri Kivimäki</name>            
+            <name>Petteri Kivimï¿½ki</name>            
             <roles>
                 <role>architect</role>
                 <role>developer</role>
@@ -113,13 +113,13 @@
             </resource>
         </resources>
     </build>
-	<repositories>
-		<repository>
-			<id>csc-repo</id>
-			<name>CSC's Maven repository</name>
-			<url>https://maven.csc.fi/repository/internal/</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>csc-repo</id>
+            <name>CSC's Maven repository</name>
+            <url>https://maven.csc.fi/repository/internal/</url>
+        </repository>
+    </repositories>
     <reporting>
         <plugins>
             <plugin>
