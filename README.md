@@ -33,4 +33,5 @@ Public and private sector enterprises and institutions can connect their informa
 * [Palveluväylä kehitysympäristö (Finnish only)](http://palveluvayla.fi)
 * [Requirements for Information Systems and Adapter
 Servers](http://x-road.ee/docs/eng/x-road_service_protocol.pdf)
+* [XRd4J - Java Library for X-Road v6](https://github.com/petkivim/xrd4j)
 
