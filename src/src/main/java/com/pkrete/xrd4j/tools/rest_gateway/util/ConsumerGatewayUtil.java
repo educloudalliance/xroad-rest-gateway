@@ -1,9 +1,30 @@
+/**
+ * MIT License
+ *
+ * Copyright (C) 2014 Petteri Kivimäki
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.pkrete.xrd4j.tools.rest_gateway.util;
 
 import com.pkrete.xrd4j.common.member.ConsumerMember;
-import com.pkrete.xrd4j.common.member.MemberClass;
 import com.pkrete.xrd4j.common.member.ProducerMember;
-import com.pkrete.xrd4j.common.member.SDSBInstance;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
@@ -237,8 +258,8 @@ public class ConsumerGatewayUtil {
             return false;
         } else {
             try {
-                SDSBInstance instance = Enum.valueOf(SDSBInstance.class, clientIdArr[0].toUpperCase());
-                MemberClass memberClass = Enum.valueOf(MemberClass.class, clientIdArr[1].toUpperCase());
+                String instance = clientIdArr[0].toUpperCase();
+                String memberClass = clientIdArr[1].toUpperCase();
                 String memberCode = clientIdArr[2];
                 String subsystem = clientIdArr[3];
                 endpoint.setConsumer(new ConsumerMember(instance, memberClass, memberCode, subsystem));
@@ -285,8 +306,8 @@ public class ConsumerGatewayUtil {
             return false;
         } else {
             try {
-                SDSBInstance instance = Enum.valueOf(SDSBInstance.class, serviceIdArr[0].toUpperCase());
-                MemberClass memberClass = Enum.valueOf(MemberClass.class, serviceIdArr[1].toUpperCase());
+                String instance = serviceIdArr[0].toUpperCase();
+                String memberClass = serviceIdArr[1].toUpperCase();
                 String memberCode = serviceIdArr[2];
                 String subsystem = serviceIdArr[3];
                 String service = serviceIdArr[4];

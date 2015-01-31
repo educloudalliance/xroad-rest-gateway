@@ -1,10 +1,31 @@
+/**
+ * MIT License
+ *
+ * Copyright (C) 2014 Petteri Kivimäki
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.pkrete.xrd4j.tools.rest_gateway.util;
 
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.member.ConsumerMember;
-import com.pkrete.xrd4j.common.member.MemberClass;
 import com.pkrete.xrd4j.common.member.ProducerMember;
-import com.pkrete.xrd4j.common.member.SDSBInstance;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
 import java.util.Properties;
@@ -83,8 +104,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
-        assertEquals(new ConsumerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
-        assertEquals(new ProducerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "1019125-0", "Demo2Service", "getOrganizationList", "v1").toString(), temp.getProducer().toString());
+        assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
+        assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getOrganizationList", "v1").toString(), temp.getProducer().toString());
     }
 
     /**
@@ -102,8 +123,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com/custom", temp.getNamespaceSerialize());
         assertEquals("test", temp.getPrefix());
         assertEquals("http://deserialize.com/custom", temp.getNamespaceDeserialize());
-        assertEquals(new ConsumerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "0245437-2", "TestService").toString(), temp.getConsumer().toString());
-        assertEquals(new ProducerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "1019125-0", "Demo2Service", "getOrganization", "v1").toString(), temp.getProducer().toString());
+        assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "TestService").toString(), temp.getConsumer().toString());
+        assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getOrganization", "v1").toString(), temp.getProducer().toString());
     }
 
     /**
@@ -121,8 +142,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
-        assertEquals(new ConsumerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
-        assertEquals(new ProducerMember(SDSBInstance.FI_PILOT, MemberClass.GOV, "1019125-0", "Demo2Service", "getCompany", "v1").toString(), temp.getProducer().toString());
+        assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
+        assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getCompany", "v1").toString(), temp.getProducer().toString());
     }
 
     /**

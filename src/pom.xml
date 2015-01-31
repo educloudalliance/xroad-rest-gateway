@@ -6,6 +6,11 @@
     <artifactId>rest-gateway</artifactId>
     <version>0.0.3-SNAPSHOT</version>
     <name>XRd4J :: Tools :: REST Gateway</name>
+    <description>
+        This is a REST Gateway component that sits between X-Road security 
+        server and a REST service. 
+    </description>
+    <url>https://github.com/educloudalliance/xroad-rest-gateway</url>
     <packaging>war</packaging>
     <properties>
         <slf4j.version>1.7.7</slf4j.version>
@@ -18,22 +23,22 @@
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>client</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>server</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>rest</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -75,6 +80,11 @@
             <url>https://joinup.ec.europa.eu/system/files/EN/EUPL%20v.1.1%20-%20Licence.pdf</url>
         </license>
     </licenses>
+    <scm>
+        <connection>scm:git:git@github.com:educloudalliance/xroad-rest-gateway.git</connection>
+        <developerConnection>scm:git:git@github.com:educloudalliance/xroad-rest-gateway.git</developerConnection>
+        <url>git@github.com:educloudalliance/xroad-rest-gateway.git</url>
+    </scm>
     <developers>
         <developer>
             <id>petkivim</id>
