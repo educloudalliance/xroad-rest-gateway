@@ -235,8 +235,8 @@ public class ConsumerGatewayUtil {
             return false;
         } else {
             try {
-                String instance = clientIdArr[0].toUpperCase();
-                String memberClass = clientIdArr[1].toUpperCase();
+                String instance = clientIdArr[0];
+                String memberClass = clientIdArr[1];
                 String memberCode = clientIdArr[2];
                 String subsystem = clientIdArr[3];
                 endpoint.setConsumer(new ConsumerMember(instance, memberClass, memberCode, subsystem));
@@ -283,8 +283,8 @@ public class ConsumerGatewayUtil {
             return false;
         } else {
             try {
-                String instance = serviceIdArr[0].toUpperCase();
-                String memberClass = serviceIdArr[1].toUpperCase();
+                String instance = serviceIdArr[0];
+                String memberClass = serviceIdArr[1];
                 String memberCode = serviceIdArr[2];
                 String subsystem = serviceIdArr[3];
                 String service = serviceIdArr[4];
