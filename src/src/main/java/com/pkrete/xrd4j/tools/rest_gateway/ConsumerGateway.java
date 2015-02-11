@@ -12,7 +12,6 @@ import com.pkrete.xrd4j.common.message.ServiceResponse;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.common.util.PropertiesUtil;
 import com.pkrete.xrd4j.common.util.SOAPHelper;
-import com.pkrete.xrd4j.rest.converter.JSONToXMLConverter;
 import com.pkrete.xrd4j.rest.converter.XMLToJSONConverter;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
@@ -35,11 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements a Servlet which functionality can be configured
- * through external properties files. This class implements a REST consumer
- * gateway by forwarding incoming requests to configured X-Road security
- * server, and returning the responses to the requesters. Requests and responses
- * can be converted from JSON to XML.
+ * This class implements a Servlet which functionality can be configured through
+ * external properties files. This class implements a REST consumer gateway by
+ * forwarding incoming requests to configured X-Road security server, and
+ * returning the responses to the requesters. Requests and responses can be
+ * converted from JSON to XML.
  *
  * @author Petteri Kivimäki
  */
@@ -67,6 +66,7 @@ public class ConsumerGateway extends HttpServlet {
     /**
      * Processes requests for HTTP <code>GET</code>, <code>POST</code>,
      * <code>PUT</code> and <code>DELETE</code> methods.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -76,9 +76,13 @@ public class ConsumerGateway extends HttpServlet {
             throws ServletException, IOException {
         String responseStr = "";
         boolean omitNamespace = false;
+        // Get resourcePath attribute
         String resourcePath = (String) request.getAttribute("resourcePath");
+        // Get HTTP headers
         String userId = request.getHeader(Constants.XRD_HEADER_USER_ID);
         String messageId = request.getHeader(Constants.XRD_HEADER_MESSAGE_ID);
+        String namespace = request.getHeader(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+        String prefix = request.getHeader(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
         String accept = request.getHeader("Accept") == null ? "text/xml" : request.getHeader("Accept");
         logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
 
@@ -122,15 +126,25 @@ public class ConsumerGateway extends HttpServlet {
             // Try to find a configured endpoint matching the request's
             // service id
             ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
-            
-			// If endpoint is null, use resourcePath as service id
+
+            // If endpoint is null, use resourcePath as service id
             if (endpoint == null) {
                 logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
-                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(request, this.props, resourcePath);            
+                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);            
             }
-            
+                        
             // If endpoint was found, process it; otherwise return an error
             if (endpoint != null) {
+                // Set namespace received from header, if not null or empty
+                if (namespace != null && !namespace.isEmpty()) {
+                    endpoint.getProducer().setNamespaceUrl(namespace);
+                    logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, namespace);
+                }
+                // Set prefix received from header, if not null or empty
+                if (prefix != null && !prefix.isEmpty()) {
+                    endpoint.getProducer().setNamespacePrefix(prefix);
+                    logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
+                } 
                 logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 try {
                     // Create ServiceRequest object
@@ -306,6 +320,7 @@ public class ConsumerGateway extends HttpServlet {
 
     /**
      * Return the URL of this servlet.
+     *
      * @param request HTTP servlet request
      * @return URL of this servlet
      */

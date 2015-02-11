@@ -9,7 +9,6 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +25,7 @@ public class ConsumerGatewayUtil {
      * Goes through the given properties and extracts all the defined consumer
      * endpoints. Returns a map containing service id - consumer endpoint
      * key-value pairs.
+     *
      * @param endpoints consumer properties
      * @param props REST Consumer Gateway general properties
      * @return map containing service id - consumer endpoint key-value pairs
@@ -142,9 +142,10 @@ public class ConsumerGatewayUtil {
     }
 
     /**
-     * Goes through the given endpoint and tries to find an endpoint which
-     * id matches the given service id. If no match is found, then tries
-     * to find a partial match.
+     * Goes through the given endpoint and tries to find an endpoint which id
+     * matches the given service id. If no match is found, then tries to find a
+     * partial match.
+     *
      * @param serviceId service id to be looked for
      * @param endpoints list of endpoints
      * @return endpoint matching the given service id or null
@@ -181,9 +182,9 @@ public class ConsumerGatewayUtil {
     /**
      * Rewrites all the URLs in the responseStr that are matching the
      * resourcePath to point the Consumer Gateway servlet.
+     *
      * @param servletUrl URL of Consumer Gateway serlvet
-     * @param resourcePath path that's rewritten to point the Consumer
-     * Gateway
+     * @param resourcePath path that's rewritten to point the Consumer Gateway
      * @param responseStr response to be modified
      * @return modified response
      */
@@ -206,9 +207,10 @@ public class ConsumerGatewayUtil {
     }
 
     /**
-     * Copies the client id string into an array. [0] = instance,
-     * [1] = memberClass, [2] = memberCode, [3] = subsystem. If the structure
-     * of the string is not correct, null is returned.
+     * Copies the client id string into an array. [0] = instance, [1] =
+     * memberClass, [2] = memberCode, [3] = subsystem. If the structure of the
+     * string is not correct, null is returned.
+     *
      * @param clientId client id string
      * @return client id in an array
      */
@@ -225,8 +227,9 @@ public class ConsumerGatewayUtil {
 
     /**
      * Constructs and initializes a ConsumerMember object related to the given
-     * ConsumerEndpoint. The object is constructed according to the value
-     * of the clientId variable.
+     * ConsumerEndpoint. The object is constructed according to the value of the
+     * clientId variable.
+     *
      * @param endpoint ConsumerEndpoint object
      * @return true if and only if creating ConsumerMember object succeeded;
      * otherwise false
@@ -243,7 +246,7 @@ public class ConsumerGatewayUtil {
                 String memberCode = clientIdArr[2];
                 String subsystem = clientIdArr[3];
                 endpoint.setConsumer(new ConsumerMember(instance, memberClass, memberCode, subsystem));
-                logger.debug("Consumer member successfully created.");
+                logger.debug("Consumer member succesfully created.");
                 return true;
             } catch (Exception ex) {
                 logger.warn("Creating consumer member failed.");
@@ -253,10 +256,10 @@ public class ConsumerGatewayUtil {
     }
 
     /**
-     * Copies the client id string into an array. [0] = instance,
-     * [1] = memberClass, [2] = memberCode, [3] = subsystem, [4] = service,
-     * [5] = version. If the structure of the string is not correct, null is
-     * returned.
+     * Copies the client id string into an array. [0] = instance, [1] =
+     * memberClass, [2] = memberCode, [3] = subsystem, [4] = service, [5] =
+     * version. If the structure of the string is not correct, null is returned.
+     *
      * @param serviceId service id string
      * @return service id in an array
      */
@@ -273,8 +276,9 @@ public class ConsumerGatewayUtil {
 
     /**
      * Constructs and initializes a ProducerMember object related to the given
-     * ConsumerEndpoint. The object is constructed according to the value
-     * of the serviceId variable.
+     * ConsumerEndpoint. The object is constructed according to the value of the
+     * serviceId variable.
+     *
      * @param endpoint ConsumerEndpoint object
      * @return true if and only if creating ProducerMember object succeeded;
      * otherwise false
@@ -301,18 +305,17 @@ public class ConsumerGatewayUtil {
             }
         }
     }
-	
+
     /**
      * Creates a ConsumerEndpoint that points to a service which configuration
      * information is not in the configuration file. Resource path is used as 
-     * service id, namespace and prefix can be defined using HTTP headers.
-     * @param request HTTP request
+     * service id.
      * @param props consumer gateway properties that contain default namespace
      * and prefix
      * @param resourcePath resource path that was called, used as service id
      * @return ConsumerEndpoint object
      */
-    public static ConsumerEndpoint createUnconfiguredEndpoint(HttpServletRequest request, Properties props, String resourcePath) {
+    public static ConsumerEndpoint createUnconfiguredEndpoint(Properties props, String resourcePath) {
         logger.debug("Create a consumer endpoint that points to a service defined by resource path.");
         String resourceId = null;      
         // Check if a resource id is present in the resource path. 
@@ -343,20 +346,7 @@ public class ConsumerGatewayUtil {
             // Get defalut namespace and prefix from properties
             String ns = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
             String prefix = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
-            // Get namespace and prefix headers
-            String nsHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
-            String prefixHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
-            // Set namespace received from header, if not null or empty
-            if (nsHeader != null && !nsHeader.isEmpty()) {
-                ns = nsHeader;
-                logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, ns);
-            }
-            // Set prefix received from header, if not null or empty
-            if (prefixHeader != null && !prefixHeader.isEmpty()) {
-                prefix = prefixHeader;
-                logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
-            }
-            // Set namespaces
+            // Set namespace and prefix
             endpoint.getProducer().setNamespaceUrl(ns);
             endpoint.getProducer().setNamespacePrefix(prefix);
         }
