@@ -122,6 +122,18 @@ public class ConsumerGateway extends HttpServlet {
             // Try to find a configured endpoint matching the request's
             // service id
             ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
+            
+            // If endpoint is null, use resourcePath as service id
+            if(endpoint == null) {
+                // Get client id
+                String clientId = this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
+                // Create new endpoint
+                endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
+                // Parse consumer and producer from ids
+                ConsumerGatewayUtil.setConsumerMember(endpoint);
+                ConsumerGatewayUtil.setProducerMember(endpoint);
+            }
+            
             // If endpoint was found, process it; otherwise return an error
             if (endpoint != null) {
                 logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
