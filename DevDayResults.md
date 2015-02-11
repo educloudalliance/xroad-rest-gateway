@@ -14,4 +14,6 @@ Things achieved on the DevDay of 11.02.2015
 * Next meeting in Finland 18.3.2015
 * enhancements and polishing the code written today
 * Only GET is supported in the REST support, add POST (and other verbs)
-* 
+* Artur will work on v5 compatibility, we shall review progress on next meeting
+* Andres will look at the possibility to add browser-based access
+* Petteri will improve the documentation and apply general magic to his code 
