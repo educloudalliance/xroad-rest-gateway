@@ -10,3 +10,8 @@ Things achieved on the DevDay of 11.02.2015
 * Metadata collection pilot (a slight deviation from the main theme) was discussed, preliminary OK given for cooperation
 * A need for API design guidelines identified: FI has an opportunity to start from a clean page while EE is stuck with API legacy
 
+**TODO**
+* Next meeting in Finland 18.3.2015
+* enhancements and polishing the code written today
+* Only GET is supported in the REST support, add POST (and other verbs)
+* 
