@@ -58,6 +58,8 @@ public class Constants {
     public static final String XRD_HEADER_SERVICE = "X-XRd-Service";
     public static final String XRD_HEADER_USER_ID = "X-XRd-UserId";
     public static final String XRD_HEADER_MESSAGE_ID = "X-XRd-MessageId";
+    public static final String XRD_HEADER_NAMESPACE_SERIALIZE = "X-XRd-NamespaceSerialize";
+    public static final String XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE = "X-XRd-NamespacePrefixSerialize";
     /**
      * HTTP error messages
      */

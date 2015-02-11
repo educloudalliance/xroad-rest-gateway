@@ -123,9 +123,9 @@ public class ConsumerGateway extends HttpServlet {
             // service id
             ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
             
-            // If endpoint is null, use resourcePath as service id
+			// If endpoint is null, use resourcePath as service id
             if (endpoint == null) {
-                logger.debug("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
+                logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
                 // Get client id
                 String clientId = this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
                 // Create new endpoint
@@ -135,9 +135,25 @@ public class ConsumerGateway extends HttpServlet {
                     // Set endpoint to null if parsing failed
                     endpoint = null;
                 } else {
+                    // Get defalut namespace and prefix from properties
+                    String ns = this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
+                    String prefix = this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
+                    // Get namespace and prefix headers
+                    String nsHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+                    String prefixHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+                    // Set namespace received from header, if not null or empty
+                    if(nsHeader != null && !nsHeader.isEmpty()) {
+                        ns = nsHeader;
+                        logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, ns);
+                    }
+                    // Set prefix received from header, if not null or empty
+                    if(prefixHeader != null && !prefixHeader.isEmpty()) {
+                        prefix = prefixHeader;
+                        logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
+                    }
                     // Set namespaces
-                    endpoint.getProducer().setNamespaceUrl(this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-                    endpoint.getProducer().setNamespacePrefix(this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+                    endpoint.getProducer().setNamespaceUrl(ns);
+                    endpoint.getProducer().setNamespacePrefix(prefix);
                 }
             }
             
