@@ -131,7 +131,7 @@ public class ConsumerGateway extends HttpServlet {
                 endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
                 // Parse consumer and producer from ids
                 if(!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
-                    endpoint == null;
+                    endpoint = null;
                 }
             }
             
