@@ -228,7 +228,7 @@ public class ConsumerGatewayUtil {
      * @return true if and only if creating ConsumerMember object succeeded;
      * otherwise false
      */
-    public static boolean setConsumerMember(ConsumerEndpoint endpoint) {
+    private static boolean setConsumerMember(ConsumerEndpoint endpoint) {
         String[] clientIdArr = ConsumerGatewayUtil.clientIdToArr(endpoint.getClientId());
         if (clientIdArr == null) {
             logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.CONSUMER_PROPS_ID_CLIENT, endpoint.getClientId());
@@ -240,7 +240,7 @@ public class ConsumerGatewayUtil {
                 String memberCode = clientIdArr[2];
                 String subsystem = clientIdArr[3];
                 endpoint.setConsumer(new ConsumerMember(instance, memberClass, memberCode, subsystem));
-                logger.debug("Consumer member succesfully created.");
+                logger.debug("Consumer member successfully created.");
                 return true;
             } catch (Exception ex) {
                 logger.warn("Creating consumer member failed.");
@@ -276,7 +276,7 @@ public class ConsumerGatewayUtil {
      * @return true if and only if creating ProducerMember object succeeded;
      * otherwise false
      */
-    public static boolean setProducerMember(ConsumerEndpoint endpoint) {
+    private static boolean setProducerMember(ConsumerEndpoint endpoint) {
         String[] serviceIdArr = ConsumerGatewayUtil.serviceIdToArr(endpoint.getServiceId());
         if (serviceIdArr == null) {
             logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.ENDPOINT_PROPS_ID, endpoint.getServiceId());
@@ -297,5 +297,66 @@ public class ConsumerGatewayUtil {
                 return false;
             }
         }
+    }
+	
+    /**
+     * Creates a ConsumerEndpoint that points to a service which configuration
+     * information is not in the configuration file. Resource path is used as 
+     * service id, namespace and prefix can be defined using HTTP headers.
+     * @param request HTTP request
+     * @param props consumer gateway properties that contain default namespace
+     * and prefix
+     * @param resourcePath resource path that was called, used as service id
+     * @return ConsumerEndpoint object
+     */
+    public static ConsumerEndpoint createUnconfiguredEndpoint(HttpServletRequest request, Properties props, String resourcePath) {
+        logger.debug("Create a consumer endpoint that points to a service defined by resource path.");
+        String resourceId = null;      
+        // Check if a resource id is present in the resource path. 
+        // Pattern for resource path and resource id.
+        String pattern = "/(.+?)/(.+)";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher m = regex.matcher(resourcePath);
+        // If resource id is found, pplit resource id and resource path
+        if (m.find()) {
+            resourcePath = m.group(1);
+            resourceId = m.group(2).substring(0, m.group(2).length() - 1);
+            logger.info("Resource id detected. Resource path : \"{}\". Resource id : \"{}\".", resourcePath, resourceId);
+        } else {
+            // Remove slashes, they're not part of service id
+            resourcePath = resourcePath.replaceAll("/", "");
+        }
+        // Get client id
+        String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
+        // Create new endpoint
+        ConsumerEndpoint endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
+        // Set resouce id
+        endpoint.setResourceId(resourceId);
+        // Parse consumer and producer from ids
+        if (!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
+            // Set endpoint to null if parsing failed
+            endpoint = null;
+        } else {
+            // Get defalut namespace and prefix from properties
+            String ns = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
+            String prefix = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
+            // Get namespace and prefix headers
+            String nsHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+            String prefixHeader = request.getHeader(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+            // Set namespace received from header, if not null or empty
+            if (nsHeader != null && !nsHeader.isEmpty()) {
+                ns = nsHeader;
+                logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, ns);
+            }
+            // Set prefix received from header, if not null or empty
+            if (prefixHeader != null && !prefixHeader.isEmpty()) {
+                prefix = prefixHeader;
+                logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
+            }
+            // Set namespaces
+            endpoint.getProducer().setNamespaceUrl(ns);
+            endpoint.getProducer().setNamespacePrefix(prefix);
+        }
+        return endpoint;
     }
 }
