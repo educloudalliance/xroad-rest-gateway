@@ -7,6 +7,9 @@ import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
