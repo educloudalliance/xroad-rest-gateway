@@ -124,14 +124,20 @@ public class ConsumerGateway extends HttpServlet {
             ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
             
             // If endpoint is null, use resourcePath as service id
-            if(endpoint == null) {
+            if (endpoint == null) {
+                logger.debug("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
                 // Get client id
                 String clientId = this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
                 // Create new endpoint
-                endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
+                endpoint = new ConsumerEndpoint(resourcePath.replaceAll("/", ""), clientId, "");
                 // Parse consumer and producer from ids
-                if(!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
-                    endpoint == null;
+                if (!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
+                    // Set endpoint to null if parsing failed
+                    endpoint = null;
+                } else {
+                    // Set namespaces
+                    endpoint.getProducer().setNamespaceUrl(this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+                    endpoint.getProducer().setNamespacePrefix(this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
                 }
             }
             

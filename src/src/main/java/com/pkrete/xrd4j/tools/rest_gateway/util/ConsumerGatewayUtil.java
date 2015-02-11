@@ -228,7 +228,7 @@ public class ConsumerGatewayUtil {
      * @return true if and only if creating ConsumerMember object succeeded;
      * otherwise false
      */
-    private static boolean setConsumerMember(ConsumerEndpoint endpoint) {
+    public static boolean setConsumerMember(ConsumerEndpoint endpoint) {
         String[] clientIdArr = ConsumerGatewayUtil.clientIdToArr(endpoint.getClientId());
         if (clientIdArr == null) {
             logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.CONSUMER_PROPS_ID_CLIENT, endpoint.getClientId());
@@ -276,7 +276,7 @@ public class ConsumerGatewayUtil {
      * @return true if and only if creating ProducerMember object succeeded;
      * otherwise false
      */
-    private static boolean setProducerMember(ConsumerEndpoint endpoint) {
+    public static boolean setProducerMember(ConsumerEndpoint endpoint) {
         String[] serviceIdArr = ConsumerGatewayUtil.serviceIdToArr(endpoint.getServiceId());
         if (serviceIdArr == null) {
             logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.ENDPOINT_PROPS_ID, endpoint.getServiceId());
