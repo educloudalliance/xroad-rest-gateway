@@ -79,11 +79,11 @@ public class ConsumerGateway extends HttpServlet {
         // Get resourcePath attribute
         String resourcePath = (String) request.getAttribute("resourcePath");
         // Get HTTP headers
-        String userId = request.getHeader(Constants.XRD_HEADER_USER_ID);
-        String messageId = request.getHeader(Constants.XRD_HEADER_MESSAGE_ID);
-        String namespace = request.getHeader(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
-        String prefix = request.getHeader(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
-        String accept = request.getHeader("Accept") == null ? "text/xml" : request.getHeader("Accept");
+        String userId = this.getXRdHeader(request, Constants.XRD_HEADER_USER_ID);
+        String messageId = this.getXRdHeader(request, Constants.XRD_HEADER_MESSAGE_ID);
+        String namespace = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+        String prefix = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+        String accept = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? "text/xml" : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
         logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
 
         // Accept header must be "text/xml" or "application/json"
@@ -130,9 +130,9 @@ public class ConsumerGateway extends HttpServlet {
             // If endpoint is null, use resourcePath as service id
             if (endpoint == null) {
                 logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
-                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);            
+                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);
             }
-                        
+
             // If endpoint was found, process it; otherwise return an error
             if (endpoint != null) {
                 // Set namespace received from header, if not null or empty
@@ -144,7 +144,7 @@ public class ConsumerGateway extends HttpServlet {
                 if (prefix != null && !prefix.isEmpty()) {
                     endpoint.getProducer().setNamespacePrefix(prefix);
                     logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
-                } 
+                }
                 logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 try {
                     // Create ServiceRequest object
@@ -152,7 +152,7 @@ public class ConsumerGateway extends HttpServlet {
                     // Set userId
                     serviceRequest.setUserId(userId);
                     // Set HTTP request parameters as request data
-                    serviceRequest.setRequestData(request.getParameterMap());
+                    serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
                     // Serializer that converts the request to SOAP
                     ServiceRequestSerializer serializer = new GetRequestSerializer(endpoint.getResourceId());
                     // Deserializer that converts the response from SOAP to XML string
@@ -331,6 +331,40 @@ public class ConsumerGateway extends HttpServlet {
                 request.getServerPort() + // "8080"
                 request.getContextPath()
                 + "/Consumer/";
+    }
+
+    /**
+     * Checks if URL parameter (1) or HTTP header (2) with the given name exists
+     * and returns its value. If no URL parameter or HTTP header is found, null
+     * is returned. URL parameters are the primary source, and HTTP headers
+     * secondary source.
+     *
+     * @param request HTTP request
+     * @param header name of the header
+     * @return value of the header
+     */
+    private String getXRdHeader(HttpServletRequest request, String header) {
+        String headerValue = request.getParameter(header);
+        if (headerValue != null && !headerValue.isEmpty()) {
+            return headerValue;
+        }
+        return request.getHeader(header);
+    }
+
+    /**
+     * Removes all the X-Road specific HTTP and SOAP headers from the request
+     * parameters map. This method must be called before writing the
+     * parameters to the SOAP request object.
+     * @param parameters HTTP request parameters map
+     * @return filtered parameters map
+     */
+    private Map filterRequestParameters(Map parameters) {
+        parameters.remove(Constants.XRD_HEADER_USER_ID);
+        parameters.remove(Constants.XRD_HEADER_MESSAGE_ID);
+        parameters.remove(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+        parameters.remove(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+        parameters.remove(Constants.HTTP_HEADER_ACCEPT);
+        return parameters;
     }
 
     /**
