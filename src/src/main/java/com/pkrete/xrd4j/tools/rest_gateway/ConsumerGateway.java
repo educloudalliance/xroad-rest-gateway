@@ -158,9 +158,9 @@ public class ConsumerGateway extends HttpServlet {
                     // String get request body
                     String requestBody = this.readRequestBody(request);
                     // Serializer that converts the request to SOAP
-                    ServiceRequestSerializer serializer = new GetRequestSerializer(endpoint.getResourceId(), requestBody, contentType);
+                    ServiceRequestSerializer serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
                     // Deserializer that converts the response from SOAP to XML string
-                    ServiceResponseDeserializer deserializer = new GetResponseDeserializer(omitNamespace);
+                    ServiceResponseDeserializer deserializer = new ResponseDeserializer(omitNamespace);
                     // SOAP client that makes the service call
                     SOAPClient client = new SOAPClientImpl();
                     logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
@@ -393,15 +393,15 @@ public class ConsumerGateway extends HttpServlet {
     }
 
     /**
-     * Serializes GET requests.
+     * Serializes GET, POST, PUT and DELETE requests to SOAP.
      */
-    private class GetRequestSerializer extends AbstractServiceRequestSerializer {
+    private class RequestSerializer extends AbstractServiceRequestSerializer {
 
         private String resourceId;
         private String requestBody;
         private String contentType;
 
-        public GetRequestSerializer(String resourceId, String requestBody, String contentType) {
+        public RequestSerializer(String resourceId, String requestBody, String contentType) {
             this.resourceId = resourceId;
             this.requestBody = requestBody;
             this.contentType = contentType;
@@ -433,13 +433,13 @@ public class ConsumerGateway extends HttpServlet {
     }
 
     /**
-     * Deserializes responses to GET requests.
+     * Deserializes SOAP responses to String.
      */
-    private class GetResponseDeserializer extends AbstractResponseDeserializer<Map, String> {
+    private class ResponseDeserializer extends AbstractResponseDeserializer<Map, String> {
 
         private boolean omitNamespace;
 
-        public GetResponseDeserializer(boolean omitNamespace) {
+        public ResponseDeserializer(boolean omitNamespace) {
             this.omitNamespace = omitNamespace;
         }
 
