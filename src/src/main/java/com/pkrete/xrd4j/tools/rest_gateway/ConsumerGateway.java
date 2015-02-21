@@ -16,6 +16,7 @@ import com.pkrete.xrd4j.rest.converter.XMLToJSONConverter;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
 import com.pkrete.xrd4j.tools.rest_gateway.util.ConsumerGatewayUtil;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -83,6 +84,7 @@ public class ConsumerGateway extends HttpServlet {
         String messageId = this.getXRdHeader(request, Constants.XRD_HEADER_MESSAGE_ID);
         String namespace = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
         String prefix = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+        String contentType = request.getHeader(Constants.HTTP_HEADER_CONTENT_TYPE);
         String accept = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? "text/xml" : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
         logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
 
@@ -153,8 +155,10 @@ public class ConsumerGateway extends HttpServlet {
                     serviceRequest.setUserId(userId);
                     // Set HTTP request parameters as request data
                     serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
+                    // String get request body
+                    String requestBody = this.readRequestBody(request);
                     // Serializer that converts the request to SOAP
-                    ServiceRequestSerializer serializer = new GetRequestSerializer(endpoint.getResourceId());
+                    ServiceRequestSerializer serializer = new GetRequestSerializer(endpoint.getResourceId(), requestBody, contentType);
                     // Deserializer that converts the response from SOAP to XML string
                     ServiceResponseDeserializer deserializer = new GetResponseDeserializer(omitNamespace);
                     // SOAP client that makes the service call
@@ -368,14 +372,39 @@ public class ConsumerGateway extends HttpServlet {
     }
 
     /**
+     * Reads the request body from the request and returns it as a String.
+     * @param request HttpServletRequest that contains the request body
+     * @return request body as a String or null
+     */
+    private String readRequestBody(HttpServletRequest request) {
+        try {
+            // Read from request
+            StringBuilder buffer = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+            }
+            return buffer.toString();
+        } catch (Exception e) {
+            logger.error("Failed to read the request body from the request.");
+        }
+        return null;
+    }
+
+    /**
      * Serializes GET requests.
      */
     private class GetRequestSerializer extends AbstractServiceRequestSerializer {
 
         private String resourceId;
+        private String requestBody;
+        private String contentType;
 
-        public GetRequestSerializer(String resourceId) {
+        public GetRequestSerializer(String resourceId, String requestBody, String contentType) {
             this.resourceId = resourceId;
+            this.requestBody = requestBody;
+            this.contentType = contentType;
         }
 
         @Override
@@ -391,6 +420,14 @@ public class ConsumerGateway extends HttpServlet {
                     logger.debug("Add parameter : \"{}\" -> \"{}\".", key, value);
                     soapRequest.addChildElement(key).addTextNode(value);
                 }
+            }
+            if (this.requestBody != null && !this.requestBody.isEmpty()) {
+                logger.debug("Request body was found from the request. Add request body as SOAP attachment. Content type is \"{}\".", this.contentType);
+                SOAPElement data = soapRequest.addChildElement(envelope.createName(Constants.PARAM_REQUEST_BODY));
+                data.addAttribute(envelope.createName("href"), Constants.PARAM_REQUEST_BODY);
+                AttachmentPart attachPart = request.getSoapMessage().createAttachmentPart(this.requestBody, this.contentType);
+                attachPart.setContentId(Constants.PARAM_REQUEST_BODY);
+                request.getSoapMessage().addAttachmentPart(attachPart);
             }
         }
     }

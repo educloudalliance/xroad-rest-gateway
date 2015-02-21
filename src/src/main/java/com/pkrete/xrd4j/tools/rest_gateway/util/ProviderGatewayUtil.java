@@ -52,6 +52,8 @@ public class ProviderGatewayUtil {
             }
 
             ProviderEndpoint endpoint = new ProviderEndpoint(id, url);
+            // Set default HTTP verb - GET
+            endpoint.setHttpVerb("get");
             // Set default values to namespace properties
             endpoint.setNamespaceDeserialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
             endpoint.setNamespaceSerialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
@@ -187,5 +189,29 @@ public class ProviderGatewayUtil {
         data = new JSONToXMLConverter().convert(data);
         // Return data inside wrapper element
         return "<" + wrapper + ">" + data + "</" + wrapper + ">";
+    }
+
+    /**
+     * Extracts the request body from the parameters map and returns the value
+     * matching the "requestBody" key. If the "requestBody" key is found, it's
+     * removed from the params map. If no "requestBody" key is found, null
+     * is returned.
+     * @param params request parameters as key value pairs
+     * @return value matching the "requestBody" key or null
+     */
+    public static String getRequestBody(Map<String, String> params) {
+        if(params.containsKey(Constants.PARAM_REQUEST_BODY)) {
+            logger.trace("\"{}\" key found.", Constants.PARAM_REQUEST_BODY);
+            // Get value matching the key
+            String requestBody = params.get(Constants.PARAM_REQUEST_BODY);
+            // Remove the key-value pair from the map
+            params.remove(Constants.PARAM_REQUEST_BODY);
+            // Return the value
+            return requestBody;
+        }
+        logger.trace("\"{}\" key not found.", Constants.PARAM_REQUEST_BODY);
+        // No key-value pair found, return null
+        return null;
+
     }
 }

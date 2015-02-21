@@ -7,7 +7,8 @@ import com.pkrete.xrd4j.common.message.ServiceResponse;
 import com.pkrete.xrd4j.common.util.PropertiesUtil;
 import com.pkrete.xrd4j.common.util.SOAPHelper;
 import com.pkrete.xrd4j.rest.ClientResponse;
-import com.pkrete.xrd4j.rest.client.GetClient;
+import com.pkrete.xrd4j.rest.client.RESTClient;
+import com.pkrete.xrd4j.rest.client.RESTClientFactory;
 import com.pkrete.xrd4j.server.AbstractAdapterServlet;
 import com.pkrete.xrd4j.server.deserializer.AbstractCustomRequestDeserializer;
 import com.pkrete.xrd4j.server.deserializer.CustomRequestDeserializer;
@@ -111,8 +112,13 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 // Get HTTP headers for the request
                 Map<String, String> headers = ProviderGatewayUtil.generateHttpHeaders(request, endpoint);
                 logger.debug("Fetch data from service...");
+                // Create a REST client, endpoint's HTTP verb defines the type
+                // of the client that's returned
+                RESTClient restClient = RESTClientFactory.createRESTClient(endpoint.getHttpVerb());
+                // Get request body
+                String requestBody = ProviderGatewayUtil.getRequestBody(((Map<String, String>) request.getRequestData()));
                 // Send request to the service endpoint
-                ClientResponse restResponse = GetClient.get(endpoint.getUrl(), ((Map<String, String>) request.getRequestData()), headers);
+                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, ((Map<String, String>) request.getRequestData()), headers);
                 logger.debug("...done!");
 
                 String data = restResponse.getData();
@@ -179,7 +185,17 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 logger.warn("\"requestNode\" is null. Null is returned.");
                 return null;
             }
-            return SOAPHelper.nodesToMap(requestNode.getChildNodes());
+            // Convert all the elements under request to key-value pairs
+            Map map = SOAPHelper.nodesToMap(requestNode.getChildNodes());
+            // If message has attachments, use the first attachment as
+            // request body
+            if (message.countAttachments() > 0 && map.containsKey(Constants.PARAM_REQUEST_BODY)) {
+                logger.debug("SOAP attachment detected. Use attachment as request body.", Constants.PARAM_REQUEST_BODY);
+                map.put(Constants.PARAM_REQUEST_BODY, SOAPHelper.toString((AttachmentPart) message.getAttachments().next()));
+            } else {
+                map.remove(Constants.PARAM_REQUEST_BODY);
+            }
+            return map;
         }
     }
 

@@ -40,6 +40,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
         this.endpoints.put("1." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getOrganization.v1");
         this.endpoints.put("1." + Constants.PROVIDER_PROPS_URL, "http://www.hel.fi/palvelukarttaws/rest/v2/organization/");
+        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_VERB, "post");
         this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com/custom");
         this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "test");
         this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com/custom");
@@ -71,7 +72,7 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(false, temp == null);
         assertEquals("FI_PILOT.GOV.1019125-0.Demo2Service.getOrganizationList.v1", temp.getServiceId());
         assertEquals("http://www.hel.fi/palvelukarttaws/rest/v2/organization/", temp.getUrl());
-        assertEquals(null, temp.getHttpVerb());
+        assertEquals("get", temp.getHttpVerb());
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
@@ -92,7 +93,7 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(false, temp == null);
         assertEquals("FI_PILOT.GOV.1019125-0.getOrganization.v1", temp.getServiceId());
         assertEquals("http://www.hel.fi/palvelukarttaws/rest/v2/organization/", temp.getUrl());
-        assertEquals(null, temp.getHttpVerb());
+        assertEquals("post", temp.getHttpVerb());
         assertEquals("http://serialize.com/custom", temp.getNamespaceSerialize());
         assertEquals("test", temp.getPrefix());
         assertEquals("http://deserialize.com/custom", temp.getNamespaceDeserialize());
@@ -113,7 +114,7 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(false, temp == null);
         assertEquals("FI_PILOT.GOV.1019125-0.Demo2Service.getWeather.v1", temp.getServiceId());
         assertEquals("http://weather.com/", temp.getUrl());
-        assertEquals(null, temp.getHttpVerb());
+        assertEquals("get", temp.getHttpVerb());
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());

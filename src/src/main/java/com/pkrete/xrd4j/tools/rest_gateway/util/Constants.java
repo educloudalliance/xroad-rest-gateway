@@ -61,6 +61,10 @@ public class Constants {
     public static final String XRD_HEADER_NAMESPACE_SERIALIZE = "X-XRd-NamespaceSerialize";
     public static final String XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE = "X-XRd-NamespacePrefixSerialize";
     /**
+     * Other constants.
+     */
+    public static final String PARAM_REQUEST_BODY = "RESTGatewayRequestBody";
+    /**
      * HTTP error messages
      */
     public static final String ERROR_404 = "404 Not Found";

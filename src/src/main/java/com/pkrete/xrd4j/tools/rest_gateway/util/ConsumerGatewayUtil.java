@@ -47,7 +47,6 @@ public class ConsumerGatewayUtil {
             String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
             String serviceId = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String path = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_PATH);
-            String verb = "GET";
 
             if (serviceId == null || serviceId.isEmpty() || path == null || path.isEmpty()) {
                 logger.warn("ID or path is null or empty. Consumer endpoint skipped.");
@@ -76,6 +75,8 @@ public class ConsumerGatewayUtil {
             endpoint.setNamespaceDeserialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
             endpoint.setNamespaceSerialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
             endpoint.setPrefix(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            // Set default HTTP verb
+            endpoint.setHttpVerb("GET");
 
             // Client id
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
@@ -129,7 +130,7 @@ public class ConsumerGatewayUtil {
             endpoint.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
             endpoint.getProducer().setNamespacePrefix(endpoint.getPrefix());
 
-            results.put(verb + " " + path, endpoint);
+            results.put(endpoint.getHttpVerb() + " " + path, endpoint);
 
             // Increase counter by one
             i++;
@@ -308,7 +309,7 @@ public class ConsumerGatewayUtil {
 
     /**
      * Creates a ConsumerEndpoint that points to a service which configuration
-     * information is not in the configuration file. Resource path is used as 
+     * information is not in the configuration file. Resource path is used as
      * service id.
      * @param props consumer gateway properties that contain default namespace
      * and prefix
@@ -317,8 +318,8 @@ public class ConsumerGatewayUtil {
      */
     public static ConsumerEndpoint createUnconfiguredEndpoint(Properties props, String resourcePath) {
         logger.debug("Create a consumer endpoint that points to a service defined by resource path.");
-        String resourceId = null;      
-        // Check if a resource id is present in the resource path. 
+        String resourceId = null;
+        // Check if a resource id is present in the resource path.
         // Pattern for resource path and resource id.
         String pattern = "/(.+?)/(.+)";
         Pattern regex = Pattern.compile(pattern);
