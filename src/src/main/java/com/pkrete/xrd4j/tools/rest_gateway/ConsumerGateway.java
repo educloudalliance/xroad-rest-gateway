@@ -176,12 +176,30 @@ public class ConsumerGateway extends HttpServlet {
                         logger.debug("Received response contains SOAP fault.");
                         responseStr = this.generateFault(serviceResponse.getErrorMessage());
                     }
-                    // If content type is JSON and the SOAP message doesn't have
-                    // attachments, the response must be converted
-                    if (response.getContentType().startsWith("application/json") && !SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
-                        logger.debug("Convert response from XML to JSON.");
-                        responseStr = new XMLToJSONConverter().convert(responseStr);
-                    } else if (SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+                    // SOAP message doesn't have attachments
+                    if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+                        // If content type is JSON and the SOAP message doesn't have
+                        // attachments, the response must be converted
+                        if (response.getContentType().startsWith("application/json")) {
+                            logger.debug("Convert response from XML to JSON.");
+                            // Remove <response> tags. Namespaces are omitted
+                            // when reponse's content type is JSON
+                            responseStr = responseStr.replaceAll("<(/)*response>", "");
+                            responseStr = new XMLToJSONConverter().convert(responseStr);
+                        } else if (response.getContentType().startsWith("text/xml")) {
+                            // If content type is XML the message doesn't have to
+                            // be converted, but it should be checked if there
+                            // are additional <response> tags as a wrapper
+                            String responseStrTemp = responseStr.replaceAll("<(/)*(\\w+:)*response.*?>", "");
+                            // Try to convert modified response to SOAP element
+                            if (SOAPHelper.xmlStrToSOAPElement(responseStrTemp) != null) {
+                                // If conversion succeeded response tag was only
+                                // a wrapper that can be removed
+                                responseStr = responseStrTemp;
+                                logger.debug("Response tag was removed from the response string.");
+                            }
+                        }
+                    } else {
                         // SOAP message has attachments. Use attachment's
                         // content type
                         String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
@@ -357,8 +375,9 @@ public class ConsumerGateway extends HttpServlet {
 
     /**
      * Removes all the X-Road specific HTTP and SOAP headers from the request
-     * parameters map. This method must be called before writing the
-     * parameters to the SOAP request object.
+     * parameters map. This method must be called before writing the parameters
+     * to the SOAP request object.
+     *
      * @param parameters HTTP request parameters map
      * @return filtered parameters map
      */
@@ -373,6 +392,7 @@ public class ConsumerGateway extends HttpServlet {
 
     /**
      * Reads the request body from the request and returns it as a String.
+     *
      * @param request HttpServletRequest that contains the request body
      * @return request body as a String or null
      */
@@ -460,11 +480,7 @@ public class ConsumerGateway extends HttpServlet {
                 return SOAPHelper.toString((AttachmentPart) message.getAttachments().next());
             }
             // Convert response to string
-            String responseStr = SOAPHelper.toString(responseNode);
-            // Remove <response> tags
-            responseStr = responseStr.replaceAll("<(/)*response>", "");
-            // Return result
-            return responseStr;
+            return SOAPHelper.toString(responseNode);
         }
     }
 }
