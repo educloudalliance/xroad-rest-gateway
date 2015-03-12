@@ -9,8 +9,6 @@ package com.pkrete.xrd4j.tools.rest_gateway.endpoint;
 public class ProviderEndpoint extends AbstractEndpoint {
 
     private String url;
-    private String objectTagName;
-    private String arrayTagName;
     private String accept;
     private String contentType;
     private boolean attachment;
@@ -24,8 +22,6 @@ public class ProviderEndpoint extends AbstractEndpoint {
     public ProviderEndpoint(String serviceId, String url) {
         super(serviceId);
         this.url = url;
-        this.objectTagName = "result";
-        this.arrayTagName = "results";
         this.sendXrdHeaders = true;
         this.attachment = false;
     }
@@ -44,41 +40,6 @@ public class ProviderEndpoint extends AbstractEndpoint {
      */
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    /**
-     * Returns the name of a single object tag in the response XML.
-     * @return name of a single object tag in the response XML
-     */
-    public String getObjectTagName() {
-        return objectTagName;
-    }
-
-    /**
-     * Sets the name of a single object tag in the response XML.
-     * @param objectTagName new value
-     */
-    public void setObjectTagName(String objectTagName) {
-        this.objectTagName = objectTagName;
-    }
-
-    /**
-     * Returns the name of the array tag that wraps multiple objects in the
-     * response XML.
-     * @return name of the array tag that wraps multiple objects in the
-     * response XML
-     */
-    public String getArrayTagName() {
-        return arrayTagName;
-    }
-
-    /**
-     * Sets the name of the array tag that wraps multiple objects in the
-     * response XML.
-     * @param arrayTagName new value
-     */
-    public void setArrayTagName(String arrayTagName) {
-        this.arrayTagName = arrayTagName;
     }
 
     /**

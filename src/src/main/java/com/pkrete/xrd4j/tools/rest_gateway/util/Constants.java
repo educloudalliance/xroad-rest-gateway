@@ -35,8 +35,6 @@ public class Constants {
     public static final String PROVIDER_PROPS_URL = "url";
     public static final String PROVIDER_PROPS_CONTENT_TYPE = "contenttype";
     public static final String PROVIDER_PROPS_ACCEPT = "accept";
-    public static final String PROVIDER_PROPS_OBJECT_TAG = "objecttag";
-    public static final String PROVIDER_PROPS_ARRAY_TAG = "arraytag";
     public static final String PROVIDER_PROPS_ATTACHMENT = "response.attachment";
     public static final String PROVIDER_PROPS_SEND_XRD_HEADERS = "request.xrdheaders";
     /**

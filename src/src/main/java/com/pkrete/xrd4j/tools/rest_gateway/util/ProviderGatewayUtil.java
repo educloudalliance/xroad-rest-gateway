@@ -79,18 +79,6 @@ public class ProviderGatewayUtil {
                 endpoint.setAccept(value);
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_ACCEPT, value);
             }
-            // Object tag
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_OBJECT_TAG)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_OBJECT_TAG);
-                endpoint.setObjectTagName(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_OBJECT_TAG, value);
-            }
-            // Array tag
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ARRAY_TAG)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ARRAY_TAG);
-                endpoint.setArrayTagName(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_ARRAY_TAG, value);
-            }
             // Attachment
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT);
@@ -173,18 +161,11 @@ public class ProviderGatewayUtil {
      * Converts JSON string to XML string. XML string is wrapped inside
      * wrapper element defined by the given endpoint.
      * @param data JSON string to be converted
-     * @param endpoint provider endpoint
      * @return XML string
      */
-    public static String fromJSONToXML(String data, ProviderEndpoint endpoint) {
-        // Get wrapper tag's name
-        String wrapper = endpoint.getObjectTagName();
-        // Modify JSON string, not required, but makes the output
-        // more readable
-        if (data.startsWith("[")) {
-            data = "{\"" + wrapper + "\":" + data + "}";
-            wrapper = endpoint.getArrayTagName();
-        }
+    public static String fromJSONToXML(String data) {
+        // Set wrapper tag's name
+        String wrapper = "response";
         // Convert service endpoint's response to XML
         data = new JSONToXMLConverter().convert(data);
         // Return data inside wrapper element

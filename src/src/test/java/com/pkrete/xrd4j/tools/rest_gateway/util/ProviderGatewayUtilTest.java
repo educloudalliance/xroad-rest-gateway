@@ -47,11 +47,9 @@ public class ProviderGatewayUtilTest extends TestCase {
 
         this.endpoints.put("2." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getWeather.v1");
         this.endpoints.put("2." + Constants.PROVIDER_PROPS_URL, "http://weather.com/");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_ARRAY_TAG, "array_tag");
         this.endpoints.put("2." + Constants.PROVIDER_PROPS_ACCEPT, "application/json");
         this.endpoints.put("2." + Constants.PROVIDER_PROPS_ATTACHMENT, "true");
         this.endpoints.put("2." + Constants.PROVIDER_PROPS_CONTENT_TYPE, "application/json");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_OBJECT_TAG, "object_tag");
         this.endpoints.put("2." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, "false");
 
         this.endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getWeather");
@@ -78,8 +76,6 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
         assertEquals(null, temp.getAccept());
         assertEquals(null, temp.getContentType());
-        assertEquals("results", temp.getArrayTagName());
-        assertEquals("result", temp.getObjectTagName());
         assertEquals(false, temp.isAttachment());
         assertEquals(true, temp.isSendXrdHeaders());
     }
@@ -99,8 +95,6 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals("http://deserialize.com/custom", temp.getNamespaceDeserialize());
         assertEquals(null, temp.getAccept());
         assertEquals(null, temp.getContentType());
-        assertEquals("results", temp.getArrayTagName());
-        assertEquals("result", temp.getObjectTagName());
         assertEquals(false, temp.isAttachment());
         assertEquals(true, temp.isSendXrdHeaders());
     }
@@ -120,8 +114,6 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
         assertEquals("application/json", temp.getAccept());
         assertEquals("application/json", temp.getContentType());
-        assertEquals("array_tag", temp.getArrayTagName());
-        assertEquals("object_tag", temp.getObjectTagName());
         assertEquals(true, temp.isAttachment());
         assertEquals(false, temp.isSendXrdHeaders());
     }

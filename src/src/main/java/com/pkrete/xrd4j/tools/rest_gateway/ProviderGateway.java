@@ -136,7 +136,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                         if (!RESTGatewayUtil.isXml(contentType)) {
                             logger.debug("Convert response to XML.");
                             // Convert service endpoint's response to XML
-                            data = ProviderGatewayUtil.fromJSONToXML(data, endpoint);
+                            data = ProviderGatewayUtil.fromJSONToXML(data);
                         } else {
                             // Do not change the namespace if response is XML
                             response.setForceNamespaceToResponseChildren(false);
@@ -207,7 +207,16 @@ public class ProviderGateway extends AbstractAdapterServlet {
 
         @Override
         public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
-            SOAPElement data = soapResponse.addChildElement((SOAPElement) response.getResponseData());
+            SOAPElement responseElem = (SOAPElement) response.getResponseData();
+            if(responseElem.getLocalName().equals("response")) {    
+                logger.debug("Additional \"response\" wrapper detected. Remove the wrapper.");
+                for (int i = 0; i < responseElem.getChildNodes().getLength(); i++) {              
+                    Node importNode = (Node) envelope.getBody().getOwnerDocument().importNode(responseElem.getChildNodes().item(i), true);
+                    soapResponse.appendChild(importNode);
+                }
+            } else {
+                SOAPElement data = soapResponse.addChildElement((SOAPElement) response.getResponseData());
+            }
         }
     }
 

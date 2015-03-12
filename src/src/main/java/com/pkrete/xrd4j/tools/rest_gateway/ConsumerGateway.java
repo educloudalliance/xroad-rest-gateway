@@ -459,7 +459,12 @@ public class ConsumerGateway extends HttpServlet {
                 logger.debug("SOAP attachment detected. Use attachment as response data.");
                 return SOAPHelper.toString((AttachmentPart) message.getAttachments().next());
             }
-            return SOAPHelper.toString((Node) responseNode.getFirstChild());
+            // Convert response to string
+            String responseStr = SOAPHelper.toString(responseNode);
+            // Remove <response> tags
+            responseStr = responseStr.replaceAll("<(/)*response>", "");
+            // Return result
+            return responseStr;
         }
     }
 }
