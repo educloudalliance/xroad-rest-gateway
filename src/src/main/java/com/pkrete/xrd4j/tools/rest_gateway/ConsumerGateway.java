@@ -187,16 +187,16 @@ public class ConsumerGateway extends HttpServlet {
                             responseStr = responseStr.replaceAll("<(/)*response>", "");
                             responseStr = new XMLToJSONConverter().convert(responseStr);
                         } else if (response.getContentType().startsWith("text/xml")) {
-                            // If content type is XML the message doesn't have to
-                            // be converted, but it should be checked if there
-                            // are additional <response> tags as a wrapper
-                            String responseStrTemp = responseStr.replaceAll("<(/)*(\\w+:)*response.*?>", "");
+                            // Remove response tag and its namespace prefixes
+                            String responseStrTemp = ConsumerGatewayUtil.removeResponseTag(responseStr);
                             // Try to convert modified response to SOAP element
                             if (SOAPHelper.xmlStrToSOAPElement(responseStrTemp) != null) {
                                 // If conversion succeeded response tag was only
                                 // a wrapper that can be removed
                                 responseStr = responseStrTemp;
                                 logger.debug("Response tag was removed from the response string.");
+                            } else {
+                                logger.debug("Response tag is the root element and cannot be removed.");
                             }
                         }
                     } else {

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * @author Petteri Kivimäki
  */
 public class ConsumerGatewayUtil {
-
+    
     private final static Logger logger = LoggerFactory.getLogger(ConsumerGatewayUtil.class);
 
     /**
@@ -37,17 +37,17 @@ public class ConsumerGatewayUtil {
             logger.warn("No endpoints were founds. The list was null or empty.");
             return results;
         }
-
+        
         int i = 0;
         String key = Integer.toString(i);
 
         // Loop through all the endpoints
         while (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_ID)) {
-
+            
             String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
             String serviceId = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String path = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_PATH);
-
+            
             if (serviceId == null || serviceId.isEmpty() || path == null || path.isEmpty()) {
                 logger.warn("ID or path is null or empty. Consumer endpoint skipped.");
                 i++;
@@ -58,9 +58,9 @@ public class ConsumerGatewayUtil {
             if (!path.endsWith("/")) {
                 path += "/";
             }
-
+            
             logger.info("New consumer endpoint found. ID : \"{}\", path : \"{}\".", serviceId, path);
-
+            
             ConsumerEndpoint endpoint = new ConsumerEndpoint(serviceId, clientId, path);
 
             // Create ProducerMember object
@@ -129,7 +129,7 @@ public class ConsumerGatewayUtil {
             // Set namespaces
             endpoint.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
             endpoint.getProducer().setNamespacePrefix(endpoint.getPrefix());
-
+            
             results.put(endpoint.getHttpVerb() + " " + path, endpoint);
 
             // Increase counter by one
@@ -137,7 +137,7 @@ public class ConsumerGatewayUtil {
             // Update keyD
             key = Integer.toString(i);
         }
-
+        
         logger.info("{} consumer endpoints extracted from properties.", results.size());
         return ((TreeMap) results).descendingMap();
     }
@@ -311,6 +311,7 @@ public class ConsumerGatewayUtil {
      * Creates a ConsumerEndpoint that points to a service which configuration
      * information is not in the configuration file. Resource path is used as
      * service id.
+     *
      * @param props consumer gateway properties that contain default namespace
      * and prefix
      * @param resourcePath resource path that was called, used as service id
@@ -352,5 +353,40 @@ public class ConsumerGatewayUtil {
             endpoint.getProducer().setNamespacePrefix(prefix);
         }
         return endpoint;
+    }
+
+    /**
+     * Removes response tag and its namespace prefixes from the given response
+     * message. All the response tag's namespace prefixes are removed from the
+     * children.
+     *
+     * @param message response message
+     * @return children of the response tag
+     */
+    public static String removeResponseTag(String message) {
+        String responsePrefix = "";
+        // Regex for reponse tag's namespace prefix
+        String regex = ".*<(\\w+:)*response.*?>.*";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            if (matcher.group(1) != null) {
+                responsePrefix = matcher.group(1);
+                logger.debug("Response tag's prefix is \"{}\".", responsePrefix);
+            } else {
+                logger.debug("No namespace prefix was found for response tag.");
+            }
+        }
+        // If content type is XML the message doesn't have to
+        // be converted, but it should be checked if there
+        // are additional <response> tags as a wrapper
+        String response = message.replaceAll("<(/)*" + responsePrefix + "response.*?>", "");
+        // Remove response tag's prefixes, because otherwise
+        // the conversion to SOAP element will fail because
+        // of them
+        if (!responsePrefix.isEmpty()) {
+            response = response.replaceAll("(</{0,1})" + responsePrefix, "$1");
+        }
+        return response;
     }
 }

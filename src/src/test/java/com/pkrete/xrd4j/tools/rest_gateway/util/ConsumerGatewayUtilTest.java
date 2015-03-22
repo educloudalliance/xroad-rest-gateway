@@ -3,6 +3,7 @@ package com.pkrete.xrd4j.tools.rest_gateway.util;
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
+import com.pkrete.xrd4j.common.util.SOAPHelper;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
 import java.util.Properties;
@@ -10,6 +11,12 @@ import junit.framework.TestCase;
 
 /**
  * Test cases for ConsumerGatewayUtil class.
+ *
+ * Running these tests cause the below error message to appear on the screen.
+ * The error message is expected and can be ignored. The error message:
+ *
+ * "[Fatal Error] :1:xx: The markup in the document following the root element
+ * must be well-formed."
  *
  * @author Petteri Kivimäki
  */
@@ -22,6 +29,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
 
     /**
      * Initializes instance variables for test cases.
+     *
      * @throws Exception
      */
     @Override
@@ -68,6 +76,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
 
     /**
      * The first endpoint on the list. No overridden properties.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer0() throws XRd4JException {
@@ -87,6 +96,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
 
     /**
      * The second endpoint on the list. Overridden properties.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer1() throws XRd4JException {
@@ -106,6 +116,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
 
     /**
      * The third endpoint on the list. No overridden properties.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer2() throws XRd4JException {
@@ -124,8 +135,9 @@ public class ConsumerGatewayUtilTest extends TestCase {
     }
 
     /**
-     * The fourth endpoint on the list. Invalid configuration - service id
-     * lacks subsystem.
+     * The fourth endpoint on the list. Invalid configuration - service id lacks
+     * subsystem.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer4() throws XRd4JException {
@@ -134,8 +146,9 @@ public class ConsumerGatewayUtilTest extends TestCase {
     }
 
     /**
-     * The fifth endpoint on the list. Invalid configuration - client id
-     * lacks subsystem.
+     * The fifth endpoint on the list. Invalid configuration - client id lacks
+     * subsystem.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer5() throws XRd4JException {
@@ -237,5 +250,130 @@ public class ConsumerGatewayUtilTest extends TestCase {
         this.servletUrl = this.servletUrl.replace("http", "https");
         responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
         assertEquals(responseCorrect, responseStr);
+    }
+
+    /**
+     * Remove response tag and namespace prefix. No namespace.
+     */
+    public void testRemoveResponseTag1() {
+        String source = "<response><param1>value1</param1><param2>value2</param2></response>";
+        String result = "<param1>value1</param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. With namespace, no prefix.
+     */
+    public void testRemoveResponseTag2() {
+        String source = "<response xmlns:ts1=\"http://test.com/ns\"><param1>value1</param1><param2>value2</param2></response>";
+        String result = "<param1>value1</param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. With namespace and prefix.
+     */
+    public void testRemoveResponseTag3() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><ts1:param1>value1</ts1:param1><ts1:param2>value2</ts1:param2></ts1:response>";
+        String result = "<param1>value1</param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Only response tag has namespace
+     * and prefix.
+     */
+    public void testRemoveResponseTag4() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><param1>value1</param1><param2>value2</param2></ts1:response>";
+        String result = "<param1>value1</param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has namespace and
+     * prefix, one child has the same prefix.
+     */
+    public void testRemoveResponseTag5() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><ts1:param1>value1</ts1:param1><param2>value2</param2></ts1:response>";
+        String result = "<param1>value1</param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has namespace and
+     * prefix, one child has another namespace and prefix.
+     */
+    public void testRemoveResponseTag6() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><param2>value2</param2></ts1:response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has namespace and
+     * prefix, one child has another namespace and prefix, and another child has
+     * reponse's namespace prefix.
+     */
+    public void testRemoveResponseTag7() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><ts1:param2>value2</ts1:value2></ts1:response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><param2>value2</value2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has no namespace,
+     * one child has namespace and prefix.
+     */
+    public void testRemoveResponseTag8() {
+        String source = "<response><ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><param2>value2</param2></response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\">value1</ts2:param1><param2>value2</param2>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        assertEquals(null, SOAPHelper.xmlStrToSOAPElement(result));
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has no namespace,
+     * children are under another element that has namespace.
+     */
+    public void testRemoveResponseTag9() {
+        String source = "<response><ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1></response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has namespace and
+     * prefix, children are under another element that has namespace.
+     */
+    public void testRemoveResponseTag10() {
+        String source = "<ts1:response xmlns:ts1=\"http://test.com/ns\"><ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><ts1:param3>value3</ts1:param3></ts2:param1></ts1:response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove response tag and namespace prefix. Response tag has namespace and
+     * no prefix, children are under another element that has namespace.
+     */
+    public void testRemoveResponseTag11() {
+        String source = "<response xmlns=\"http://test.com/ns\"><ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1></response>";
+        String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
     }
 }
