@@ -504,7 +504,7 @@
 
     <wsdl:service name="vrk-testService">
         <wsdl:port binding="tns:sdsbBinding" name="sdsbServicePort">
-            <soap:address location="http://localhost:8080/rest-gateway-0.0.5/Provider"/>
+            <soap:address location="http://localhost:8080/RESTGateway/Provider"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
