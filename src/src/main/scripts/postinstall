@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Should we deploy into tomcat?
+
