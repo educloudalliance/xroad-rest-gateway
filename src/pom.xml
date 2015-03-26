@@ -18,6 +18,7 @@
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding> 
+        <app.home>/var/lib/tomcat/webapps/rest-gateway/</app.home>
     </properties>
     <dependencies>
         <dependency>
@@ -66,7 +67,7 @@
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
         </dependency>
-		
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -88,7 +89,7 @@
     <developers>
         <developer>
             <id>petkivim</id>
-            <name>Petteri Kivimäki</name>            
+            <name>Petteri Kivimäki</name>
             <roles>
                 <role>architect</role>
                 <role>developer</role>
@@ -105,7 +106,60 @@
                 <configuration>
                     <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                 </configuration>
-            </plugin>         
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>generate-rpm</id>
+                        <goals>
+                            <goal>rpm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <license>EUPL V.1.1</license>
+                    <distribution>RHEL</distribution>
+                    <!-- version comes from above -->
+                    <release>SNAPSHOT</release>
+                    <group>System Environment/Libraries</group>
+                    <packager>Petteri Kivimäki</packager>
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                    </defineStatements>
+                    <requires>
+                        <require>tomcat</require>
+                    </requires>
+                    <mappings>
+                        <mapping>
+                            <directory>${app.home}</directory>
+                            <filemode>440</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>target/rest-gateway-${version}.war</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                    <!--
+                    <preinstallScriptlet>
+                        <script>echo "installing now"</script>
+                    </preinstallScriptlet>
+                    -->
+                    <postinstallScriptlet>
+                        <scriptFile>src/main/scripts/postinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
+                    <preremoveScriptlet>
+                        <scriptFile>src/main/scripts/preremove</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </preremoveScriptlet>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -129,7 +183,7 @@
                     </systemProperties>
                     <encoding>UTF-8</encoding>
                     <inputEncoding>UTF-8</inputEncoding>
-                    <outputEncoding>UTF-8</outputEncoding> 
+                    <outputEncoding>UTF-8</outputEncoding>
                 </configuration>
             </plugin>
         </plugins>
