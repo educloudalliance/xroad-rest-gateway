@@ -307,7 +307,7 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <complexType name="ogranization">
+            <complexType name="organization">
                 <all>
                     <element name="id" type="xsd:int" />
                     <element name="name_fi" type="xsd:string" />
