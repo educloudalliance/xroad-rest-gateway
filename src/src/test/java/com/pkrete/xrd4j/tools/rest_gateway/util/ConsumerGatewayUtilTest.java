@@ -5,6 +5,7 @@ import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
 import com.pkrete.xrd4j.common.util.SOAPHelper;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;
@@ -75,6 +76,183 @@ public class ConsumerGatewayUtilTest extends TestCase {
     }
 
     /**
+     * Test parsing client ids from string.
+     *
+     * @throws XRd4JException if there's a XRd4J error
+     */
+    public void testParseConsumer1() throws XRd4JException {
+        String clientId = "FI_PILOT.GOV.0245437-2";
+        ConsumerEndpoint consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
+        assertEquals(true, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
+        assertEquals(clientId, consumerEndpoint.getConsumer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getConsumer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getConsumer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getConsumer().getSubsystemCode());
+
+        clientId = "FI_PILOT.GOV.0245437-2.ConsumerService";
+        consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
+        assertEquals(true, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
+        assertEquals(clientId, consumerEndpoint.getConsumer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getConsumer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getConsumer().getMemberCode());
+        assertEquals("ConsumerService", consumerEndpoint.getConsumer().getSubsystemCode());
+
+        clientId = "FI_PILOT.GOV.0245437-2.ConsumerService.getOrganizationList";
+        consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
+        assertEquals(false, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
+
+        clientId = "FI_PILOT.GOV.0245437-2.ConsumerService.getOrganizationList.v1";
+        consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
+        assertEquals(false, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
+
+        clientId = "FI_PILOT.GOV";
+        consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
+        assertEquals(false, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
+    }
+
+    /**
+     * Test parsing service ids from string.
+     *
+     * @throws XRd4JException if there's a XRd4J error
+     */
+    public void testParseProducer1() throws XRd4JException {
+        String serviceId = "FI_PILOT.GOV.0245437-2.ConsumerService.getOrganizationList.v1";
+        ConsumerEndpoint consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals("ConsumerService", consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("v1", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.ConsumerService2.getOrganizationList.V1";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals("ConsumerService2", consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("V1", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.ConsumerService2.getOrganizationList.V1_0";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals("ConsumerService2", consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("V1_0", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.ConsumerService.getOrganizationList1";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals("ConsumerService", consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList1", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals(null, consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList2";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList2", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals(null, consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.v1";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("v1", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.V11";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("V11", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.1";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("1", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.1_0";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("1_0", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.1-0";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals("1-0", consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV.0245437-2.getOrganizationList.ve1";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+        assertEquals(serviceId, consumerEndpoint.getProducer().toString());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
+        assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
+        assertEquals("getOrganizationList", consumerEndpoint.getProducer().getSubsystemCode());
+        assertEquals("ve1", consumerEndpoint.getProducer().getServiceCode());
+        assertEquals(null, consumerEndpoint.getProducer().getServiceVersion());
+
+        serviceId = "FI_PILOT.GOV";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(false, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+
+        serviceId = "FI_PILOT.GOV.0245437-2";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(false, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+
+        serviceId = "FI_PILOT.GOV.0245437-2.subsystem.service.v1.0";
+        consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
+        assertEquals(false, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
+    }
+
+    /**
      * The first endpoint on the list. No overridden properties.
      *
      * @throws XRd4JException if there's a XRd4J error
@@ -142,7 +320,19 @@ public class ConsumerGatewayUtilTest extends TestCase {
      */
     public void testExtractConsumer4() throws XRd4JException {
         ConsumerEndpoint temp = ConsumerGatewayUtil.findMatch("GET /test.com/api/", map);
-        assertEquals(true, temp == null);
+        assertEquals(false, temp == null);
+        assertEquals("FI_PILOT.GOV.0245437-2.ConsumerService", temp.getClientId());
+        assertEquals("FI_PILOT.GOV.1019125-0.testApi.v1", temp.getServiceId());
+        assertEquals("/test.com/api/", temp.getResourcePath());
+        assertEquals(null, temp.getResourceId());
+        assertEquals(false, temp.isModifyUrl());
+        assertEquals("http://serialize.com", temp.getNamespaceSerialize());
+        assertEquals("ts1", temp.getPrefix());
+        assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
+        assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
+        ProducerMember producer = new ProducerMember("FI_PILOT", "GOV", "1019125-0", "null", "testApi", "v1");
+        producer.setSubsystemCode(null);
+        assertEquals(producer.toString(), temp.getProducer().toString());
     }
 
     /**
@@ -371,6 +561,19 @@ public class ConsumerGatewayUtilTest extends TestCase {
     public void testRemoveResponseTag11() {
         String source = "<response xmlns=\"http://test.com/ns\"><ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1></response>";
         String result = "<ts2:param1 xmlns:ts2=\"http://test.com/ns2\"><ts2:param2>value2</ts2:param2><param3>value3</param3></ts2:param1>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove response tag and namespace prefix. No namespace. XML uses
+     * ISO-8859-1 character set.
+     */
+    public void testRemoveResponseTag12() throws UnsupportedEncodingException {
+        String source = new String("<response><wrapper><param1>value1</param1><param2>ÄÖÅäöå</param2></wrapper></response>".getBytes(), "ISO-8859-1");
+        String result = new String("<wrapper><param1>value1</param1><param2>ÄÖÅäöå</param2></wrapper>".getBytes(), "ISO-8859-1");
         assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
         if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
             fail("Response can't be null");
