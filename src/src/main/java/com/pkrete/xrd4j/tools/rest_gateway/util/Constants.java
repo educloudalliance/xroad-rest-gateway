@@ -8,8 +8,7 @@ package com.pkrete.xrd4j.tools.rest_gateway.util;
 public class Constants {
 
     /**
-     * Constructs and initializes a new Constants object. Should never
-     * be used.
+     * Constructs and initializes a new Constants object. Should never be used.
      */
     private Constants() {
     }
@@ -67,4 +66,17 @@ public class Constants {
      */
     public static final String ERROR_404 = "404 Not Found";
     public static final String ERROR_500 = "500 Internal Server Error";
+    // HTTP Headers
+    /**
+     * Content-Type: text/xml
+     */
+    public static final String TEXT_XML = "text/xml";
+    /**
+     * Content-Type: application/json
+     */
+    public static final String APPLICATION_JSON = "application/json";
+    /**
+     * Character set UTF-8
+     */
+    public static final String CHARSET_UTF8 = "charset=utf-8";
 }

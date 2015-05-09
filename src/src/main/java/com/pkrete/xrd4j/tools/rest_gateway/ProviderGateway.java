@@ -79,7 +79,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
      */
     @Override
     protected ServiceResponse handleRequest(ServiceRequest request) throws SOAPException, XRd4JException {
-        ServiceResponseSerializer serializer = null;
+        ServiceResponseSerializer serializer;
         ServiceResponse response = null;
         String serviceId = request.getProducer().toString();
 
@@ -124,7 +124,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 String data = restResponse.getData();
                 contentType = restResponse.getContentType();
 
-                if (contentType.startsWith("text/xml") || contentType.startsWith("application/json")) {
+                if (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_JSON)) {
                     // If response is passed as an attachement, there's no need
                     // for for conversion
                     if (endpoint.isAttachment()) {
@@ -145,7 +145,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                         response.setResponseData(SOAPHelper.xmlStrToSOAPElement(data));
                     }
                 } else {
-                    logger.warn("Response's content type is not \"text/xml\" or \"application/json\".");
+                    logger.warn("Response's content type is not \"{}\" or \"{}\".", Constants.TEXT_XML, Constants.APPLICATION_JSON);
                     if (restResponse.getStatusCode() == 200) {
                         logger.warn("Response's status code is 200. Return generic 404 error.");
                         response.setErrorMessage(new ErrorMessage("404", Constants.ERROR_404));
@@ -208,9 +208,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
         @Override
         public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
             SOAPElement responseElem = (SOAPElement) response.getResponseData();
-            if(responseElem.getLocalName().equals("response")) {    
+            if (responseElem.getLocalName().equals("response")) {
                 logger.debug("Additional \"response\" wrapper detected. Remove the wrapper.");
-                for (int i = 0; i < responseElem.getChildNodes().getLength(); i++) {              
+                for (int i = 0; i < responseElem.getChildNodes().getLength(); i++) {
                     Node importNode = (Node) envelope.getBody().getOwnerDocument().importNode(responseElem.getChildNodes().item(i), true);
                     soapResponse.appendChild(importNode);
                 }

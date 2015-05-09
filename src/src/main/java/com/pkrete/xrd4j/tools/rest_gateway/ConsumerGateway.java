@@ -85,18 +85,18 @@ public class ConsumerGateway extends HttpServlet {
         String namespace = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
         String prefix = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
         String contentType = request.getHeader(Constants.HTTP_HEADER_CONTENT_TYPE);
-        String accept = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? "text/xml" : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
+        String accept = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? Constants.TEXT_XML : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
         logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
 
         // Accept header must be "text/xml" or "application/json"
         logger.debug("Incoming accept header value : \"{}\"", accept);
-        if (!accept.startsWith("text/xml") && !accept.startsWith("application/json")) {
-            accept = "text/xml; charset=utf-8";
-            logger.trace("Accept header value set to \"text/xml\".");
+        if (!accept.startsWith(Constants.TEXT_XML) && !accept.startsWith(Constants.APPLICATION_JSON)) {
+            accept = Constants.TEXT_XML + "; " + Constants.CHARSET_UTF8;
+            logger.trace("Accept header value set to \"{}\".", Constants.TEXT_XML);
         }
         // Character set must be added to the accept header, if it's missing
         if (!accept.endsWith("8")) {
-            accept += "; charset=utf-8";
+            accept += "; " + Constants.CHARSET_UTF8;
         }
         // Set reponse content type according the accept header
         response.setContentType(accept);
@@ -113,7 +113,7 @@ public class ConsumerGateway extends HttpServlet {
         }
 
         // Omit response namespace, if response is wanted in JSON
-        if (accept.startsWith("application/json")) {
+        if (accept.startsWith(Constants.APPLICATION_JSON)) {
             omitNamespace = true;
         }
 
@@ -180,13 +180,13 @@ public class ConsumerGateway extends HttpServlet {
                     if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
                         // If content type is JSON and the SOAP message doesn't have
                         // attachments, the response must be converted
-                        if (response.getContentType().startsWith("application/json")) {
+                        if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
                             logger.debug("Convert response from XML to JSON.");
                             // Remove <response> tags. Namespaces are omitted
                             // when reponse's content type is JSON
                             responseStr = responseStr.replaceAll("<(/)*response>", "");
                             responseStr = new XMLToJSONConverter().convert(responseStr);
-                        } else if (response.getContentType().startsWith("text/xml")) {
+                        } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
                             // Remove response tag and its namespace prefixes
                             String responseStrTemp = ConsumerGatewayUtil.removeResponseTag(responseStr);
                             // Try to convert modified response to SOAP element
@@ -311,7 +311,7 @@ public class ConsumerGateway extends HttpServlet {
 
     private String generateError(String errorMsg, String contentType) {
         StringBuilder builder = new StringBuilder();
-        if (contentType.startsWith("application/json")) {
+        if (contentType.startsWith(Constants.APPLICATION_JSON)) {
             builder.append("{\"error\":\"").append(errorMsg).append("\"}");
         } else {
             builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
