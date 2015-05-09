@@ -48,17 +48,21 @@ public class ConsumerGateway extends HttpServlet {
     private Properties props;
     private Map<String, ConsumerEndpoint> endpoints;
     private final static Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
+    private boolean serviceCallsByXRdServiceId;
 
     @Override
     public void init() throws ServletException {
         super.init();
         logger.debug("Starting to initialize Consumer REST Gateway.");
         this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
+        String serviceCallsByXRdServiceIdStr = this.props.getProperty(Constants.CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED);
+        this.serviceCallsByXRdServiceId = serviceCallsByXRdServiceIdStr == null ? false : serviceCallsByXRdServiceIdStr.equalsIgnoreCase("true");
         logger.debug("Security server URL : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
         logger.debug("Default client id : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT));
         logger.debug("Default namespace for incoming ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
         logger.debug("Default namespace for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
         logger.debug("Default namespace prefix for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+        logger.debug("Service calls by X-Road service id are enabled : {}.", this.serviceCallsByXRdServiceId);
         Properties endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
         logger.debug("Consumer REST Gateway initialized.");
@@ -75,7 +79,7 @@ public class ConsumerGateway extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String responseStr = "";
+        String responseStr;
         boolean omitNamespace = false;
         // Get resourcePath attribute
         String resourcePath = (String) request.getAttribute("resourcePath");
@@ -129,10 +133,14 @@ public class ConsumerGateway extends HttpServlet {
             // service id
             ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
 
-            // If endpoint is null, use resourcePath as service id
+            // If endpoint is null, try to use resourcePath as service id
             if (endpoint == null) {
-                logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
-                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);
+                if (this.serviceCallsByXRdServiceId) {
+                    logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
+                    endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);
+                } else {
+                    logger.info("Endpoint is null and service calls by X-Road service id are disabled. Nothing to do here.");
+                }
             }
 
             // If endpoint was found, process it; otherwise return an error
