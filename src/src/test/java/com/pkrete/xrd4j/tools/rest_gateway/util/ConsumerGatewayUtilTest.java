@@ -85,7 +85,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         ConsumerEndpoint consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
         assertEquals(true, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
         assertEquals(clientId, consumerEndpoint.getConsumer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getConsumer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getConsumer().getMemberCode());
         assertEquals(null, consumerEndpoint.getConsumer().getSubsystemCode());
@@ -94,7 +94,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(null, clientId, null);
         assertEquals(true, ConsumerGatewayUtil.setConsumerMember(consumerEndpoint));
         assertEquals(clientId, consumerEndpoint.getConsumer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getConsumer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getConsumer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getConsumer().getMemberCode());
         assertEquals("ConsumerService", consumerEndpoint.getConsumer().getSubsystemCode());
@@ -122,7 +122,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         ConsumerEndpoint consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals("ConsumerService", consumerEndpoint.getProducer().getSubsystemCode());
@@ -133,7 +133,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals("ConsumerService2", consumerEndpoint.getProducer().getSubsystemCode());
@@ -144,7 +144,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals("ConsumerService2", consumerEndpoint.getProducer().getSubsystemCode());
@@ -155,7 +155,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals("ConsumerService", consumerEndpoint.getProducer().getSubsystemCode());
@@ -166,7 +166,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -177,7 +177,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -188,7 +188,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -199,7 +199,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -210,7 +210,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -221,7 +221,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals(null, consumerEndpoint.getProducer().getSubsystemCode());
@@ -232,7 +232,7 @@ public class ConsumerGatewayUtilTest extends TestCase {
         consumerEndpoint = new ConsumerEndpoint(serviceId, null, null);
         assertEquals(true, ConsumerGatewayUtil.setProducerMember(consumerEndpoint));
         assertEquals(serviceId, consumerEndpoint.getProducer().toString());
-        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getSdsbInstance());
+        assertEquals("FI_PILOT", consumerEndpoint.getProducer().getXRoadInstance());
         assertEquals("GOV", consumerEndpoint.getProducer().getMemberClass());
         assertEquals("0245437-2", consumerEndpoint.getProducer().getMemberCode());
         assertEquals("getOrganizationList", consumerEndpoint.getProducer().getSubsystemCode());

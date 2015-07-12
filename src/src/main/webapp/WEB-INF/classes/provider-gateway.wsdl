@@ -2,29 +2,31 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
                   xmlns:tns="http://vrk-test.x-road.fi/producer" 
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-                  xmlns:sdsb="http://x-road.eu/xsd/sdsb.xsd" 
+                  xmlns:xrd="http://x-road.eu/xsd/xroad.xsd"
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
                   xmlns:id="http://x-road.eu/xsd/identifiers"
-                  name="vrk-testService" targetNamespace="http://vrk-test.x-road.fi/producer">
+                  name="provider-gateway" targetNamespace="http://vrk-test.x-road.fi/producer">
     <wsdl:types>
+        
         <!-- Schema for identifiers (reduced) -->
         <xsd:schema elementFormDefault="qualified"
-                    targetNamespace="http://x-road.eu/xsd/identifiers" xmlns="http://x-road.eu/xsd/identifiers">
-            <xsd:simpleType name="SdsbObjectType">
+                    targetNamespace="http://x-road.eu/xsd/identifiers" 
+                    xmlns="http://x-road.eu/xsd/identifiers">
+            <xsd:simpleType name="XRoadObjectType">
                 <xsd:annotation>
-                    <xsd:documentation>Enumeration for SDSB identifier
+                    <xsd:documentation>Enumeration for X-Road identifier
                         types that can be used in requests.
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:restriction base="xsd:string">
-                    <xsd:enumeration value="MEMBER" />					
+                    <xsd:enumeration value="MEMBER" />
                     <xsd:enumeration value="SUBSYSTEM" />
-                    <xsd:enumeration value="SERVICE" />					
+                    <xsd:enumeration value="SERVICE" />
                 </xsd:restriction>
             </xsd:simpleType>
-            <xsd:element name="sdsbInstance" type="xsd:string">
+            <xsd:element name="xRoadInstance" type="xsd:string">
                 <xsd:annotation>
-                    <xsd:documentation>Identifies the SDSB instance.
+                    <xsd:documentation>Identifies the X-Road instance.
                         This field is applicable to all identifier
                         types.
                     </xsd:documentation>
@@ -47,14 +49,14 @@
             <xsd:element name="subsystemCode" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>Code that uniquely identifies a
-                        subsystem of given SDSB member.
+                        subsystem of given X-Road member.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
             <xsd:element name="serviceCode" type="xsd:string">
                 <xsd:annotation>
                     <xsd:documentation>Code that uniquely identifies a
-                        service offered by given SDSB member or
+                        service offered by given X-Road member or
                         subsystem.
                     </xsd:documentation>
                 </xsd:annotation>
@@ -65,19 +67,19 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:attribute name="objectType" type="SdsbObjectType" />
-            <xsd:complexType name="SdsbClientIdentifierType">
+            <xsd:attribute name="objectType" type="XRoadObjectType" />
+            <xsd:complexType name="XRoadClientIdentifierType">
                 <xsd:sequence>
-                    <xsd:element ref="sdsbInstance" />
+                    <xsd:element ref="xRoadInstance" />
                     <xsd:element ref="memberClass" />
                     <xsd:element ref="memberCode" />
                     <xsd:element minOccurs="0" ref="subsystemCode" />
                 </xsd:sequence>
                 <xsd:attribute ref="objectType" use="required" />
             </xsd:complexType>
-            <xsd:complexType name="SdsbServiceIdentifierType">
+            <xsd:complexType name="XRoadServiceIdentifierType">
                 <xsd:sequence>
-                    <xsd:element ref="sdsbInstance" />
+                    <xsd:element ref="xRoadInstance" />
                     <xsd:element ref="memberClass" />
                     <xsd:element ref="memberCode" />
                     <xsd:element minOccurs="0" ref="subsystemCode" />
@@ -90,13 +92,15 @@
 
         <!-- Schema for request headers -->
         <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
-                    targetNamespace="http://x-road.eu/xsd/sdsb.xsd"
+                    targetNamespace="http://x-road.eu/xsd/xroad.xsd"
                     elementFormDefault="qualified">
-	    							     
-            <xsd:element name="client" type="id:SdsbClientIdentifierType" />
-            <xsd:element name="service" type="id:SdsbServiceIdentifierType" />
+	       
+            <xsd:element name="client" type="id:XRoadClientIdentifierType" />
+            <xsd:element name="service" type="id:XRoadServiceIdentifierType" />
             <xsd:element name="userId" type="xsd:string" />
             <xsd:element name="id" type="xsd:string" />
+            <xsd:element name="issue" type="xsd:string" />
+            <xsd:element name="protocolVersion" type="xsd:string" />
         </xsd:schema>	     
 			     
         <!-- Schema for requests -->
@@ -320,10 +324,12 @@
     </wsdl:types>
 
     <wsdl:message name="requestheader">
-        <wsdl:part name="client" element="sdsb:client" />
-        <wsdl:part name="service" element="sdsb:service" />
-        <wsdl:part name="userId" element="sdsb:userId" />
-        <wsdl:part name="id" element="sdsb:id" />
+        <wsdl:part name="client" element="xrd:client" />
+        <wsdl:part name="service" element="xrd:service" />
+        <wsdl:part name="userId" element="xrd:userId" />
+        <wsdl:part name="id" element="xrd:id" />
+        <wsdl:part name="issue" element="xrd:issue" />
+        <wsdl:part name="protocolVersion" element="xrd:protocolVersion" />
     </wsdl:message>
 
     <wsdl:message name="getOrganizationList">
@@ -363,7 +369,7 @@
         <wsdl:part name="body" element="tns:fintoServiceResponse"/>
     </wsdl:message>
 
-    <wsdl:portType name="sdsbPortType">
+    <wsdl:portType name="xRoadPortType">
         <wsdl:operation name="getOrganizationList">
             <wsdl:input message="tns:getOrganizationList"/>
             <wsdl:output message="tns:getOrganizationListResponse"/>
@@ -390,7 +396,7 @@
         </wsdl:operation>
     </wsdl:portType>
 
-    <wsdl:binding name="sdsbBinding" type="tns:sdsbPortType">
+    <wsdl:binding name="xRoadBinding" type="tns:xRoadPortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="getOrganizationList">
             <soap:operation soapAction="" style="document"/>
@@ -401,6 +407,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -408,6 +416,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getOrganization">
@@ -419,6 +429,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -426,6 +438,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getWeather">
@@ -437,6 +451,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -444,6 +460,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="searchCompany">
@@ -455,6 +473,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -462,6 +482,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getCompany">
@@ -473,6 +495,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -480,6 +504,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="fintoService">
@@ -491,6 +517,8 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body parts="body" use="literal"/>
@@ -498,12 +526,14 @@
                 <soap:header message="tns:requestheader" part="service" use="literal"/>
                 <soap:header message="tns:requestheader" part="userId" use="literal"/>
                 <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
 
-    <wsdl:service name="vrk-testService">
-        <wsdl:port binding="tns:sdsbBinding" name="sdsbServicePort">
+    <wsdl:service name="provider-gateway">
+        <wsdl:port binding="tns:xRoadBinding" name="xRoadServicePort">
             <soap:address location="http://localhost:8080/RESTGateway/Provider"/>
         </wsdl:port>
     </wsdl:service>

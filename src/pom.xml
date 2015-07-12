@@ -8,11 +8,13 @@
     <name>XRd4J :: Tools :: REST Gateway</name>
     <description>
         This is a REST Gateway component that sits between X-Road security 
-        server and a REST service. 
+        server and a REST service. REST Gateway supports X-Road version
+        6.4 and above.
     </description>
     <url>https://github.com/educloudalliance/xroad-rest-gateway</url>
     <packaging>war</packaging>
     <properties>
+        <xrd4j.version>0.0.6</xrd4j.version>
         <slf4j.version>1.7.7</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <jdk.version>1.7</jdk.version>
@@ -24,22 +26,22 @@
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.5</version>
+            <version>${xrd4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>client</artifactId>
-            <version>0.0.5</version>
+            <version>${xrd4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>server</artifactId>
-            <version>0.0.5</version>
+            <version>${xrd4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.pkrete.xrd4j</groupId>
             <artifactId>rest</artifactId>
-            <version>0.0.5</version>
+            <version>${xrd4j.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
