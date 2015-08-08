@@ -16,6 +16,23 @@ First aim is to get first practical REST API integrated to X-Road, document the 
 
 In parallel with the technical development we will collect more use cases from Finland about REST/JSON APIs that need to be integrated with X-Road. Aim is not to make automated solution which covers 100% of cases. We will cheer loudly if 80% coverage is achieved.
 
+## Try It Out
+
+The fastest and easiest way to try out the application is to [download](https://github.com/educloudalliance/xroad-rest-gateway/releases/download/v0.0.7/rest-gateway-0.0.7.jar) the executable jar version (```rest-gateway-0.0.7.jar```) and run it: ```java -jar rest-gateway-0.0.7.jar```. The application is accessible at:
+
+```
+http://localhost:8080/rest-gateway-0.0.7/Provider
+
+http://localhost:8080/rest-gateway-0.0.7/Consumer
+```
+
+The Provider WSDL description is accessible at:
+
+```
+http://localhost:8080/rest-gateway-0.0.7/Provider?wsdl
+```
+
+More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.7#usage).
 
 ## Data Exchange Layer X-Road
 
