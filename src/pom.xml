@@ -135,6 +135,26 @@
                     <outputEncoding>UTF-8</outputEncoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.0</version>
+                <executions>
+                    <execution>
+                        <id>tomcat-run</id>
+                        <goals>
+                            <goal>exec-war</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <path>/${project.artifactId}-${project.version}</path>
+                    <enableNaming>false</enableNaming>
+                    <finalName>${project.artifactId}-${project.version}.jar</finalName>
+                    <charset>utf-8</charset>
+                </configuration>
+            </plugin>
         </plugins>
         <defaultGoal>package</defaultGoal>
         <resources>
