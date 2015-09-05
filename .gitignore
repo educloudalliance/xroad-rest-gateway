@@ -53,4 +53,5 @@ $RECYCLE.BIN/
 
 # REST Gateway target dir
 src/target/
+src/.extract/
 

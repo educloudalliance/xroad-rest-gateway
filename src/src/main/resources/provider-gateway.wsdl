@@ -534,7 +534,7 @@
 
     <wsdl:service name="provider-gateway">
         <wsdl:port binding="tns:xRoadBinding" name="xRoadServicePort">
-            <soap:address location="http://localhost:8080/RESTGateway/Provider"/>
+            <soap:address location="http://localhost:8080/${project.build.finalName}/Provider"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
