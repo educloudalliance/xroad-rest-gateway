@@ -9,7 +9,7 @@
     </appender>
     <appender name="file" class="org.apache.log4j.FileAppender">
         <param name="File" value="${catalina.base}/logs/rest-gateway.log"/>
-        <param name="Append" value="false"/>
+        <param name="Append" value="true"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} %-5p %c{1} : %m%n"/>
         </layout>
