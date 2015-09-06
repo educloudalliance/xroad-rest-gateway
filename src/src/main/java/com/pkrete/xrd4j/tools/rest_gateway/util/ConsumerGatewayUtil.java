@@ -2,6 +2,7 @@ package com.pkrete.xrd4j.tools.rest_gateway.util;
 
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
+import com.pkrete.xrd4j.common.util.ConfigurationHelper;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
@@ -208,25 +209,6 @@ public class ConsumerGatewayUtil {
     }
 
     /**
-     * Copies the client id string into an array. [0] = instance, [1] =
-     * memberClass, [2] = memberCode, [3] = subsystem. If the structure of the
-     * string is not correct, null is returned.
-     *
-     * @param clientId client id string
-     * @return client id in an array
-     */
-    private static String[] clientIdToArr(String clientId) {
-        if (clientId == null) {
-            return null;
-        }
-        String[] clientArr = clientId.split("\\.");
-        if (clientArr.length == 3 || clientArr.length == 4) {
-            return clientArr;
-        }
-        return null;
-    }
-
-    /**
      * Constructs and initializes a ConsumerMember object related to the given
      * ConsumerEndpoint. The object is constructed according to the value of the
      * clientId variable.
@@ -236,7 +218,7 @@ public class ConsumerGatewayUtil {
      * otherwise false
      */
     protected static boolean setConsumerMember(ConsumerEndpoint endpoint) {
-        ConsumerMember consumer = ConsumerGatewayUtil.parseConsumerMember(endpoint.getClientId());
+        ConsumerMember consumer = ConfigurationHelper.parseConsumerMember(endpoint.getClientId());
         if (consumer == null) {
             logger.warn("ConsumerMember not found.");
             return false;
@@ -244,60 +226,6 @@ public class ConsumerGatewayUtil {
         endpoint.setConsumer(consumer);
         logger.debug("ConsumerMember id : \"{}\".", consumer.toString());
         return true;
-    }
-
-    /**
-     * Parses the given client id string and creates a new ConsumerMember
-     * according to its value. Null is returned if the given string doesn't
-     * contain a valid client id.
-     *
-     * @param clientId String containing a client id
-     * @return new ProducerMember object or null
-     */
-    public static ConsumerMember parseConsumerMember(String clientId) {
-        String[] clientIdArr = ConsumerGatewayUtil.clientIdToArr(clientId);
-        if (clientIdArr == null) {
-            logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.CONSUMER_PROPS_ID_CLIENT, clientId);
-            return null;
-        } else {
-            try {
-                ConsumerMember consumer = null;
-                String instance = clientIdArr[0];
-                String memberClass = clientIdArr[1];
-                String memberCode = clientIdArr[2];
-                if (clientIdArr.length == 3) {
-                    consumer = new ConsumerMember(instance, memberClass, memberCode);
-                    logger.debug("Consumer member succesfully created. Identifier format : \"instance.memberClass.memberCode\".");
-                } else if (clientIdArr.length == 4) {
-                    String subsystem = clientIdArr[3];
-                    consumer = new ConsumerMember(instance, memberClass, memberCode, subsystem);
-                    logger.debug("Consumer member succesfully created. Identifier format : \"instance.memberClass.memberCode.subsystem\".");
-                }
-                return consumer;
-            } catch (Exception ex) {
-                logger.warn("Creating consumer member failed.");
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Copies the client id string into an array. [0] = instance, [1] =
-     * memberClass, [2] = memberCode, [3] = subsystem, [4] = service, [5] =
-     * version. If the structure of the string is not correct, null is returned.
-     *
-     * @param serviceId service id string
-     * @return service id in an array
-     */
-    private static String[] serviceIdToArr(String serviceId) {
-        if (serviceId == null) {
-            return null;
-        }
-        String[] serviceArr = serviceId.split("\\.");
-        if (serviceArr.length >= 4 && serviceArr.length <= 6) {
-            return serviceArr;
-        }
-        return null;
     }
 
     /**
@@ -310,7 +238,7 @@ public class ConsumerGatewayUtil {
      * otherwise false
      */
     protected static boolean setProducerMember(ConsumerEndpoint endpoint) {
-        ProducerMember producer = ConsumerGatewayUtil.parseProducerMember(endpoint.getServiceId());
+        ProducerMember producer = ConfigurationHelper.parseProducerMember(endpoint.getServiceId());
         if (producer == null) {
             logger.warn("ProducerMember not found.");
             return false;
@@ -318,61 +246,6 @@ public class ConsumerGatewayUtil {
         endpoint.setProducer(producer);
         logger.debug("ProducerMember id : \"{}\".", producer.toString());
         return true;
-    }
-
-    /**
-     * Parses the given service id string and creates a new ProducerMember
-     * according to its value. Null is returned if the given string doesn't
-     * contain a valid service id.
-     *
-     * @param serviceId String containing a service id
-     * @return new ProducerMember object or null
-     */
-    public static ProducerMember parseProducerMember(String serviceId) {
-        String[] serviceIdArr = ConsumerGatewayUtil.serviceIdToArr(serviceId);
-        if (serviceIdArr == null) {
-            logger.warn("Incorrect \"{}\" value : \"{}\".", Constants.ENDPOINT_PROPS_ID, serviceId);
-            return null;
-        } else {
-            try {
-                ProducerMember producer = null;
-                String instance = serviceIdArr[0];
-                String memberClass = serviceIdArr[1];
-                String memberCode = serviceIdArr[2];
-                if (serviceIdArr.length == 4) {
-                    String service = serviceIdArr[3];
-                    producer = new ProducerMember(instance, memberClass, memberCode, service);
-                    logger.debug("Producer member succesfully created. Identifier format : \"instance.memberClass.memberCode.service\".");
-                } else if (serviceIdArr.length == 5) {
-                    // Last element is considered as version number if it
-                    // starts with the letters [vV] and besides that contains
-                    // only numbers, or if the element contains only numbers.
-                    // Also characters [-_] are allowed.
-                    if (serviceIdArr[4].matches("(v|V|)[\\d_-]+")) {
-                        String service = serviceIdArr[3];
-                        String version = serviceIdArr[4];
-                        producer = new ProducerMember(instance, memberClass, memberCode, "subsystem", service, version);
-                        producer.setSubsystemCode(null);
-                        logger.debug("Producer member succesfully created. Identifier format : \"instance.memberClass.memberCode.service.version\".");
-                    } else {
-                        String subsystem = serviceIdArr[3];
-                        String service = serviceIdArr[4];
-                        producer = new ProducerMember(instance, memberClass, memberCode, subsystem, service);
-                        logger.debug("Producer member succesfully created. Identifier format : \"instance.memberClass.memberCode.subsystem.service\".");
-                    }
-                } else if (serviceIdArr.length == 6) {
-                    String subsystem = serviceIdArr[3];
-                    String service = serviceIdArr[4];
-                    String version = serviceIdArr[5];
-                    producer = new ProducerMember(instance, memberClass, memberCode, subsystem, service, version);
-                    logger.debug("Producer member succesfully created. Identifier format : \"instance.memberClass.memberCode.subsystem.service.version\".");
-                }
-                return producer;
-            } catch (Exception ex) {
-                logger.warn("Creating producer member failed.");
-                return null;
-            }
-        }
     }
 
     /**
