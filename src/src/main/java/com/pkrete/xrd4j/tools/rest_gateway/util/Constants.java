@@ -66,12 +66,17 @@ public class Constants {
      * HTTP error messages
      */
     public static final String ERROR_404 = "404 Not Found";
+    public static final String ERROR_422 = "422 Unprocessable Entity. Missing request data.";
     public static final String ERROR_500 = "500 Internal Server Error";
     // HTTP Headers
     /**
      * Content-Type: text/xml
      */
     public static final String TEXT_XML = "text/xml";
+    /**
+     * Content-Type: application/xml
+     */
+    public static final String APPLICATION_XML = "application/xml";
     /**
      * Content-Type: application/json
      */

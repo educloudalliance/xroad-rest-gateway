@@ -124,7 +124,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 String data = restResponse.getData();
                 contentType = restResponse.getContentType();
 
-                if (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_JSON)) {
+                // Content-type must be "text/xml", "application/xml" or 
+                // "application/json"
+                if (RESTGatewayUtil.isValidContentType(contentType)) {
                     // If response is passed as an attachement, there's no need
                     // for for conversion
                     if (endpoint.isAttachment()) {
@@ -145,7 +147,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                         response.setResponseData(SOAPHelper.xmlStrToSOAPElement(data));
                     }
                 } else {
-                    logger.warn("Response's content type is not \"{}\" or \"{}\".", Constants.TEXT_XML, Constants.APPLICATION_JSON);
+                    logger.warn("Response's content type is not \"{}\", \"{}\" or \"{}\".", Constants.TEXT_XML, Constants.APPLICATION_XML, Constants.APPLICATION_JSON);
                     if (restResponse.getStatusCode() == 200) {
                         logger.warn("Response's status code is 200. Return generic 404 error.");
                         response.setErrorMessage(new ErrorMessage("404", Constants.ERROR_404));
@@ -156,7 +158,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 }
             } else {
                 logger.warn("No request data was found. Return a non-techinal error message.");
-                ErrorMessage error = new ErrorMessage("422", "422 Unprocessable Entity. Missing request data.");
+                ErrorMessage error = new ErrorMessage("422", Constants.ERROR_422);
                 response.setErrorMessage(error);
             }
             logger.debug("Message prosessing done!");
