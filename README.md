@@ -51,8 +51,8 @@ The X-Road REST Gateway also builds RPMs for use with RHEL (or derivatives) and 
 ### Links to material
 
 * [Data Exchange Layer X-Road](https://www.ria.ee/x-road/)
-* [X-Road overview ](https://speakerdeck.com/pilvivayla/x-road-overview)
-* [X-Road regulations](https://speakerdeck.com/pilvivayla/x-road-regulations)
+* [X-Road overview ](https://speakerdeck.com/educloudalliance/x-road-overview)
+* [X-Road regulations](https://speakerdeck.com/educloudalliance/x-road-regulations)
 * [Palveluväylä kehitysympäristö (Finnish only)](http://palveluvayla.fi)
 * [Requirements for Information Systems and Adapter
 Servers](http://x-road.ee/docs/eng/x-road_service_protocol.pdf)
