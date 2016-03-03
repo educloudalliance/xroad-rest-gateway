@@ -54,7 +54,15 @@ public class ConsumerGateway extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         logger.debug("Starting to initialize Consumer REST Gateway.");
-        this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
+        String propertiesDirectoryParameter = System.getProperty(Constants.PROPERTIES_DIR_PARAM_NAME);
+        Properties endpointProps;
+        if (propertiesDirectoryParameter != null) {
+          endpointProps = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMERS, false);
+          this.props = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMER_GATEWAY, false);
+        } else {
+          endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
+          this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
+        }
         String serviceCallsByXRdServiceIdStr = this.props.getProperty(Constants.CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED);
         this.serviceCallsByXRdServiceId = serviceCallsByXRdServiceIdStr == null ? false : serviceCallsByXRdServiceIdStr.equalsIgnoreCase("true");
         logger.debug("Security server URL : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
@@ -63,7 +71,6 @@ public class ConsumerGateway extends HttpServlet {
         logger.debug("Default namespace for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
         logger.debug("Default namespace prefix for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
         logger.debug("Service calls by X-Road service id are enabled : {}.", this.serviceCallsByXRdServiceId);
-        Properties endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
         logger.debug("Consumer REST Gateway initialized.");
     }
