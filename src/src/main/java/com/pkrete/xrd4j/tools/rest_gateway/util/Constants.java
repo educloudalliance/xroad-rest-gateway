@@ -63,6 +63,10 @@ public class Constants {
      */
     public static final String PARAM_REQUEST_BODY = "RESTGatewayRequestBody";
     /**
+     * Parameter names
+     */
+    public static final String PROPERTIES_DIR_PARAM_NAME = "propertiesDirectory";
+    /**
      * HTTP error messages
      */
     public static final String ERROR_404 = "404 Not Found";
