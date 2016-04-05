@@ -173,6 +173,10 @@ public class ConsumerGateway extends HttpServlet {
                     serviceRequest.setUserId(userId);
                     // Set HTTP request parameters as request data
                     serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
+                    // Set request wrapper processing
+                    if (endpoint.isProcessingWrappers() != null) {
+                        serviceRequest.setProcessingWrappers(endpoint.isProcessingWrappers());
+                    }
                     // String get request body
                     String requestBody = this.readRequestBody(request);
                     // Serializer that converts the request to SOAP
@@ -185,6 +189,10 @@ public class ConsumerGateway extends HttpServlet {
                     // Make the service call that returns the service response
                     ServiceResponse serviceResponse = client.send(serviceRequest, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL), serializer, deserializer);
                     logger.info("Received response ({}) from the security server.", messageId);
+                    // Set response wrapper processing
+                    if (endpoint.isProcessingWrappers() != null) {
+                        serviceResponse.setProcessingWrappers(endpoint.isProcessingWrappers());
+                    }
                     // Check that response doesn't contain SOAP fault
                     if (!serviceResponse.hasError()) {
                         // Get the response that's now XML string

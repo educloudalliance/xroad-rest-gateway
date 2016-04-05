@@ -100,6 +100,10 @@ public class ProviderGateway extends AbstractAdapterServlet {
             ProviderEndpoint endpoint = this.endpoints.get(serviceId);
             logger.info("Process \"{}\" service.", serviceId);
 
+            // Set request wrapper processing
+            if (endpoint.isProcessingWrappers() != null) {
+                request.setProcessingWrappers(endpoint.isProcessingWrappers());
+            }
             // Deserialize the request
             CustomRequestDeserializer customDeserializer = new ReqToMapRequestDeserializerImpl();
             customDeserializer.deserialize(request, endpoint.getNamespaceDeserialize());
@@ -111,6 +115,10 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 response = new ServiceResponse<Map, SOAPElement>(request.getConsumer(), request.getProducer(), request.getId());
             }
 
+            // Set response wrapper processing
+            if (endpoint.isProcessingWrappers() != null) {
+                response.setProcessingWrappers(endpoint.isProcessingWrappers());
+            }
             // Set producer namespace URI and prefix before processing
             response.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
             response.getProducer().setNamespacePrefix(endpoint.getPrefix());
