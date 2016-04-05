@@ -60,7 +60,7 @@ public class ProviderGatewayUtil {
             endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
             endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
             if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
-                endpoint.setProcessWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+                endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
             }
 
             logger.info("New provider endpoint found. ID : \"{}\", URL : \"{}\".", id, url);
@@ -98,7 +98,7 @@ public class ProviderGatewayUtil {
             // Wrapper processing
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
-                endpoint.setProcessWrappers(MessageHelper.strToBool(value));
+                endpoint.setProcessingWrappers(MessageHelper.strToBool(value));
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceRequest namespace
