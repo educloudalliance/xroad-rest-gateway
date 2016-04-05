@@ -28,6 +28,7 @@ public class Constants {
     public static final String ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE = "namespace.deserialize";
     public static final String ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE = "namespace.serialize";
     public static final String ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE = "namespace.prefix.serialize";
+    public static final String ENDPOINT_PROPS_WRAPPERS = "wrappers";
     /**
      * Provider properties
      */
