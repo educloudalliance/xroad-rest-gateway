@@ -72,12 +72,18 @@ public class ConsumerGatewayUtil {
                 continue;
             }
 
-            // Set default values to namespace properties
+            // Initialize endpoint properties to those defined in gateway properties
             endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
             endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
             endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                endpoint.setProcessWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+            }
+
             // Set default HTTP verb
             endpoint.setHttpVerb("GET");
+
+            // Set more specific endpoint properties
 
             // Client id
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
@@ -99,6 +105,12 @@ public class ConsumerGatewayUtil {
                 String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_MOD_URL);
                 endpoint.setModifyUrl(MessageHelper.strToBool(value));
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.CONSUMER_PROPS_MOD_URL, value);
+            }
+            // Wrapper processing
+            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
+                endpoint.setProcessWrappers(MessageHelper.strToBool(value));
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceResponse namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {

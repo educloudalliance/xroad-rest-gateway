@@ -54,10 +54,14 @@ public class ProviderGatewayUtil {
             ProviderEndpoint endpoint = new ProviderEndpoint(id, url);
             // Set default HTTP verb - GET
             endpoint.setHttpVerb("get");
-            // Set default values to namespace properties
+
+            // Initialize endpoint properties to those defined in gateway properties
             endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
             endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
             endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                endpoint.setProcessWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+            }
 
             logger.info("New provider endpoint found. ID : \"{}\", URL : \"{}\".", id, url);
 
@@ -90,6 +94,12 @@ public class ProviderGatewayUtil {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS);
                 endpoint.setSendXrdHeaders(MessageHelper.strToBool(value));
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
+            }
+            // Wrapper processing
+            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
+                endpoint.setProcessWrappers(MessageHelper.strToBool(value));
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceRequest namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {
