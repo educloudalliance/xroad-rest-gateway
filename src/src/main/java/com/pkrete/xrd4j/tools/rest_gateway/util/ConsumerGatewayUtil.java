@@ -28,10 +28,10 @@ public class ConsumerGatewayUtil {
      * key-value pairs.
      *
      * @param endpoints consumer properties
-     * @param props REST Consumer Gateway general properties
+     * @param gatewayProperties REST Consumer Gateway general properties
      * @return map containing service id - consumer endpoint key-value pairs
      */
-    public static Map<String, ConsumerEndpoint> extractConsumers(Properties endpoints, Properties props) {
+    public static Map<String, ConsumerEndpoint> extractConsumers(Properties endpoints, Properties gatewayProperties) {
         Map<String, ConsumerEndpoint> results = new TreeMap<String, ConsumerEndpoint>();
         logger.info("Start extracting consumer endpoints from properties.");
         if (endpoints == null || endpoints.isEmpty()) {
@@ -45,7 +45,7 @@ public class ConsumerGatewayUtil {
         // Loop through all the endpoints
         while (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_ID)) {
 
-            String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
+            String clientId = gatewayProperties.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
             String serviceId = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String path = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_PATH);
 
@@ -73,9 +73,9 @@ public class ConsumerGatewayUtil {
             }
 
             // Set default values to namespace properties
-            endpoint.setNamespaceDeserialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
-            endpoint.setNamespaceSerialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-            endpoint.setPrefix(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+            endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+            endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
             // Set default HTTP verb
             endpoint.setHttpVerb("GET");
 

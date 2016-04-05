@@ -24,10 +24,10 @@ public class ProviderGatewayUtil {
      * endpoints. Returns a map containing service id - provider endpoint
      * key-value pairs.
      * @param endpoints endpoint properties
-     * @param props REST Provider Gateway general properties
+     * @param gatewayProperties REST Provider Gateway general properties
      * @return map containing service id - provider endpoint key-value pairs
      */
-    public static Map<String, ProviderEndpoint> extractProviders(Properties endpoints, Properties props) {
+    public static Map<String, ProviderEndpoint> extractProviders(Properties endpoints, Properties gatewayProperties) {
         Map<String, ProviderEndpoint> results = new HashMap<String, ProviderEndpoint>();
         logger.info("Start extracting provider endpoints from properties.");
         if (endpoints == null || endpoints.isEmpty()) {
@@ -55,9 +55,9 @@ public class ProviderGatewayUtil {
             // Set default HTTP verb - GET
             endpoint.setHttpVerb("get");
             // Set default values to namespace properties
-            endpoint.setNamespaceDeserialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
-            endpoint.setNamespaceSerialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-            endpoint.setPrefix(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+            endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+            endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
 
             logger.info("New provider endpoint found. ID : \"{}\", URL : \"{}\".", id, url);
 
