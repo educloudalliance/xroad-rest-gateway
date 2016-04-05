@@ -291,14 +291,14 @@ public class ConsumerGatewayUtil {
         String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
         // Create new endpoint
         ConsumerEndpoint endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
-        // Set resouce id
+        // Set resource id
         endpoint.setResourceId(resourceId);
         // Parse consumer and producer from ids
         if (!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
             // Set endpoint to null if parsing failed
             endpoint = null;
         } else {
-            // Get defalut namespace and prefix from properties
+            // Get default namespace and prefix from properties
             String ns = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
             String prefix = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
             // Set namespace and prefix

@@ -201,7 +201,7 @@ public class ConsumerGateway extends HttpServlet {
                         if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
                             logger.debug("Convert response from XML to JSON.");
                             // Remove <response> tags. Namespaces are omitted
-                            // when reponse's content type is JSON
+                            // when content type of response is JSON
                             responseStr = responseStr.replaceAll("<(/)*response>", "");
                             responseStr = new XMLToJSONConverter().convert(responseStr);
                         } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
@@ -232,7 +232,7 @@ public class ConsumerGateway extends HttpServlet {
                         // Modify the response
                         responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
                     }
-                    logger.info("Processing \"{}\" service succesfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+                    logger.info("Processing \"{}\" service successfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     logger.error("Processing \"{}\" service failed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
@@ -267,7 +267,7 @@ public class ConsumerGateway extends HttpServlet {
             if (out != null) {
                 out.close();
             }
-            logger.debug("Request was succesfully processed.");
+            logger.debug("Request was successfully processed.");
         }
     }
 

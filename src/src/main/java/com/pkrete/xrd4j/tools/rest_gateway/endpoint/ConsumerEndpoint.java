@@ -148,7 +148,7 @@ public class ConsumerEndpoint extends AbstractEndpoint {
     /**
      * Returns a boolean value that indicates if URLs in the response body
      * should be modified to point the Consumer Endpoint instance.
-     * @return true if and only if the URLs shold be modified; orherwise false
+     * @return true if and only if the URLs should be modified; otherwise false
      */
     public boolean isModifyUrl() {
         return modifyUrl;

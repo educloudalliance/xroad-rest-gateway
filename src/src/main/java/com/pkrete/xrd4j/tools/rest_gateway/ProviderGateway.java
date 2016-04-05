@@ -114,7 +114,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
             // Set producer namespace URI and prefix before processing
             response.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
             response.getProducer().setNamespacePrefix(endpoint.getPrefix());
-            logger.debug("Do message prosessing...");
+            logger.debug("Do message processing...");
 
             // Process the request if request data is present
             if (request.getRequestData() != null) {
@@ -133,11 +133,11 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 String data = restResponse.getData();
                 contentType = restResponse.getContentType();
 
-                // Content-type must be "text/xml", "application/xml" or 
+                // Content-type must be "text/xml", "application/xml" or
                 // "application/json"
                 if (RESTGatewayUtil.isValidContentType(contentType)) {
-                    // If response is passed as an attachement, there's no need
-                    // for for conversion
+                    // If response is passed as an attachment, there's no need
+                    // for conversion
                     if (endpoint.isAttachment()) {
                         // Data will be put as attachment - no modifications
                         // needed
