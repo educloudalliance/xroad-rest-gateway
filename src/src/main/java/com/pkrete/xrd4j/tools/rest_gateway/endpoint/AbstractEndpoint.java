@@ -13,6 +13,8 @@ public abstract class AbstractEndpoint {
     private String namespaceSerialize;
     private String namespaceDeserialize;
     private String prefix;
+    private Boolean processingWrappers;
+
 
     /**
      * Constructs and initializes a new AbstractEndpoint object.
@@ -101,4 +103,21 @@ public abstract class AbstractEndpoint {
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
+    /**
+     * @return True/False indicating whether <response> and <request> tags are expected in
+     * incoming and outgoing SOAP message bodies, or a null value indicating no setting.
+     */
+    public Boolean isProcessingWrappers() {
+        return this.processingWrappers;
+    }
+
+    /**
+     * set whether <response> and <request> tags are expected in
+     * incoming and outgoing SOAP message bodies.
+     * @param processingWrappers
+     */
+    public void setProcessingWrappers(Boolean processingWrappers) {
+        this.processingWrappers = processingWrappers;
+    }
+
 }

@@ -28,10 +28,10 @@ public class ConsumerGatewayUtil {
      * key-value pairs.
      *
      * @param endpoints consumer properties
-     * @param props REST Consumer Gateway general properties
+     * @param gatewayProperties REST Consumer Gateway general properties
      * @return map containing service id - consumer endpoint key-value pairs
      */
-    public static Map<String, ConsumerEndpoint> extractConsumers(Properties endpoints, Properties props) {
+    public static Map<String, ConsumerEndpoint> extractConsumers(Properties endpoints, Properties gatewayProperties) {
         Map<String, ConsumerEndpoint> results = new TreeMap<String, ConsumerEndpoint>();
         logger.info("Start extracting consumer endpoints from properties.");
         if (endpoints == null || endpoints.isEmpty()) {
@@ -45,7 +45,7 @@ public class ConsumerGatewayUtil {
         // Loop through all the endpoints
         while (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_ID)) {
 
-            String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
+            String clientId = gatewayProperties.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
             String serviceId = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String path = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_PATH);
 
@@ -72,12 +72,18 @@ public class ConsumerGatewayUtil {
                 continue;
             }
 
-            // Set default values to namespace properties
-            endpoint.setNamespaceDeserialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
-            endpoint.setNamespaceSerialize(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-            endpoint.setPrefix(props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            // Initialize endpoint properties to those defined in gateway properties
+            endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+            endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+            endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+            if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+            }
+
             // Set default HTTP verb
             endpoint.setHttpVerb("GET");
+
+            // Set more specific endpoint properties
 
             // Client id
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
@@ -99,6 +105,12 @@ public class ConsumerGatewayUtil {
                 String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_MOD_URL);
                 endpoint.setModifyUrl(MessageHelper.strToBool(value));
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.CONSUMER_PROPS_MOD_URL, value);
+            }
+            // Wrapper processing
+            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
+                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
+                endpoint.setProcessingWrappers(MessageHelper.strToBool(value));
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceResponse namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {
@@ -279,14 +291,14 @@ public class ConsumerGatewayUtil {
         String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
         // Create new endpoint
         ConsumerEndpoint endpoint = new ConsumerEndpoint(resourcePath, clientId, "");
-        // Set resouce id
+        // Set resource id
         endpoint.setResourceId(resourceId);
         // Parse consumer and producer from ids
         if (!ConsumerGatewayUtil.setConsumerMember(endpoint) || !ConsumerGatewayUtil.setProducerMember(endpoint)) {
             // Set endpoint to null if parsing failed
             endpoint = null;
         } else {
-            // Get defalut namespace and prefix from properties
+            // Get default namespace and prefix from properties
             String ns = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
             String prefix = props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
             // Set namespace and prefix

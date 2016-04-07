@@ -54,6 +54,7 @@ public class ConsumerGateway extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         logger.debug("Starting to initialize Consumer REST Gateway.");
+        logger.debug("Reading Consumer and ConsumerGateway properties");
         String propertiesDirectoryParameter = System.getProperty(Constants.PROPERTIES_DIR_PARAM_NAME);
         Properties endpointProps;
         if (propertiesDirectoryParameter != null) {
@@ -63,6 +64,7 @@ public class ConsumerGateway extends HttpServlet {
           endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
           this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
         }
+        logger.debug("Setting Consumer and ConsumerGateway properties");
         String serviceCallsByXRdServiceIdStr = this.props.getProperty(Constants.CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED);
         this.serviceCallsByXRdServiceId = serviceCallsByXRdServiceIdStr == null ? false : serviceCallsByXRdServiceIdStr.equalsIgnoreCase("true");
         logger.debug("Security server URL : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
@@ -71,6 +73,7 @@ public class ConsumerGateway extends HttpServlet {
         logger.debug("Default namespace for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
         logger.debug("Default namespace prefix for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
         logger.debug("Service calls by X-Road service id are enabled : {}.", this.serviceCallsByXRdServiceId);
+        logger.debug("Extracting individual consumers from properties");
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
         logger.debug("Consumer REST Gateway initialized.");
     }
@@ -170,6 +173,10 @@ public class ConsumerGateway extends HttpServlet {
                     serviceRequest.setUserId(userId);
                     // Set HTTP request parameters as request data
                     serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
+                    // Set request wrapper processing
+                    if (endpoint.isProcessingWrappers() != null) {
+                        serviceRequest.setProcessingWrappers(endpoint.isProcessingWrappers());
+                    }
                     // String get request body
                     String requestBody = this.readRequestBody(request);
                     // Serializer that converts the request to SOAP
@@ -182,6 +189,10 @@ public class ConsumerGateway extends HttpServlet {
                     // Make the service call that returns the service response
                     ServiceResponse serviceResponse = client.send(serviceRequest, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL), serializer, deserializer);
                     logger.info("Received response ({}) from the security server.", messageId);
+                    // Set response wrapper processing
+                    if (endpoint.isProcessingWrappers() != null) {
+                        serviceResponse.setProcessingWrappers(endpoint.isProcessingWrappers());
+                    }
                     // Check that response doesn't contain SOAP fault
                     if (!serviceResponse.hasError()) {
                         // Get the response that's now XML string
@@ -198,7 +209,7 @@ public class ConsumerGateway extends HttpServlet {
                         if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
                             logger.debug("Convert response from XML to JSON.");
                             // Remove <response> tags. Namespaces are omitted
-                            // when reponse's content type is JSON
+                            // when content type of response is JSON
                             responseStr = responseStr.replaceAll("<(/)*response>", "");
                             responseStr = new XMLToJSONConverter().convert(responseStr);
                         } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
@@ -229,7 +240,7 @@ public class ConsumerGateway extends HttpServlet {
                         // Modify the response
                         responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
                     }
-                    logger.info("Processing \"{}\" service succesfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+                    logger.info("Processing \"{}\" service successfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 } catch (Exception ex) {
                     logger.error(ex.getMessage(), ex);
                     logger.error("Processing \"{}\" service failed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
@@ -264,7 +275,7 @@ public class ConsumerGateway extends HttpServlet {
             if (out != null) {
                 out.close();
             }
-            logger.debug("Request was succesfully processed.");
+            logger.debug("Request was successfully processed.");
         }
     }
 

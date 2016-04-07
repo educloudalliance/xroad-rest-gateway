@@ -7,19 +7,19 @@
     <version>0.0.8-SNAPSHOT</version>
     <name>XRd4J :: Tools :: REST Gateway</name>
     <description>
-        This is a REST Gateway component that sits between X-Road security 
+        This is a REST Gateway component that sits between X-Road security
         server and a REST service. REST Gateway supports X-Road version
         6.4 and above.
     </description>
     <url>https://github.com/educloudalliance/xroad-rest-gateway</url>
     <packaging>war</packaging>
     <properties>
-        <xrd4j.version>0.0.7</xrd4j.version>
+        <xrd4j.version>0.0.10</xrd4j.version>
         <slf4j.version>1.7.7</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding> 
+        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <app.home>/var/lib/tomcat/webapps/rest-gateway/</app.home>
     </properties>
     <dependencies>
@@ -180,7 +180,7 @@
                 <os>
                     <family>linux</family>
                 </os>
-            </activation> 
+            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -239,7 +239,7 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>          
+    </profiles>
     <repositories>
         <repository>
             <id>csc-repo</id>
