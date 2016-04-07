@@ -208,9 +208,10 @@ public class ConsumerGateway extends HttpServlet {
                         // attachments, the response must be converted
                         if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
                             logger.debug("Convert response from XML to JSON.");
-                            // Remove <response> tags. Namespaces are omitted
-                            // when content type of response is JSON
-                            responseStr = responseStr.replaceAll("<(/)*response>", "");
+                            // Remove <response> and <serviceNameResponse> tags. 
+                            // Namespaces are omitted when content type of 
+                            // response is JSON
+                            responseStr = responseStr.replaceAll("<(/)*(\\w+:)*(\\w+R|r)esponse.*?>", ""); 
                             responseStr = new XMLToJSONConverter().convert(responseStr);
                         } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
                             // Remove response tag and its namespace prefixes
