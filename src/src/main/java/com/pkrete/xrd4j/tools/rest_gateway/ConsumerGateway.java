@@ -58,11 +58,11 @@ public class ConsumerGateway extends HttpServlet {
         String propertiesDirectoryParameter = System.getProperty(Constants.PROPERTIES_DIR_PARAM_NAME);
         Properties endpointProps;
         if (propertiesDirectoryParameter != null) {
-          endpointProps = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMERS, false);
-          this.props = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMER_GATEWAY, false);
+            endpointProps = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMERS, false);
+            this.props = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_CONSUMER_GATEWAY, false);
         } else {
-          endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
-          this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
+            endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMERS);
+            this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_CONSUMER_GATEWAY);
         }
         logger.debug("Setting Consumer and ConsumerGateway properties");
         String serviceCallsByXRdServiceIdStr = this.props.getProperty(Constants.CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED);
@@ -208,10 +208,8 @@ public class ConsumerGateway extends HttpServlet {
                         // attachments, the response must be converted
                         if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
                             logger.debug("Convert response from XML to JSON.");
-                            // Remove <response> and <serviceNameResponse> tags. 
-                            // Namespaces are omitted when content type of 
-                            // response is JSON
-                            responseStr = responseStr.replaceAll("<(/)*(\\w+:)*(\\w+R|r)esponse.*?>", ""); 
+                            // Remove response tag and its namespace prefixes 
+                            responseStr = ConsumerGatewayUtil.removeResponseTag(responseStr);
                             responseStr = new XMLToJSONConverter().convert(responseStr);
                         } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
                             // Remove response tag and its namespace prefixes

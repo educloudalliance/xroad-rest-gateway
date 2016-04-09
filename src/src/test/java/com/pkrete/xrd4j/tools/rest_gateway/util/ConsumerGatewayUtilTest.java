@@ -579,4 +579,56 @@ public class ConsumerGatewayUtilTest extends TestCase {
             fail("Response can't be null");
         }
     }
+
+    /**
+     * Remove {serviceName}response tag and namespace prefix. No namespace.
+     */
+    public void testRemoveResponseTag13() {
+        String source = "<testServiceResponse><wrapper><param1>value1</param1><param2>value2</param2></wrapper></testServiceResponse>";
+        String result = "<wrapper><param1>value1</param1><param2>value2</param2></wrapper>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove {serviceName}response tag and namespace prefix. Response tag has
+     * namespace and no prefix, children are under another element that has
+     * namespace and prefix.
+     */
+    public void testRemoveResponseTag14() {
+        String source = "<testServiceResponse xmlns=\"http://test.com/ns\"><ts1:wrapper xmlns:ts1=\"http://test.com/ns2\"><ts1:param1>value1</ts1:param1><ts1:param2>value2</ts1:param2></ts1:wrapper></testServiceResponse>";
+        String result = "<ts1:wrapper xmlns:ts1=\"http://test.com/ns2\"><ts1:param1>value1</ts1:param1><ts1:param2>value2</ts1:param2></ts1:wrapper>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove {serviceName}response tag and namespace prefix. Response tag has
+     * namespace and no prefix, children are under another element that has
+     * namespace and prefix.
+     */
+    public void testRemoveResponseTag15() {
+        String source = "<ts0:testServiceResponse xmlns:ts0=\"http://test.com/ns\"><ts1:wrapper xmlns:ts1=\"http://test.com/ns2\"><ts1:param1>value1</ts1:param1><ts1:param2>value2</ts1:param2></ts1:wrapper></ts0:testServiceResponse>";
+        String result = "<ts1:wrapper xmlns:ts1=\"http://test.com/ns2\"><ts1:param1>value1</ts1:param1><ts1:param2>value2</ts1:param2></ts1:wrapper>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
+
+    /**
+     * Remove {serviceName}response tag and namespace prefix.
+     */
+    public void testRemoveResponseTag16() {
+        String source = "<ts0:testServiceResponse xmlns:ts0=\"http://test.com/ns\"><wrapper><param1>value1</param1><param2>value2</param2></wrapper></ts0:testServiceResponse>";
+        String result = "<wrapper><param1>value1</param1><param2>value2</param2></wrapper>";
+        assertEquals(result, ConsumerGatewayUtil.removeResponseTag(source));
+        if (SOAPHelper.xmlStrToSOAPElement(result) == null) {
+            fail("Response can't be null");
+        }
+    }
 }

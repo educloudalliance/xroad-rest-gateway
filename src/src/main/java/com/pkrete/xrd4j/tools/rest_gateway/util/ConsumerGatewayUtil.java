@@ -311,7 +311,8 @@ public class ConsumerGatewayUtil {
     /**
      * Removes response tag and its namespace prefixes from the given response
      * message. All the response tag's namespace prefixes are removed from the
-     * children.
+     * children. Response tag can be simple <response> or prefixed with
+     * service name <serviceNameResponse>.
      *
      * @param message response message
      * @return children of the response tag
@@ -319,7 +320,7 @@ public class ConsumerGatewayUtil {
     public static String removeResponseTag(String message) {
         String responsePrefix = "";
         // Regex for reponse tag's namespace prefix
-        String regex = ".*<(\\w+:)*response.*?>.*";
+        String regex = ".*<(\\w+:)*(\\w+R|r)esponse.*?>.*";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
@@ -333,7 +334,7 @@ public class ConsumerGatewayUtil {
         // If content type is XML the message doesn't have to
         // be converted, but it should be checked if there
         // are additional <response> tags as a wrapper
-        String response = message.replaceAll("<(/)*" + responsePrefix + "response.*?>", "");
+        String response = message.replaceAll("<(/)*" + responsePrefix + "(\\w+R|r)esponse.*?>", "");
         // Remove response tag's prefixes, because otherwise
         // the conversion to SOAP element will fail because
         // of them

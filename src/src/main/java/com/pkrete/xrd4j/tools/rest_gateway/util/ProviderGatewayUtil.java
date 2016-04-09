@@ -169,7 +169,11 @@ public class ProviderGatewayUtil {
 
     /**
      * Converts JSON string to XML string. XML string is wrapped inside
-     * wrapper element defined by the given endpoint.
+     * <response> wrapper element. The wrapper must be added, because otherwise
+     * it's not possible to convert the XML to SOAP element. JSON string does
+     * not likely have a root element that SOAP requires. <response> is used
+     * as a temporary root element and will be omitted by ProviderGateway when
+     * SOAP response is serialized as XML.
      * @param data JSON string to be converted
      * @return XML string
      */
