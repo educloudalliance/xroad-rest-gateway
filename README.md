@@ -18,7 +18,7 @@ In parallel with the technical development we will collect more use cases from F
 
 ## Try It Out
 
-The fastest and easiest way to try out the application is to [download](https://github.com/educloudalliance/xroad-rest-gateway/releases/download/v0.0.7/rest-gateway-0.0.8.jar) the executable jar version (```rest-gateway-0.0.8.jar```) and run it: ```java -jar rest-gateway-0.0.8.jar```. The application is accessible at:
+The fastest and easiest way to try out the application is to [download](https://github.com/educloudalliance/xroad-rest-gateway/releases/download/v0.0.8/rest-gateway-0.0.8.jar) the executable jar version (```rest-gateway-0.0.8.jar```) and run it: ```java -jar rest-gateway-0.0.8.jar```. The application is accessible at:
 
 ```
 http://localhost:8080/rest-gateway-0.0.8/Provider
