@@ -38,7 +38,21 @@ Executable JAR version supports ```propertiesDirectory``` command line variable 
 java -jar rest-gateway.jar -DpropertiesDirectory=/my/custom/path
 ```
 
-More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.7#usage).
+More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.8#usage).
+
+## Running the Docker Image
+
+REST Gatewat is available as Docker image. 
+
+```
+docker run -p 8080:8080 petkivim/xroad-rest-gateway
+```
+
+If customized properties are used, the host directory containing the properties files must be mounted as a data directory. In addition, the directory containing the properties files inside the container must be set using ```JAVA_OPTS``` and```propertiesDirectory``` property.
+
+```
+docker run -p 8080:8080 -v /host/dir/conf:/my/conf -e "JAVA_OPTS=-DpropertiesDirectory=/my/conf"  petkivim/xroad-rest-gateway
+```
 
 ## Data Exchange Layer X-Road
 
