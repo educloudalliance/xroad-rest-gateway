@@ -171,6 +171,7 @@
                 <configuration>
                     <cveValidForHours>12</cveValidForHours>
                     <failBuildOnCVSS>4</failBuildOnCVSS>
+                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
