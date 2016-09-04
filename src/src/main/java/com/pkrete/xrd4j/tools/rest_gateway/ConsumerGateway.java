@@ -19,6 +19,7 @@ import com.pkrete.xrd4j.tools.rest_gateway.util.ConsumerGatewayUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletException;
@@ -372,10 +373,14 @@ public class ConsumerGateway extends HttpServlet {
      * @return URL of this servlet
      */
     private String getServletUrl(HttpServletRequest request) {
-        return request.getScheme() + "://" + // "http" + "://
-                request.getServerName() + // "myhost"
-                ":" + // ":"
-                request.getServerPort() + // "8080"
+        return request.getScheme() + "://"
+                + // "http" + "://
+                request.getServerName()
+                + // "myhost"
+                ":"
+                + // ":"
+                request.getServerPort()
+                + // "8080"
                 request.getContextPath()
                 + "/Consumer/";
     }
@@ -406,13 +411,17 @@ public class ConsumerGateway extends HttpServlet {
      * @param parameters HTTP request parameters map
      * @return filtered parameters map
      */
-    private Map filterRequestParameters(Map parameters) {
-        parameters.remove(Constants.XRD_HEADER_USER_ID);
-        parameters.remove(Constants.XRD_HEADER_MESSAGE_ID);
-        parameters.remove(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
-        parameters.remove(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
-        parameters.remove(Constants.HTTP_HEADER_ACCEPT);
-        return parameters;
+    private Map filterRequestParameters(Map<String, String[]> parameters) {
+        // Request parameters map is unmodifiable so we need to copy it
+        Map<String, String[]> params = new HashMap<>(parameters);
+        // Remove X-Road headers
+        params.remove(Constants.XRD_HEADER_USER_ID);
+        params.remove(Constants.XRD_HEADER_MESSAGE_ID);
+        params.remove(Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
+        params.remove(Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
+        params.remove(Constants.HTTP_HEADER_ACCEPT);
+        // Return copied parameters Map
+        return params;
     }
 
     /**
