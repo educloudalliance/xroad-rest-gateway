@@ -124,6 +124,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
             response.getProducer().setNamespacePrefix(endpoint.getPrefix());
             logger.debug("Do message processing...");
 
+            // Filter request parameters
+            ProviderGatewayUtil.filterRequestParameters(request, endpoint);
+            
             // Process the request if request data is present
             if (request.getRequestData() != null) {
                 // Get HTTP headers for the request

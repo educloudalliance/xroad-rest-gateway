@@ -37,6 +37,10 @@ public class Constants {
     public static final String PROVIDER_PROPS_ACCEPT = "accept";
     public static final String PROVIDER_PROPS_ATTACHMENT = "response.attachment";
     public static final String PROVIDER_PROPS_SEND_XRD_HEADERS = "request.xrdheaders";
+    public static final String PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION = "reqParamNameFilterCondition";
+    public static final String PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION = "reqParamNameFilterOperation";
+    public static final String PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION = "reqParamValueFilterCondition";
+    public static final String PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION = "reqParamValueFilterOperation";
     /**
      * Consumer properties
      */
@@ -63,6 +67,7 @@ public class Constants {
      * Other constants.
      */
     public static final String PARAM_REQUEST_BODY = "RESTGatewayRequestBody";
+    public static final String PARAM_RESOURCE_ID = "resourceId";
     /**
      * Parameter names
      */

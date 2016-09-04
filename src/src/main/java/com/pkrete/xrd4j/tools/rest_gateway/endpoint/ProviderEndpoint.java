@@ -1,8 +1,8 @@
 package com.pkrete.xrd4j.tools.rest_gateway.endpoint;
 
 /**
- * This class represents provider endpoint and holds all the information that
- * is needed for connecting to it.
+ * This class represents provider endpoint and holds all the information that is
+ * needed for connecting to it.
  *
  * @author Petteri Kivimäki
  */
@@ -13,9 +13,14 @@ public class ProviderEndpoint extends AbstractEndpoint {
     private String contentType;
     private boolean attachment;
     private boolean sendXrdHeaders;
+    private String reqParamNameFilterCondition;
+    private String reqParamNameFilterOperation;
+    private String reqParamValueFilterCondition;
+    private String reqParamValueFilterOperation;
 
     /**
      * Constructs and initializes a new ProviderEndpoint object.
+     *
      * @param serviceId unique ID of the service
      * @param url URL of the Adapter Service
      */
@@ -28,6 +33,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Returns the URL of the Adapter Service.
+     *
      * @return URL of the Adapter Service
      */
     public String getUrl() {
@@ -36,6 +42,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Sets the URL of the Adapter Service.
+     *
      * @param url new value
      */
     public void setUrl(String url) {
@@ -44,6 +51,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Returns the value of the accept header that's used in the request.
+     *
      * @return value of the accept header that's used in the request
      */
     public String getAccept() {
@@ -52,6 +60,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Sets the value of the accept header that's used in the request.
+     *
      * @param accept new value
      */
     public void setAccept(String accept) {
@@ -60,6 +69,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Returns the value of the content type header that's used in the request.
+     *
      * @return value of the content type header that's used in the request
      */
     public String getContentType() {
@@ -68,6 +78,7 @@ public class ProviderEndpoint extends AbstractEndpoint {
 
     /**
      * Sets the value of the content type header that's used in the request.
+     *
      * @param contentType new value
      */
     public void setContentType(String contentType) {
@@ -75,8 +86,9 @@ public class ProviderEndpoint extends AbstractEndpoint {
     }
 
     /**
-     * Returns a boolean value that tells if X-Road specific HTTP headers
-     * should be sent with the request.
+     * Returns a boolean value that tells if X-Road specific HTTP headers should
+     * be sent with the request.
+     *
      * @return true if and only if headers must be sent; otherwise false
      */
     public boolean isSendXrdHeaders() {
@@ -84,8 +96,9 @@ public class ProviderEndpoint extends AbstractEndpoint {
     }
 
     /**
-     * Sets the boolean value that tells if X-Road specific HTTP headers
-     * should be sent with the request.
+     * Sets the boolean value that tells if X-Road specific HTTP headers should
+     * be sent with the request.
+     *
      * @param sendXrdHeaders new value
      */
     public void setSendXrdHeaders(boolean sendXrdHeaders) {
@@ -93,21 +106,114 @@ public class ProviderEndpoint extends AbstractEndpoint {
     }
 
     /**
-     * Returns true if and only if the response data is passed as
-     * SOAP attachment. Otherwise false.
-     * @return true if and only if the response data is passed as
-     * SOAP attachment; otherwise false
+     * Returns true if and only if the response data is passed as SOAP
+     * attachment. Otherwise false.
+     *
+     * @return true if and only if the response data is passed as SOAP
+     * attachment; otherwise false
      */
     public boolean isAttachment() {
         return attachment;
     }
 
     /**
-     * Sets the boolean value that defines if the response data is passed
-     * as SOAP attachment
+     * Sets the boolean value that defines if the response data is passed as
+     * SOAP attachment
+     *
      * @param attachment new value
      */
     public void setAttachment(boolean attachment) {
         this.attachment = attachment;
+    }
+
+    /**
+     * Returns the value of the request parameter name filter condition that's
+     * used for modifying request parameter names. Filtering is done using
+     * regex.
+     *
+     * @return value of the request parameter name filter condition
+     */
+    public String getReqParamNameFilterCondition() {
+        return this.reqParamNameFilterCondition;
+    }
+
+    /**
+     * Sets the value of the request parameter name filter condition that's used
+     * for modifying request parameter names. Filtering is done using regex.
+     *
+     * @param reqParamNameFilterCondition new value
+     */
+    public void setReqParamNameFilterCondition(String reqParamNameFilterCondition) {
+        this.reqParamNameFilterCondition = reqParamNameFilterCondition;
+    }
+
+    /**
+     * Returns the value of the request parameter name filter operation that's
+     * used for modifying request parameter names. Filtering is done using
+     * regex. Operation is executed if and only if request parameter name
+     * matches the condition.
+     *
+     * @return value of the request parameter name filter operation
+     */
+    public String getReqParamNameFilterOperation() {
+        return this.reqParamNameFilterOperation;
+    }
+
+    /**
+     * Sets the value of the request parameter name filter operation that's used
+     * for modifying request parameter names. Filtering is done using regex.
+     * Operation is executed if and only if request parameter name matches the
+     * condition.
+     *
+     * @param reqParamNameFilterOperation new value
+     */
+    public void setReqParamNameFilterOperation(String reqParamNameFilterOperation) {
+        this.reqParamNameFilterOperation = reqParamNameFilterOperation;
+    }
+
+    /**
+     * Returns the value of the request parameter value filter condition that's
+     * used for modifying request parameter values. Filtering is done using
+     * regex.
+     *
+     * @return value of the request parameter value filter condition
+     */
+    public String getReqParamValueFilterCondition() {
+        return reqParamValueFilterCondition;
+    }
+
+    /**
+     * Sets the value of the request parameter value filter condition that's
+     * used for modifying request parameter values. Filtering is done using
+     * regex.
+     *
+     * @param reqParamValueFilterCondition new value
+     */
+    public void setReqParamValueFilterCondition(String reqParamValueFilterCondition) {
+        this.reqParamValueFilterCondition = reqParamValueFilterCondition;
+    }
+
+    /**
+     * Returns the value of the request parameter value filter operation that's
+     * used for modifying request parameter values. Filtering is done using
+     * regex. Operation is executed if and only if request parameter value
+     * matches the condition.
+     *
+     * @return value of the request parameter value filter operation
+     */
+    public String getReqParamValueFilterOperation() {
+        return this.reqParamValueFilterOperation;
+    }
+
+    /**
+     * Sets the value of the request parameter value filter operation that's
+     * used for modifying request parameter values. Filtering is done using
+     * regex. Operation is executed if and only if request parameter value
+     * matches the condition.
+     *
+     * @param reqParamValueFilterOperation new value
+     */
+    public void setReqParamValueFilterOperation(String reqParamValueFilterOperation) {
+        this.reqParamValueFilterOperation = reqParamValueFilterOperation;
     }
 }

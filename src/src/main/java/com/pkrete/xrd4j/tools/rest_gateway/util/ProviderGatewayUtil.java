@@ -4,9 +4,13 @@ import com.pkrete.xrd4j.common.message.ServiceRequest;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.rest.converter.JSONToXMLConverter;
 import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ProviderEndpoint;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +27,7 @@ public class ProviderGatewayUtil {
      * Goes through the given properties and extracts all the defined provider
      * endpoints. Returns a map containing service id - provider endpoint
      * key-value pairs.
+     *
      * @param endpoints endpoint properties
      * @param gatewayProperties REST Provider Gateway general properties
      * @return map containing service id - provider endpoint key-value pairs
@@ -119,6 +124,30 @@ public class ProviderGatewayUtil {
                 endpoint.setPrefix(value);
                 logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
             }
+            // Request parameter name filter condition
+            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION)) {
+                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION);
+                endpoint.setReqParamNameFilterCondition(value);
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION, value);
+            }
+            // Request parameter name filter operation
+            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION)) {
+                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION);
+                endpoint.setReqParamNameFilterOperation(value);
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION, value);
+            }
+            // Request parameter value filter condition
+            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION)) {
+                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION);
+                endpoint.setReqParamValueFilterCondition(value);
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION, value);
+            }
+            // Request parameter value filter operation
+            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION)) {
+                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION);
+                endpoint.setReqParamValueFilterOperation(value);
+                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION, value);
+            }
             results.put(id, endpoint);
 
             // Increase counter by one
@@ -133,6 +162,7 @@ public class ProviderGatewayUtil {
     /**
      * Generates a Map containing HTTP headers that are sent to the service
      * endpoint.
+     *
      * @param request ServiceRequest holding X-Road specific headers
      * @param endpoint ProviderEndpoint holding standard HTTP headers
      * @return Map containing HTTP headers
@@ -171,9 +201,10 @@ public class ProviderGatewayUtil {
      * Converts JSON string to XML string. XML string is wrapped inside
      * <response> wrapper element. The wrapper must be added, because otherwise
      * it's not possible to convert the XML to SOAP element. JSON string does
-     * not likely have a root element that SOAP requires. <response> is used
-     * as a temporary root element and will be omitted by ProviderGateway when
-     * SOAP response is serialized as XML.
+     * not likely have a root element that SOAP requires. <response> is used as
+     * a temporary root element and will be omitted by ProviderGateway when SOAP
+     * response is serialized as XML.
+     *
      * @param data JSON string to be converted
      * @return XML string
      */
@@ -189,13 +220,14 @@ public class ProviderGatewayUtil {
     /**
      * Extracts the request body from the parameters map and returns the value
      * matching the "requestBody" key. If the "requestBody" key is found, it's
-     * removed from the params map. If no "requestBody" key is found, null
-     * is returned.
+     * removed from the params map. If no "requestBody" key is found, null is
+     * returned.
+     *
      * @param params request parameters as key value pairs
      * @return value matching the "requestBody" key or null
      */
     public static String getRequestBody(Map<String, String> params) {
-        if(params.containsKey(Constants.PARAM_REQUEST_BODY)) {
+        if (params.containsKey(Constants.PARAM_REQUEST_BODY)) {
             logger.trace("\"{}\" key found.", Constants.PARAM_REQUEST_BODY);
             // Get value matching the key
             String requestBody = params.get(Constants.PARAM_REQUEST_BODY);
@@ -208,5 +240,68 @@ public class ProviderGatewayUtil {
         // No key-value pair found, return null
         return null;
 
+    }
+
+    /**
+     * Filters request parameter names and values according to the rules defined
+     * by the ProviderEndpoint. Filter can be applied to only parameter name or
+     * value or both of them. Filter condition and operation are defined
+     * individually for parameter name and value.
+     *
+     * @param request request which parameters are filtered
+     * @param endpoint endpoint that contains the rules for filtering
+     */
+    public static void filterRequestParameters(ServiceRequest request, ProviderEndpoint endpoint) {
+        logger.debug("Start filtering request parameters.");
+        // Get a list of keys in the parameters map
+        List<String> keys = new ArrayList<>(((Map<String, String>) request.getRequestData()).keySet());
+        // Loop through request parameters
+        for (String orgKey : keys) {
+            // Skip request body and resourceId parameters - all the other 
+            // parameters are filtered
+            if (!orgKey.equals(Constants.PARAM_REQUEST_BODY) && !orgKey.equals(Constants.PARAM_RESOURCE_ID)) {
+                // Variable that tells if request data must be updated
+                boolean update = false;
+                // Variable for new key value
+                String key = orgKey;
+                // Get value
+                String orgValue = ((Map<String, String>) request.getRequestData()).get(orgKey);
+                String value = orgValue;
+
+                // Check if request parameter name filter has been defined
+                if (endpoint.getReqParamNameFilterCondition() != null && endpoint.getReqParamNameFilterOperation() != null) {
+                    logger.trace("Request parameter name: \"{}\". Filter condition: \"{}\"", orgKey, endpoint.getReqParamNameFilterCondition());
+                    Pattern regex = Pattern.compile(endpoint.getReqParamNameFilterCondition());
+                    Matcher m = regex.matcher(orgKey);
+                    if (m.find()) {
+                        key = m.replaceAll(endpoint.getReqParamNameFilterOperation());
+                        logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamNameFilterOperation(), orgKey, key);
+                        update = true;
+                    }
+                }
+                // Check if request parameter value filter has been defined
+                if (endpoint.getReqParamValueFilterCondition() != null && endpoint.getReqParamValueFilterOperation() != null) {
+                    logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
+                    Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
+                    Matcher m = regex.matcher(orgValue);
+                    if (m.find()) {
+                        value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
+                        logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
+                        update = true;
+                    }
+                }
+
+                // If key or value have changed, request data must be updated
+                if (update) {
+                    // Remove old key-value pair
+                    ((Map<String, String>) request.getRequestData()).remove(orgKey);
+                    // Add modified key-value pair
+                    ((Map<String, String>) request.getRequestData()).put(key, value);
+                }
+            } else {
+                logger.trace("Skip \"{}\" and \"{}\" parameters.", Constants.PARAM_REQUEST_BODY, Constants.PARAM_RESOURCE_ID);
+            }
+        }
+        logger.debug("Filtering request parameters done.");
     }
 }
