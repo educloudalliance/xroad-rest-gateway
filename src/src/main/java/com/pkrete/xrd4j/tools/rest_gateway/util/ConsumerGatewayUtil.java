@@ -170,7 +170,7 @@ public class ConsumerGatewayUtil {
             return endpoints.get(serviceId);
         }
         for (String key : endpoints.keySet()) {
-            String keyMod = key.replaceAll("\\{resourceId\\}", "([\\\\w\\\\-]+?)");
+            String keyMod = key.replaceAll("\\{" + Constants.PARAM_RESOURCE_ID + "\\}", "([\\\\w\\\\-]+?)");
             logger.trace("Modified key used for comparison : \"{}\".", keyMod);
             if (serviceId.matches(keyMod)) {
                 logger.debug("Found partial match by service id. Request value : \"{}\", matching value : \"{}\".", serviceId, key);
@@ -208,7 +208,7 @@ public class ConsumerGatewayUtil {
         try {
             // Remove "/{resourceId}" from resource path, and omit
             // first and last slash ('/') character
-            resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("/\\{resourceId\\}", "");
+            resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("/\\{" + Constants.PARAM_RESOURCE_ID + "\\}", "");
             logger.debug("Resourse URL that's replaced with Consumer Gateway URL : \"http(s)://{}\".", resourcePath);
             logger.debug("New resource URL : \"{}{}\".", servletUrl, resourcePath);
             // Modify the response
