@@ -18,6 +18,8 @@ import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ProviderEndpoint;
 import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
 import com.pkrete.xrd4j.tools.rest_gateway.util.ProviderGatewayUtil;
 import com.pkrete.xrd4j.tools.rest_gateway.util.RESTGatewayUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.xml.soap.AttachmentPart;
@@ -136,9 +138,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 // of the client that's returned
                 RESTClient restClient = RESTClientFactory.createRESTClient(endpoint.getHttpVerb());
                 // Get request body
-                String requestBody = ProviderGatewayUtil.getRequestBody(((Map<String, String>) request.getRequestData()));
+                String requestBody = ProviderGatewayUtil.getRequestBody(((Map<String, List<String>>) request.getRequestData()));
                 // Send request to the service endpoint
-                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, ((Map<String, String>) request.getRequestData()), headers);
+                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, ((Map<String, List<String>>) request.getRequestData()), headers);
                 logger.debug("...done!");
 
                 String data = restResponse.getData();
@@ -207,13 +209,16 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 logger.warn("\"requestNode\" is null. Null is returned.");
                 return null;
             }
-            // Convert all the elements under request to key-value pairs
-            Map map = SOAPHelper.nodesToMap(requestNode.getChildNodes());
+            // Convert all the elements under request to key - value list pairs.
+            // Each key can have multiple values
+            Map map = SOAPHelper.nodesToMultiMap(requestNode.getChildNodes());
             // If message has attachments, use the first attachment as
             // request body
             if (message.countAttachments() > 0 && map.containsKey(Constants.PARAM_REQUEST_BODY)) {
                 logger.debug("SOAP attachment detected. Use attachment as request body.", Constants.PARAM_REQUEST_BODY);
-                map.put(Constants.PARAM_REQUEST_BODY, SOAPHelper.toString((AttachmentPart) message.getAttachments().next()));
+                List<String> values = new ArrayList<>();
+                values.add(SOAPHelper.toString((AttachmentPart) message.getAttachments().next()));
+                map.put(Constants.PARAM_REQUEST_BODY, values);
             } else {
                 map.remove(Constants.PARAM_REQUEST_BODY);
             }

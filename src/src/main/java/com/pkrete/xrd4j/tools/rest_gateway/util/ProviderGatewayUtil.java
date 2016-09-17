@@ -226,11 +226,11 @@ public class ProviderGatewayUtil {
      * @param params request parameters as key value pairs
      * @return value matching the "requestBody" key or null
      */
-    public static String getRequestBody(Map<String, String> params) {
+    public static String getRequestBody(Map<String, List<String>> params) {
         if (params.containsKey(Constants.PARAM_REQUEST_BODY)) {
             logger.trace("\"{}\" key found.", Constants.PARAM_REQUEST_BODY);
             // Get value matching the key
-            String requestBody = params.get(Constants.PARAM_REQUEST_BODY);
+            String requestBody = params.get(Constants.PARAM_REQUEST_BODY).get(0);
             // Remove the key-value pair from the map
             params.remove(Constants.PARAM_REQUEST_BODY);
             // Return the value
@@ -264,9 +264,8 @@ public class ProviderGatewayUtil {
                 boolean update = false;
                 // Variable for new key value
                 String key = orgKey;
-                // Get value
-                String orgValue = ((Map<String, String>) request.getRequestData()).get(orgKey);
-                String value = orgValue;
+                // Get values list
+                List<String> values = ((Map<String, List<String>>) request.getRequestData()).get(orgKey);
 
                 // Check if request parameter name filter has been defined
                 if (endpoint.getReqParamNameFilterCondition() != null && endpoint.getReqParamNameFilterOperation() != null) {
@@ -281,22 +280,29 @@ public class ProviderGatewayUtil {
                 }
                 // Check if request parameter value filter has been defined
                 if (endpoint.getReqParamValueFilterCondition() != null && endpoint.getReqParamValueFilterOperation() != null) {
-                    logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
-                    Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
-                    Matcher m = regex.matcher(orgValue);
-                    if (m.find()) {
-                        value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
-                        logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
-                        update = true;
+                    // Loop through the values
+                    for (int i = 0; i < values.size(); i++) {
+                        String orgValue = values.get(i);
+                        String value = orgValue;
+                        logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
+                        Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
+                        Matcher m = regex.matcher(orgValue);
+                        if (m.find()) {
+                            value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
+                            logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
+                            values.set(i, value);
+                            update = true;
+                        }
+
                     }
                 }
 
                 // If key or value have changed, request data must be updated
                 if (update) {
-                    // Remove old key-value pair
-                    ((Map<String, String>) request.getRequestData()).remove(orgKey);
-                    // Add modified key-value pair
-                    ((Map<String, String>) request.getRequestData()).put(key, value);
+                    // Remove old key - value list pair
+                    ((Map<String, List<String>>) request.getRequestData()).remove(orgKey);
+                    // Add modified key - value list pair
+                    ((Map<String, List<String>>) request.getRequestData()).put(key, values);
                 }
             } else {
                 logger.trace("Skip \"{}\" and \"{}\" parameters.", Constants.PARAM_REQUEST_BODY, Constants.PARAM_RESOURCE_ID);
