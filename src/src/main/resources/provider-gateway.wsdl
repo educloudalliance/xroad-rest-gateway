@@ -270,7 +270,40 @@
                         </xsd:element>
                     </xsd:sequence>
                 </xsd:complexType>
-            </xsd:element>            
+            </xsd:element>               
+            <xsd:element name="getFinnaRecord">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getFinnaRecordResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>                                        
             <complexType name="organization">
                 <all>
                     <element name="id" type="xsd:int" />
@@ -340,6 +373,12 @@
     <wsdl:message name="getPTVOrganizationResponse">
         <wsdl:part name="body" element="tns:getPTVOrganizationResponse"/>
     </wsdl:message>
+    <wsdl:message name="getFinnaRecord">
+        <wsdl:part name="body" element="tns:getFinnaRecord"/>
+    </wsdl:message>
+    <wsdl:message name="getFinnaRecordResponse">
+        <wsdl:part name="body" element="tns:getFinnaRecordResponse"/>
+    </wsdl:message>
 
     <wsdl:portType name="xRoadPortType">
         <wsdl:operation name="getOrganizationList">
@@ -373,6 +412,10 @@
         <wsdl:operation name="getPTVOrganization">
             <wsdl:input message="tns:getPTVOrganization"/>
             <wsdl:output message="tns:getPTVOrganizationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getFinnaRecord">
+            <wsdl:input message="tns:getFinnaRecord"/>
+            <wsdl:output message="tns:getFinnaRecordResponse"/>
         </wsdl:operation>
     </wsdl:portType>
 
@@ -533,6 +576,28 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="getPTVOrganization">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getFinnaRecord">
             <soap:operation soapAction="" style="document"/>
             <id:version>v1</id:version>
             <wsdl:input>
