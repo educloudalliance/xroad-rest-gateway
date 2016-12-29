@@ -247,53 +247,66 @@ public class ProviderGatewayUtil {
             // Skip request body and resourceId parameters - all the other 
             // parameters are filtered
             if (!orgKey.equals(Constants.PARAM_REQUEST_BODY) && !orgKey.equals(Constants.PARAM_RESOURCE_ID)) {
-                // Variable that tells if request data must be updated
-                boolean update = false;
-                // Variable for new key value
-                String key = orgKey;
-                // Get values list
-                List<String> values = ((Map<String, List<String>>) request.getRequestData()).get(orgKey);
-
-                // Check if request parameter name filter has been defined
-                if (endpoint.getReqParamNameFilterCondition() != null && endpoint.getReqParamNameFilterOperation() != null) {
-                    logger.trace("Request parameter name: \"{}\". Filter condition: \"{}\"", orgKey, endpoint.getReqParamNameFilterCondition());
-                    Pattern regex = Pattern.compile(endpoint.getReqParamNameFilterCondition());
-                    Matcher m = regex.matcher(orgKey);
-                    if (m.find()) {
-                        key = m.replaceAll(endpoint.getReqParamNameFilterOperation());
-                        logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamNameFilterOperation(), orgKey, key);
-                        update = true;
-                    }
-                }
-                // Check if request parameter value filter has been defined
-                if (endpoint.getReqParamValueFilterCondition() != null && endpoint.getReqParamValueFilterOperation() != null) {
-                    // Loop through the values
-                    for (int i = 0; i < values.size(); i++) {
-                        String orgValue = values.get(i);
-                        logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
-                        Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
-                        Matcher m = regex.matcher(orgValue);
-                        if (m.find()) {
-                            String value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
-                            logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
-                            values.set(i, value);
-                            update = true;
-                        }
-
-                    }
-                }
-
-                // If key or value have changed, request data must be updated
-                if (update) {
-                    // Remove old key - value list pair
-                    ((Map<String, List<String>>) request.getRequestData()).remove(orgKey);
-                    // Add modified key - value list pair
-                    ((Map<String, List<String>>) request.getRequestData()).put(key, values);
-                }
+                processReqParamFilters(request, endpoint, orgKey);
             } else {
                 logger.trace("Skip \"{}\" and \"{}\" parameters.", Constants.PARAM_REQUEST_BODY, Constants.PARAM_RESOURCE_ID);
             }
         }
         logger.debug("Filtering request parameters done.");
+    }
+
+    /**
+     * Processes request parameter name and value filters for the parameter
+     * specified by orgKey. After processing processing the modified values are
+     * updated to the original request.
+     *
+     * @param request request which parameters are filtered
+     * @param endpoint endpoint that contains the rules for filtering
+     * @param orgKey the name of parameter to process
+     */
+    private static void processReqParamFilters(ServiceRequest request, ProviderEndpoint endpoint, String orgKey) {
+        // Variable that tells if request data must be updated
+        boolean update = false;
+        // Variable for new key value
+        String key = orgKey;
+        // Get values list
+        List<String> values = ((Map<String, List<String>>) request.getRequestData()).get(orgKey);
+
+        // Check if request parameter name filter has been defined
+        if (endpoint.getReqParamNameFilterCondition() != null && endpoint.getReqParamNameFilterOperation() != null) {
+            logger.trace("Request parameter name: \"{}\". Filter condition: \"{}\"", orgKey, endpoint.getReqParamNameFilterCondition());
+            Pattern regex = Pattern.compile(endpoint.getReqParamNameFilterCondition());
+            Matcher m = regex.matcher(orgKey);
+            if (m.find()) {
+                key = m.replaceAll(endpoint.getReqParamNameFilterOperation());
+                logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamNameFilterOperation(), orgKey, key);
+                update = true;
+            }
+        }
+        // Check if request parameter value filter has been defined
+        if (endpoint.getReqParamValueFilterCondition() != null && endpoint.getReqParamValueFilterOperation() != null) {
+            // Loop through the values
+            for (int i = 0; i < values.size(); i++) {
+                String orgValue = values.get(i);
+                logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
+                Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
+                Matcher m = regex.matcher(orgValue);
+                if (m.find()) {
+                    String value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
+                    logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
+                    values.set(i, value);
+                    update = true;
+                }
+
+            }
+        }
+
+        // If key or value have changed, request data must be updated
+        if (update) {
+            // Remove old key - value list pair
+            ((Map<String, List<String>>) request.getRequestData()).remove(orgKey);
+            // Add modified key - value list pair
+            ((Map<String, List<String>>) request.getRequestData()).put(key, values);
+        }
     }
 }
