@@ -57,93 +57,119 @@ public class ProviderGatewayUtil {
             String id = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String url = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_URL);
 
-            if (id == null || id.isEmpty() || url == null || url.isEmpty()) {
+            if (RESTGatewayUtil.isNullOrEmpty(id) || RESTGatewayUtil.isNullOrEmpty(url)) {
                 logger.warn("ID or URL is null or empty. Provider endpoint skipped.");
-                i++;
-                key = Integer.toString(i);
+                key = Integer.toString(++i);
                 continue;
             }
 
             ProviderEndpoint endpoint = new ProviderEndpoint(id, url);
-            // Set default HTTP verb - GET
-            endpoint.setHttpVerb("get");
-
-            // Initialize endpoint properties to those defined in gateway properties
-            endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
-            endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-            endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
-            if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
-                endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
-            }
+            setDefaultValues(endpoint, gatewayProperties);
 
             logger.info("New provider endpoint found. ID : \"{}\", URL : \"{}\".", id, url);
 
-            // HTTP verb
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_VERB);
-                endpoint.setHttpVerb(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
-            }
-            // Content-Type HTTP header
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE);
-                endpoint.setContentType(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_CONTENT_TYPE, value);
-            }
-            // Accept HTTP header
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ACCEPT)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ACCEPT);
-                endpoint.setAccept(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ACCEPT, value);
-            }
-            // Attachment
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT);
-                endpoint.setAttachment(MessageHelper.strToBool(value));
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ATTACHMENT, value);
-            }
-            // X-Road headers
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS);
-                endpoint.setSendXrdHeaders(MessageHelper.strToBool(value));
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
-            }
+            // HTTP verb, content-Type HTTP header, accept HTTP header,
+            // attachment, X-Road headers, request parameter name filter 
+            // condition, request parameter name filter operation,
+            // request parameter value filter condition, request parameter 
+            // value filter operation
+            extractEndpoints(key, endpoints, endpoint);
+
             // Wrapper processing, ServiceRequest namespace,
             // ServiceResponse namespace, ServiceResponse namespace prefix
             RESTGatewayUtil.extractEndpoints(key, endpoints, endpoint);
-            // Request parameter name filter condition
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION);
-                endpoint.setReqParamNameFilterCondition(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION, value);
-            }
-            // Request parameter name filter operation
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION);
-                endpoint.setReqParamNameFilterOperation(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION, value);
-            }
-            // Request parameter value filter condition
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION);
-                endpoint.setReqParamValueFilterCondition(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION, value);
-            }
-            // Request parameter value filter operation
-            if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION)) {
-                String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION);
-                endpoint.setReqParamValueFilterOperation(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION, value);
-            }
+
             results.put(id, endpoint);
 
-            // Increase counter by one
-            i++;
-            // Update keyD
-            key = Integer.toString(i);
+            // Increase counter by one and update key
+            key = Integer.toString(++i);
         }
         logger.info("{} provider endpoints extracted from properties.", results.size());
         return results;
+    }
+
+    /**
+     * Extracts properties common for consumer endpoints from the given
+     * properties.
+     *
+     * @param key property key
+     * @param endpoints list of configured endpoints read from properties
+     * @param endpoint the endpoint object that's being initialized
+     */
+    public static void extractEndpoints(String key, Properties endpoints, ProviderEndpoint endpoint) {
+        // HTTP verb
+        if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
+            String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_VERB);
+            endpoint.setHttpVerb(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
+        }
+        // Content-Type HTTP header
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE);
+            endpoint.setContentType(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_CONTENT_TYPE, value);
+        }
+        // Accept HTTP header
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ACCEPT)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ACCEPT);
+            endpoint.setAccept(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ACCEPT, value);
+        }
+        // Attachment
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT);
+            endpoint.setAttachment(MessageHelper.strToBool(value));
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ATTACHMENT, value);
+        }
+        // X-Road headers
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS);
+            endpoint.setSendXrdHeaders(MessageHelper.strToBool(value));
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
+        }
+        // Request parameter name filter condition
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION);
+            endpoint.setReqParamNameFilterCondition(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION, value);
+        }
+        // Request parameter name filter operation
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION);
+            endpoint.setReqParamNameFilterOperation(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION, value);
+        }
+        // Request parameter value filter condition
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION);
+            endpoint.setReqParamValueFilterCondition(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION, value);
+        }
+        // Request parameter value filter operation
+        if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION)) {
+            String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION);
+            endpoint.setReqParamValueFilterOperation(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION, value);
+        }
+    }
+
+    /**
+     * Sets default values to the given endpoint.
+     *
+     * @param endpoint ProviderEndpoint to be modified
+     * @param gatewayProperties REST Consumer Gateway general properties
+     */
+    private static void setDefaultValues(ProviderEndpoint endpoint, Properties gatewayProperties) {
+        // Set default HTTP verb - GET
+        endpoint.setHttpVerb("get");
+
+        // Initialize endpoint properties to those defined in gateway properties
+        endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+        endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+        endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+        if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
+            endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+        }
     }
 
     /**
