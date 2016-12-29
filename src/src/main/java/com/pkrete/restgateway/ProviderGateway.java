@@ -90,111 +90,104 @@ public class ProviderGateway extends AbstractAdapterServlet {
      */
     @Override
     protected ServiceResponse handleRequest(ServiceRequest request) throws SOAPException, XRd4JException {
-        ServiceResponseSerializer serializer;
-        ServiceResponse response = null;
+        ServiceResponseSerializer serializer = new XMLServiceResponseSerializer();
+        ServiceResponse response = new ServiceResponse<>(request.getConsumer(), request.getProducer(), request.getId());
         String serviceId = request.getProducer().toString();
 
         // Check if an endpoint that matches the given service ID exists
-        if (this.endpoints.containsKey(serviceId)) {
-            // Response content type
-            String contentType = null;
-            // Get the endpoint
-            ProviderEndpoint endpoint = this.endpoints.get(serviceId);
-            logger.info("Process \"{}\" service.", serviceId);
+        if (!this.endpoints.containsKey(serviceId)) {
+            logger.warn("No endpoint matching the given service id found: \"{}\".", serviceId);
+            return response;
+        }
 
-            // Set request wrapper processing
-            if (endpoint.isProcessingWrappers() != null) {
-                request.setProcessingWrappers(endpoint.isProcessingWrappers());
-            }
-            // Deserialize the request
-            CustomRequestDeserializer customDeserializer = new ReqToMapRequestDeserializerImpl();
-            customDeserializer.deserialize(request, endpoint.getNamespaceDeserialize());
+        // Get the endpoint
+        ProviderEndpoint endpoint = this.endpoints.get(serviceId);
+        logger.info("Process \"{}\" service.", serviceId);
 
-            // Create response object according to the settings
-            if (endpoint.isAttachment()) {
-                response = new ServiceResponse<Map, String>(request.getConsumer(), request.getProducer(), request.getId());
-            } else {
-                response = new ServiceResponse<Map, SOAPElement>(request.getConsumer(), request.getProducer(), request.getId());
-            }
+        // Set request and response wrapper processing
+        if (endpoint.isProcessingWrappers() != null) {
+            request.setProcessingWrappers(endpoint.isProcessingWrappers());
+            response.setProcessingWrappers(endpoint.isProcessingWrappers());
+        }
+        // Deserialize the request
+        CustomRequestDeserializer customDeserializer = new ReqToMapRequestDeserializerImpl();
+        customDeserializer.deserialize(request, endpoint.getNamespaceDeserialize());
 
-            // Set response wrapper processing
-            if (endpoint.isProcessingWrappers() != null) {
-                response.setProcessingWrappers(endpoint.isProcessingWrappers());
-            }
-            // Set producer namespace URI and prefix before processing
-            response.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
-            response.getProducer().setNamespacePrefix(endpoint.getPrefix());
-            logger.debug("Do message processing...");
+        // Set producer namespace URI and prefix before processing
+        response.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
+        response.getProducer().setNamespacePrefix(endpoint.getPrefix());
+        logger.debug("Do message processing...");
 
-            // Filter request parameters
-            ProviderGatewayUtil.filterRequestParameters(request, endpoint);
+        // Filter request parameters
+        ProviderGatewayUtil.filterRequestParameters(request, endpoint);
 
-            // Process the request if request data is present
-            if (request.getRequestData() != null) {
-                // Get HTTP headers for the request
-                Map<String, String> headers = ProviderGatewayUtil.generateHttpHeaders(request, endpoint);
-                logger.debug("Fetch data from service...");
-                // Create a REST client, endpoint's HTTP verb defines the type
-                // of the client that's returned
-                RESTClient restClient = RESTClientFactory.createRESTClient(endpoint.getHttpVerb());
-                // Get request body
-                String requestBody = ProviderGatewayUtil.getRequestBody((Map<String, List<String>>) request.getRequestData());
-                // Send request to the service endpoint
-                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, (Map<String, List<String>>) request.getRequestData(), headers);
-                logger.debug("...done!");
-
-                String data = restResponse.getData();
-                contentType = restResponse.getContentType();
-
-                // Content-type must be "text/xml", "application/xml" or
-                // "application/json"
-                if (RESTGatewayUtil.isValidContentType(contentType)) {
-                    // If response is passed as an attachment, there's no need
-                    // for conversion
-                    if (endpoint.isAttachment()) {
-                        // Data will be put as attachment - no modifications
-                        // needed
-                        response.setResponseData(data);
-                    } else {
-                        // If data is not XML, it must be converted
-                        if (!RESTGatewayUtil.isXml(contentType)) {
-                            logger.debug("Convert response to XML.");
-                            // Convert service endpoint's response to XML
-                            data = ProviderGatewayUtil.fromJSONToXML(data);
-                        } else {
-                            // Do not change the namespace if response is XML
-                            response.setForceNamespaceToResponseChildren(false);
-                        }
-                        // Use XML as response data
-                        response.setResponseData(SOAPHelper.xmlStrToSOAPElement(data));
-                    }
-                } else {
-                    logger.warn("Response's content type is not \"{}\", \"{}\" or \"{}\".", Constants.TEXT_XML, Constants.APPLICATION_XML, Constants.APPLICATION_JSON);
-                    if (restResponse.getStatusCode() == 200) {
-                        logger.warn("Response's status code is 200. Return generic 404 error.");
-                        response.setErrorMessage(new ErrorMessage("404", Constants.ERROR_404));
-                    } else {
-                        logger.warn("Response's status code is {}. Reason phrase is : \"{}\".", restResponse.getStatusCode(), restResponse.getReasonPhrase());
-                        response.setErrorMessage(new ErrorMessage(Integer.toString(restResponse.getStatusCode()), restResponse.getReasonPhrase()));
-                    }
-                }
-            } else {
-                logger.warn("No request data was found. Return a non-techinal error message.");
-                ErrorMessage error = new ErrorMessage("422", Constants.ERROR_422);
-                response.setErrorMessage(error);
-            }
-            logger.debug("Message prosessing done!");
-            // Create serializer object according to the settings
-            if (endpoint.isAttachment()) {
-                serializer = new AttachmentServiceResponseSerializer(contentType);
-            } else {
-                serializer = new XMLServiceResponseSerializer();
-            }
-            // Serialize the response
+        // Return an error message if request data is missing
+        if (request.getRequestData() == null) {
+            logger.warn("No request data was found. Return a non-techinal error message.");
+            ErrorMessage error = new ErrorMessage("422", Constants.ERROR_422);
+            response.setErrorMessage(error);
             serializer.serialize(response, request);
             return response;
         }
+
+        // Get HTTP headers for the request
+        Map<String, String> headers = ProviderGatewayUtil.generateHttpHeaders(request, endpoint);
+        logger.debug("Fetch data from service...");
+        // Create a REST client, endpoint's HTTP verb defines the type
+        // of the client that's returned
+        RESTClient restClient = RESTClientFactory.createRESTClient(endpoint.getHttpVerb());
+        // Get request body
+        String requestBody = ProviderGatewayUtil.getRequestBody((Map<String, List<String>>) request.getRequestData());
+        // Send request to the service endpoint
+        ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, (Map<String, List<String>>) request.getRequestData(), headers);
+        logger.debug("...done!");
+
+        String data = restResponse.getData();
+        String contentType = restResponse.getContentType();
+
+        // Content-type must be "text/xml", "application/xml" or
+        // "application/json"
+        if (!RESTGatewayUtil.isValidContentType(contentType)) {
+            logger.warn("Response's content type is not \"{}\", \"{}\" or \"{}\".", Constants.TEXT_XML, Constants.APPLICATION_XML, Constants.APPLICATION_JSON);
+            if (restResponse.getStatusCode() == 200) {
+                logger.warn("Response's status code is 200. Return generic 404 error.");
+                response.setErrorMessage(new ErrorMessage("404", Constants.ERROR_404));
+            } else {
+                logger.warn("Response's status code is {}. Reason phrase is : \"{}\".", restResponse.getStatusCode(), restResponse.getReasonPhrase());
+                response.setErrorMessage(new ErrorMessage(Integer.toString(restResponse.getStatusCode()), restResponse.getReasonPhrase()));
+            }
+            serializer.serialize(response, request);
+            return response;
+        }
+
+        // If response is passed as an attachment, there's no need
+        // for conversion
+        if (endpoint.isAttachment()) {
+            // Data will be put as attachment - no modifications
+            // needed
+            response.setResponseData(data);
+            // Create new serializer if we need to handle attachments
+            serializer = new AttachmentServiceResponseSerializer(contentType);
+        } else {
+            // If data is not XML, it must be converted
+            if (!RESTGatewayUtil.isXml(contentType)) {
+                logger.debug("Convert response to XML.");
+                // Convert service endpoint's response to XML
+                data = ProviderGatewayUtil.fromJSONToXML(data);
+            } else {
+                // Do not change the namespace if response is XML
+                response.setForceNamespaceToResponseChildren(false);
+            }
+            // Use XML as response data
+            response.setResponseData(SOAPHelper.xmlStrToSOAPElement(data));
+        }
+
+        logger.debug("Message prosessing done!");
+
+        // Serialize the response
+        serializer.serialize(response, request);
         return response;
+
     }
 
     /**
