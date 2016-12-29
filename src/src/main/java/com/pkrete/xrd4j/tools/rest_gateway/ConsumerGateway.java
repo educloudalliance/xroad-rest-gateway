@@ -67,7 +67,7 @@ public class ConsumerGateway extends HttpServlet {
         }
         logger.debug("Setting Consumer and ConsumerGateway properties");
         String serviceCallsByXRdServiceIdStr = this.props.getProperty(Constants.CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED);
-        this.serviceCallsByXRdServiceId = serviceCallsByXRdServiceIdStr == null ? false : serviceCallsByXRdServiceIdStr.equalsIgnoreCase("true");
+        this.serviceCallsByXRdServiceId = serviceCallsByXRdServiceIdStr == null ? false : "true".equalsIgnoreCase(serviceCallsByXRdServiceIdStr);
         logger.debug("Security server URL : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
         logger.debug("Default client id : \"{}\".", this.props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT));
         logger.debug("Default namespace for incoming ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
@@ -270,7 +270,7 @@ public class ConsumerGateway extends HttpServlet {
             out.println(responseStr);
             logger.trace("Consumer Gateway response : \"{}\"", responseStr);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         } finally {
             if (out != null) {
                 out.close();
@@ -441,7 +441,7 @@ public class ConsumerGateway extends HttpServlet {
             }
             return buffer.toString();
         } catch (Exception e) {
-            logger.error("Failed to read the request body from the request.");
+            logger.error("Failed to read the request body from the request.", e);
         }
         return null;
     }
@@ -451,9 +451,9 @@ public class ConsumerGateway extends HttpServlet {
      */
     private class RequestSerializer extends AbstractServiceRequestSerializer {
 
-        private String resourceId;
-        private String requestBody;
-        private String contentType;
+        private final String resourceId;
+        private final String requestBody;
+        private final String contentType;
 
         public RequestSerializer(String resourceId, String requestBody, String contentType) {
             this.resourceId = resourceId;
@@ -468,8 +468,9 @@ public class ConsumerGateway extends HttpServlet {
                 soapRequest.addChildElement("resourceId").addTextNode(this.resourceId);
             }
             Map<String, String[]> params = (Map<String, String[]>) request.getRequestData();
-            for (String key : params.keySet()) {
-                String[] arr = params.get(key);
+            for (Map.Entry<String, String[]> entry : params.entrySet()) {
+                String key = entry.getKey();
+                String[] arr = entry.getValue();
                 for (String value : arr) {
                     logger.debug("Add parameter : \"{}\" -> \"{}\".", key, value);
                     soapRequest.addChildElement(key).addTextNode(value);

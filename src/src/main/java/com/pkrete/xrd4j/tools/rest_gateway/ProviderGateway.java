@@ -54,11 +54,11 @@ public class ProviderGateway extends AbstractAdapterServlet {
         String propertiesDirectoryParameter = System.getProperty(Constants.PROPERTIES_DIR_PARAM_NAME);
         Properties endpointProps;
         if (propertiesDirectoryParameter != null) {
-          this.props = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_PROVIDER_GATEWAY, false);
-          endpointProps = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_PROVIDERS, false);
+            this.props = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_PROVIDER_GATEWAY, false);
+            endpointProps = PropertiesUtil.getInstance().load(propertiesDirectoryParameter + Constants.PROPERTIES_FILE_PROVIDERS, false);
         } else {
-          this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_PROVIDER_GATEWAY);
-          endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_PROVIDERS);
+            this.props = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_PROVIDER_GATEWAY);
+            endpointProps = PropertiesUtil.getInstance().load(Constants.PROPERTIES_FILE_PROVIDERS);
         }
         logger.debug("Default namespace for incoming ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
         logger.debug("Default namespace for outgoing ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
@@ -128,7 +128,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
 
             // Filter request parameters
             ProviderGatewayUtil.filterRequestParameters(request, endpoint);
-            
+
             // Process the request if request data is present
             if (request.getRequestData() != null) {
                 // Get HTTP headers for the request
@@ -235,14 +235,14 @@ public class ProviderGateway extends AbstractAdapterServlet {
         @Override
         public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
             SOAPElement responseElem = (SOAPElement) response.getResponseData();
-            if (responseElem.getLocalName().equals("response")) {
+            if ("response".equals(responseElem.getLocalName())) {
                 logger.debug("Additional \"response\" wrapper detected. Remove the wrapper.");
                 for (int i = 0; i < responseElem.getChildNodes().getLength(); i++) {
                     Node importNode = (Node) envelope.getBody().getOwnerDocument().importNode(responseElem.getChildNodes().item(i), true);
                     soapResponse.appendChild(importNode);
                 }
             } else {
-                SOAPElement data = soapResponse.addChildElement((SOAPElement) response.getResponseData());
+                soapResponse.addChildElement((SOAPElement) response.getResponseData());
             }
         }
     }

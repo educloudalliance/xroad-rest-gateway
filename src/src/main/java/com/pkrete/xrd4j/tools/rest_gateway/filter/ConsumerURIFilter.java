@@ -36,8 +36,8 @@ public class ConsumerURIFilter implements Filter {
         logger.debug("Incoming request : \"{}\"", oldURI);
 
         if (oldURI.length() > servletName.length()) {
-            String resourcePath = oldURI.substring(oldURI.indexOf("/"));
-            if (!resourcePath.equals("/")) {
+            String resourcePath = oldURI.substring(oldURI.indexOf('/'));
+            if (!"/".equals(resourcePath)) {
                 // Path must end with "/"
                 if (!resourcePath.endsWith("/")) {
                     resourcePath += "/";

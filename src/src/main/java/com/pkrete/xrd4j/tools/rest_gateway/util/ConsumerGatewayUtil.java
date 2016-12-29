@@ -84,7 +84,6 @@ public class ConsumerGatewayUtil {
             endpoint.setHttpVerb("GET");
 
             // Set more specific endpoint properties
-
             // Client id
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
                 String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT);
@@ -169,13 +168,14 @@ public class ConsumerGatewayUtil {
             logger.debug("Found match by service id : \"{}\".", serviceId);
             return endpoints.get(serviceId);
         }
-        for (String key : endpoints.keySet()) {
+        for (Map.Entry<String, ConsumerEndpoint> entry : endpoints.entrySet()) {
+            String key = entry.getKey();
             String keyMod = key.replaceAll("\\{" + Constants.PARAM_RESOURCE_ID + "\\}", "([\\\\w\\\\-]+?)");
             logger.trace("Modified key used for comparison : \"{}\".", keyMod);
             if (serviceId.matches(keyMod)) {
                 logger.debug("Found partial match by service id. Request value : \"{}\", matching value : \"{}\".", serviceId, key);
-                ConsumerEndpoint endpoint = endpoints.get(key);
-                int index = key.indexOf("{");
+                ConsumerEndpoint endpoint = entry.getValue();
+                int index = key.indexOf('{');
                 if (index != -1) {
                     // Get the resource id - starts from the first "{"
                     String resourceId = serviceId.substring(index);
@@ -198,23 +198,23 @@ public class ConsumerGatewayUtil {
      * resourcePath to point the Consumer Gateway servlet.
      *
      * @param servletUrl URL of Consumer Gateway serlvet
-     * @param resourcePath path that's rewritten to point the Consumer Gateway
+     * @param pathToResource path that's rewritten to point the Consumer Gateway
      * @param responseStr response to be modified
      * @return modified response
      */
-    public static String rewriteUrl(String servletUrl, String resourcePath, String responseStr) {
+    public static String rewriteUrl(String servletUrl, String pathToResource, String responseStr) {
         logger.debug("Rewrite URLs in the response to point Consumer Gateway.");
         logger.debug("Consumer Gateway URL : \"{}\".", servletUrl);
         try {
             // Remove "/{resourceId}" from resource path, and omit
             // first and last slash ('/') character
-            resourcePath = resourcePath.substring(1, resourcePath.length() - 1).replaceAll("/\\{" + Constants.PARAM_RESOURCE_ID + "\\}", "");
+            String resourcePath = pathToResource.substring(1, pathToResource.length() - 1).replaceAll("/\\{" + Constants.PARAM_RESOURCE_ID + "\\}", "");
             logger.debug("Resourse URL that's replaced with Consumer Gateway URL : \"http(s)://{}\".", resourcePath);
             logger.debug("New resource URL : \"{}{}\".", servletUrl, resourcePath);
             // Modify the response
             return responseStr.replaceAll("http(s|):\\/\\/" + resourcePath, servletUrl + resourcePath);
         } catch (Exception ex) {
-            logger.error("Reqriting the URLs failed!");
+            logger.error("Rewriting the URLs failed!");
             logger.error(ex.getMessage(), ex);
             return responseStr;
         }
@@ -267,25 +267,26 @@ public class ConsumerGatewayUtil {
      *
      * @param props consumer gateway properties that contain default namespace
      * and prefix
-     * @param resourcePath resource path that was called, used as service id
+     * @param pathToResource resource path that was called, used as service id
      * @return ConsumerEndpoint object
      */
-    public static ConsumerEndpoint createUnconfiguredEndpoint(Properties props, String resourcePath) {
+    public static ConsumerEndpoint createUnconfiguredEndpoint(Properties props, String pathToResource) {
         logger.debug("Create a consumer endpoint that points to a service defined by resource path.");
         String resourceId = null;
+        String resourcePath;
         // Check if a resource id is present in the resource path.
         // Pattern for resource path and resource id.
         String pattern = "/(.+?)/(.+)";
         Pattern regex = Pattern.compile(pattern);
-        Matcher m = regex.matcher(resourcePath);
-        // If resource id is found, pplit resource id and resource path
+        Matcher m = regex.matcher(pathToResource);
+        // If resource id is found, split resource id and resource path
         if (m.find()) {
             resourcePath = m.group(1);
             resourceId = m.group(2).substring(0, m.group(2).length() - 1);
             logger.info("Resource id detected. Resource path : \"{}\". Resource id : \"{}\".", resourcePath, resourceId);
         } else {
             // Remove slashes, they're not part of service id
-            resourcePath = resourcePath.replaceAll("/", "");
+            resourcePath = pathToResource.replaceAll("/", "");
         }
         // Get client id
         String clientId = props.getProperty(Constants.CONSUMER_PROPS_ID_CLIENT);
@@ -311,8 +312,8 @@ public class ConsumerGatewayUtil {
     /**
      * Removes response tag and its namespace prefixes from the given response
      * message. All the response tag's namespace prefixes are removed from the
-     * children. Response tag can be simple <response> or prefixed with
-     * service name <serviceNameResponse>.
+     * children. Response tag can be simple \<response\> or prefixed with service
+     * name \<serviceNameResponse\>.
      *
      * @param message response message
      * @return children of the response tag

@@ -33,7 +33,7 @@ public class ProviderGatewayUtil {
      * @return map containing service id - provider endpoint key-value pairs
      */
     public static Map<String, ProviderEndpoint> extractProviders(Properties endpoints, Properties gatewayProperties) {
-        Map<String, ProviderEndpoint> results = new HashMap<String, ProviderEndpoint>();
+        Map<String, ProviderEndpoint> results = new HashMap<>();
         logger.info("Start extracting provider endpoints from properties.");
         if (endpoints == null || endpoints.isEmpty()) {
             logger.warn("No endpoints were founds. The list was null or empty.");
@@ -169,7 +169,7 @@ public class ProviderGatewayUtil {
      */
     public static Map<String, String> generateHttpHeaders(ServiceRequest request, ProviderEndpoint endpoint) {
         logger.info("Generate HTTP headers.");
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         if (endpoint.isSendXrdHeaders()) {
             logger.debug("Generate X-Road specific headers.");
             headers.put(Constants.XRD_HEADER_CLIENT, request.getConsumer().toString());
@@ -199,9 +199,9 @@ public class ProviderGatewayUtil {
 
     /**
      * Converts JSON string to XML string. XML string is wrapped inside
-     * <response> wrapper element. The wrapper must be added, because otherwise
+     * \<response\> wrapper element. The wrapper must be added, because otherwise
      * it's not possible to convert the XML to SOAP element. JSON string does
-     * not likely have a root element that SOAP requires. <response> is used as
+     * not likely have a root element that SOAP requires. \<response\> is used as
      * a temporary root element and will be omitted by ProviderGateway when SOAP
      * response is serialized as XML.
      *
@@ -212,9 +212,9 @@ public class ProviderGatewayUtil {
         // Set wrapper tag's name
         String wrapper = "response";
         // Convert service endpoint's response to XML
-        data = new JSONToXMLConverter().convert(data);
+        String dataXml = new JSONToXMLConverter().convert(data);
         // Return data inside wrapper element
-        return "<" + wrapper + ">" + data + "</" + wrapper + ">";
+        return "<" + wrapper + ">" + dataXml + "</" + wrapper + ">";
     }
 
     /**
@@ -283,12 +283,11 @@ public class ProviderGatewayUtil {
                     // Loop through the values
                     for (int i = 0; i < values.size(); i++) {
                         String orgValue = values.get(i);
-                        String value = orgValue;
                         logger.trace("Request parameter value: \"{}\". Filter condition: \"{}\"", orgValue, endpoint.getReqParamValueFilterCondition());
                         Pattern regex = Pattern.compile(endpoint.getReqParamValueFilterCondition());
                         Matcher m = regex.matcher(orgValue);
                         if (m.find()) {
-                            value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
+                            String value = m.replaceAll(endpoint.getReqParamValueFilterOperation());
                             logger.trace("Filter condition: true. Filter operation: \"{}\". Parameter name: \"{}\" => \"{}\"", endpoint.getReqParamValueFilterOperation(), orgValue, value);
                             values.set(i, value);
                             update = true;
