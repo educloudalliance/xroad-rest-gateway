@@ -16,6 +16,7 @@ import com.pkrete.xrd4j.rest.converter.XMLToJSONConverter;
 import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ConsumerGatewayUtil;
+import com.pkrete.restgateway.util.RESTGatewayUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -94,37 +95,18 @@ public class ConsumerGateway extends HttpServlet {
         // Get resourcePath attribute
         String resourcePath = (String) request.getAttribute("resourcePath");
         // Get HTTP headers
-        String userId = this.getXRdHeader(request, Constants.XRD_HEADER_USER_ID);
-        String messageId = this.getXRdHeader(request, Constants.XRD_HEADER_MESSAGE_ID);
+        String userId = processUserId(this.getXRdHeader(request, Constants.XRD_HEADER_USER_ID));
+        String messageId = processMessageId(this.getXRdHeader(request, Constants.XRD_HEADER_MESSAGE_ID));
         String namespace = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_SERIALIZE);
         String prefix = this.getXRdHeader(request, Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE);
         String contentType = request.getHeader(Constants.HTTP_HEADER_CONTENT_TYPE);
-        String accept = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? Constants.TEXT_XML : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
+        String acceptHeader = this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT) == null ? Constants.TEXT_XML : this.getXRdHeader(request, Constants.HTTP_HEADER_ACCEPT);
         logger.info("Request received. Method : \"{}\". Resource path : \"{}\".", request.getMethod(), resourcePath);
 
-        // Accept header must be "text/xml" or "application/json"
-        logger.debug("Incoming accept header value : \"{}\"", accept);
-        if (!accept.startsWith(Constants.TEXT_XML) && !accept.startsWith(Constants.APPLICATION_JSON)) {
-            accept = Constants.TEXT_XML + "; " + Constants.CHARSET_UTF8;
-            logger.trace("Accept header value set to \"{}\".", Constants.TEXT_XML);
-        }
-        // Character set must be added to the accept header, if it's missing
-        if (!accept.endsWith("8")) {
-            accept += "; " + Constants.CHARSET_UTF8;
-        }
+        // Check accept header
+        String accept = processAcceptHeader(acceptHeader);
         // Set reponse content type according the accept header
         response.setContentType(accept);
-
-        // Set userId if null
-        if (userId == null) {
-            logger.debug("\"{}\" header is null. Use \"anonymous\" as userId.", Constants.XRD_HEADER_USER_ID);
-            userId = "anonymous";
-        }
-        // Set messageId if null
-        if (messageId == null) {
-            messageId = MessageHelper.generateId();
-            logger.debug("\"{}\" header is null. Use auto-generated id \"{}\" instead.", Constants.XRD_HEADER_MESSAGE_ID, messageId);
-        }
 
         // Omit response namespace, if response is wanted in JSON
         boolean omitNamespace = accept.startsWith(Constants.APPLICATION_JSON);
@@ -170,17 +152,9 @@ public class ConsumerGateway extends HttpServlet {
             return;
         }
 
-        // Endpoint was found, so process it
-        // Set namespace received from header, if not null or empty
-        if (namespace != null && !namespace.isEmpty()) {
-            endpoint.getProducer().setNamespaceUrl(namespace);
-            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, namespace);
-        }
-        // Set prefix received from header, if not null or empty
-        if (prefix != null && !prefix.isEmpty()) {
-            endpoint.getProducer().setNamespacePrefix(prefix);
-            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
-        }
+        // Set namespace and prefix received from header, if not null or empty
+        processNamespaceAndPrefix(endpoint, namespace, prefix);
+
         logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
         try {
             // Create ServiceRequest object
@@ -231,6 +205,82 @@ public class ConsumerGateway extends HttpServlet {
 
         // Send response
         this.writeResponse(response, responseStr);
+    }
+
+    /**
+     * Returns "anonymous" if the given user id is null. Otherwise returns the
+     * given user id.
+     *
+     * @param userId user id to be checked
+     * @return "anonymous" if the given user id is null; otherwise userId
+     */
+    private String processUserId(String userId) {
+        // Set userId if null
+        if (userId == null) {
+            logger.debug("\"{}\" header is null. Use \"anonymous\" as userId.", Constants.XRD_HEADER_USER_ID);
+            return "anonymous";
+        }
+        return userId;
+    }
+
+    /**
+     * Generates a unique identifier if the given message id is null. Otherwise
+     * returns the given message id.
+     *
+     * @param messageId message id to be checked
+     * @return unique identifier if the given message id is null; otherwise
+     * messageId
+     */
+    private String processMessageId(String messageId) {
+        // Set messageId if null
+        if (messageId == null) {
+            logger.debug("\"{}\" header is null. Use auto-generated id \"{}\" instead.", Constants.XRD_HEADER_MESSAGE_ID, messageId);
+            return MessageHelper.generateId();
+        }
+        return messageId;
+
+    }
+
+    /**
+     * Checks namespace and prefix for null and empty, and sets them to endpoint
+     * if a value is found.
+     *
+     * @param endpoint ConsumerEndpoint object
+     * @param namespace namespace HTTP header String
+     * @param prefix prefix HTTP header String
+     */
+    private void processNamespaceAndPrefix(ConsumerEndpoint endpoint, String namespace, String prefix) {
+        // Set namespace received from header, if not null or empty
+        if (!RESTGatewayUtil.isNullOrEmpty(namespace)) {
+            endpoint.getProducer().setNamespaceUrl(namespace);
+            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, namespace);
+        }
+        // Set prefix received from header, if not null or empty
+        if (!RESTGatewayUtil.isNullOrEmpty(prefix)) {
+            endpoint.getProducer().setNamespacePrefix(prefix);
+            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
+        }
+    }
+
+    /**
+     * Checks the value of the accept header and sets it to "text/xml" if no
+     * valid value is found. UTF8 character set definition is added if missing.
+     *
+     * @param accept HTTP Accept header value from the request
+     * @return sanitized Accept header value
+     */
+    private String processAcceptHeader(String accept) {
+        // Accept header must be "text/xml" or "application/json"
+        logger.debug("Incoming accept header value : \"{}\"", accept);
+        if (!accept.startsWith(Constants.TEXT_XML) && !accept.startsWith(Constants.APPLICATION_JSON)) {
+            accept = Constants.TEXT_XML + "; " + Constants.CHARSET_UTF8;
+            logger.trace("Accept header value set to \"{}\".", Constants.TEXT_XML);
+        }
+        // Character set must be added to the accept header, if it's missing
+        if (!accept.endsWith("8")) {
+            accept += "; " + Constants.CHARSET_UTF8;
+        }
+        return accept;
     }
 
     /**

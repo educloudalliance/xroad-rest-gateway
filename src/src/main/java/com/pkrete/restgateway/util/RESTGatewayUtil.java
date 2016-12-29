@@ -82,4 +82,15 @@ public class RESTGatewayUtil {
             logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
         }
     }
+
+    /**
+     * Checks the given String for null and empty. Returns true if and only if
+     * the string is null or empty.
+     *
+     * @param value String to be checked
+     * @return rue if and only if the string is null or empty; otherwise false
+     */
+    public static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
 }
