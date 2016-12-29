@@ -91,7 +91,6 @@ public class ConsumerGateway extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String responseStr;
-        boolean omitNamespace = false;
         // Get resourcePath attribute
         String resourcePath = (String) request.getAttribute("resourcePath");
         // Get HTTP headers
@@ -128,9 +127,7 @@ public class ConsumerGateway extends HttpServlet {
         }
 
         // Omit response namespace, if response is wanted in JSON
-        if (accept.startsWith(Constants.APPLICATION_JSON)) {
-            omitNamespace = true;
-        }
+        boolean omitNamespace = accept.startsWith(Constants.APPLICATION_JSON);
 
         // Set userId and messageId to response
         response.addHeader(Constants.XRD_HEADER_USER_ID, userId);
@@ -212,30 +209,9 @@ public class ConsumerGateway extends HttpServlet {
             if (endpoint.isProcessingWrappers() != null) {
                 serviceResponse.setProcessingWrappers(endpoint.isProcessingWrappers());
             }
-            // Check that response doesn't contain SOAP fault
-            if (!serviceResponse.hasError()) {
-                // Get the response that's now XML string. If the response has
-                // attachments, the first attachment is returned. In case
-                // of attachment, the response might not be XML. This is
-                // handled later.
-                responseStr = (String) serviceResponse.getResponseData();
-            } else {
-                // Error message detected
-                logger.debug("Received response contains SOAP fault.");
-                responseStr = this.generateFault(serviceResponse.getErrorMessage());
-            }
-            // SOAP message doesn't have attachments
-            if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
-                // Convert the response acconding to content type and remove
-                // response tag if possible
-                responseStr = handleResponseBody(response, responseStr);
-            } else {
-                // SOAP message has attachments. Use attachment's
-                // content type.
-                String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
-                response.setContentType(attContentType);
-                logger.debug("Use SOAP attachment as response message.");
-            }
+            // Generate response message
+            responseStr = handleResponse(response, serviceResponse);
+
             // Check if the URLs in the response should be rewritten
             // to point this servlet
             if (endpoint.isModifyUrl()) {
@@ -255,6 +231,43 @@ public class ConsumerGateway extends HttpServlet {
 
         // Send response
         this.writeResponse(response, responseStr);
+    }
+
+    /**
+     * Process the response and check it for error messages and attachments
+     * etc., and generate the response message string.
+     *
+     * @param response HttpServletResponse object
+     * @param serviceResponse ServiceResponse object
+     * @return response message as a String
+     */
+    private String handleResponse(HttpServletResponse response, ServiceResponse serviceResponse) {
+        String responseStr;
+        // Check that response doesn't contain SOAP fault
+        if (!serviceResponse.hasError()) {
+            // Get the response that's now XML string. If the response has
+            // attachments, the first attachment is returned. In case
+            // of attachment, the response might not be XML. This is
+            // handled later.
+            responseStr = (String) serviceResponse.getResponseData();
+        } else {
+            // Error message detected
+            logger.debug("Received response contains SOAP fault.");
+            responseStr = this.generateFault(serviceResponse.getErrorMessage());
+        }
+        // SOAP message doesn't have attachments
+        if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+            // Convert the response according to content type and remove
+            // response tag if possible
+            responseStr = handleResponseBody(response, responseStr);
+        } else {
+            // SOAP message has attachments. Use attachment's
+            // content type.
+            String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
+            response.setContentType(attContentType);
+            logger.debug("Use SOAP attachment as response message.");
+        }
+        return responseStr;
     }
 
     /**
