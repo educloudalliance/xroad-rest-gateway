@@ -1,5 +1,6 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
+import com.pkrete.restgateway.util.RESTGatewayUtil;
 import junit.framework.TestCase;
 
 /**

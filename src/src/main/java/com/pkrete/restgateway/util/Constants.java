@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
 /**
  * REST Gateway constants.
@@ -7,11 +7,6 @@ package com.pkrete.xrd4j.tools.rest_gateway.util;
  */
 public class Constants {
 
-    /**
-     * Constructs and initializes a new Constants object. Should never be used.
-     */
-    private Constants() {
-    }
     /**
      * Properties files
      */
@@ -95,4 +90,15 @@ public class Constants {
      * Character set UTF-8
      */
     public static final String CHARSET_UTF8 = "charset=utf-8";
+    /**
+     * Constants for logging.
+     */
+    public static final String LOG_STRING_FOR_SETTINGS = "\"{}\" setting found. Value : \"{}\".";
+    public static final String LOG_STRING_FOR_HEADERS = "{} : {}";
+
+    /**
+     * Constructs and initializes a new Constants object. Should never be used.
+     */
+    private Constants() {
+    }
 }

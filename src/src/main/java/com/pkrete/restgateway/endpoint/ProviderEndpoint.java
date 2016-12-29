@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway.endpoint;
+package com.pkrete.restgateway.endpoint;
 
 /**
  * This class represents provider endpoint and holds all the information that is

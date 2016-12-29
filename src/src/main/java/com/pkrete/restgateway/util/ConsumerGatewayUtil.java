@@ -1,10 +1,10 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
 import com.pkrete.xrd4j.common.util.ConfigurationHelper;
 import com.pkrete.xrd4j.common.util.MessageHelper;
-import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
+import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -20,7 +20,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ConsumerGatewayUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(ConsumerGatewayUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerGatewayUtil.class);
+
+    /**
+     * This a utility class providing only static methods which is why it should
+     * not be initiated.
+     */
+    private ConsumerGatewayUtil() {
+
+    }
 
     /**
      * Goes through the given properties and extracts all the defined consumer
@@ -32,7 +40,7 @@ public class ConsumerGatewayUtil {
      * @return map containing service id - consumer endpoint key-value pairs
      */
     public static Map<String, ConsumerEndpoint> extractConsumers(Properties endpoints, Properties gatewayProperties) {
-        Map<String, ConsumerEndpoint> results = new TreeMap<String, ConsumerEndpoint>();
+        Map<String, ConsumerEndpoint> results = new TreeMap<>();
         logger.info("Start extracting consumer endpoints from properties.");
         if (endpoints == null || endpoints.isEmpty()) {
             logger.warn("No endpoints were founds. The list was null or empty.");
@@ -88,7 +96,7 @@ public class ConsumerGatewayUtil {
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
                 String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT);
                 endpoint.setClientId(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.CONSUMER_PROPS_ID_CLIENT, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_ID_CLIENT, value);
             }
             // HTTP verb
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
@@ -97,37 +105,37 @@ public class ConsumerGatewayUtil {
                     value = value.toUpperCase();
                 }
                 endpoint.setHttpVerb(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_VERB, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
             }
             // Modify URLs
             if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_MOD_URL)) {
                 String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_MOD_URL);
                 endpoint.setModifyUrl(MessageHelper.strToBool(value));
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.CONSUMER_PROPS_MOD_URL, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_MOD_URL, value);
             }
             // Wrapper processing
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
                 endpoint.setProcessingWrappers(MessageHelper.strToBool(value));
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceResponse namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE);
                 endpoint.setNamespaceDeserialize(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, value);
             }
             // ServiceRequest namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
                 endpoint.setNamespaceSerialize(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, value);
             }
             // ServiceRequest namespace prefix
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
                 endpoint.setPrefix(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
             }
 
             // Create ConsumerMember object
@@ -312,8 +320,8 @@ public class ConsumerGatewayUtil {
     /**
      * Removes response tag and its namespace prefixes from the given response
      * message. All the response tag's namespace prefixes are removed from the
-     * children. Response tag can be simple \<response\> or prefixed with service
-     * name \<serviceNameResponse\>.
+     * children. Response tag can be simple \<response\> or prefixed with
+     * service name \<serviceNameResponse\>.
      *
      * @param message response message
      * @return children of the response tag

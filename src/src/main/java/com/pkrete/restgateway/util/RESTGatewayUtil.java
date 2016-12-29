@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,12 @@ import org.slf4j.LoggerFactory;
  */
 public class RESTGatewayUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(RESTGatewayUtil.class);
+    /**
+     * Constructs and initializes a new RESTGatewayUtil object. Should never be
+     * used.
+     */
+    private RESTGatewayUtil() {
+    }
 
     /**
      * Checks the given content type and returns true if and only if it begins
@@ -21,10 +26,7 @@ public class RESTGatewayUtil {
      * "text/xml" or "application/xml"; otherwise returns false
      */
     public static boolean isXml(String contentType) {
-        if (contentType != null && (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_XML))) {
-            return true;
-        }
-        return false;
+        return contentType != null && (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_XML));
     }
 
     /**
@@ -38,10 +40,7 @@ public class RESTGatewayUtil {
      * false
      */
     public static boolean isValidContentType(String contentType) {
-        if (contentType != null && (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_XML) || contentType.startsWith(Constants.APPLICATION_JSON))) {
-            return true;
-        }
-        return false;
+        return contentType != null && (contentType.startsWith(Constants.TEXT_XML) || contentType.startsWith(Constants.APPLICATION_XML) || contentType.startsWith(Constants.APPLICATION_JSON));
     }
 
 }

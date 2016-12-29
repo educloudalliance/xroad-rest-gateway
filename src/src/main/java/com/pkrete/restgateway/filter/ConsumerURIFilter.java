@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway.filter;
+package com.pkrete.restgateway.filter;
 
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -12,16 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This filter is responsible of filtering each request to "Consumer/*" URI.
- * The part after "Consumer/" is removed and stored in an attribute. The
- * request is then redirected to ConsumerEndpoint servlet that takes cares
- * of processing it.
+ * This filter is responsible of filtering each request to "Consumer/*" URI. The
+ * part after "Consumer/" is removed and stored in an attribute. The request is
+ * then redirected to ConsumerEndpoint servlet that takes cares of processing
+ * it.
  *
  * @author Petteri Kivimäki
  */
 public class ConsumerURIFilter implements Filter {
 
-    private final static Logger logger = LoggerFactory.getLogger(ConsumerURIFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerURIFilter.class);
 
     @Override
     public void init(FilterConfig fc) throws ServletException {
@@ -55,5 +55,6 @@ public class ConsumerURIFilter implements Filter {
 
     @Override
     public void destroy() {
+        // Nothing to do here.
     }
 }

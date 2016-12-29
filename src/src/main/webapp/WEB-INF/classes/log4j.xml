@@ -14,7 +14,7 @@
             <param name="ConversionPattern" value="%d{dd.MM.yyyy HH:mm:ss} %-5p %c{1} : %m%n"/>
         </layout>
     </appender>
-    <logger name="com.pkrete.xrd4j.tools.rest_gateway" additivity="false">
+    <logger name="com.pkrete.restgateway" additivity="false">
         <level value="ALL"/>
         <appender-ref ref="console"/>
     </logger>

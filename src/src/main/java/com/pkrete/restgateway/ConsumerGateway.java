@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway;
+package com.pkrete.restgateway;
 
 import com.pkrete.xrd4j.client.SOAPClient;
 import com.pkrete.xrd4j.client.SOAPClientImpl;
@@ -13,9 +13,9 @@ import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.common.util.PropertiesUtil;
 import com.pkrete.xrd4j.common.util.SOAPHelper;
 import com.pkrete.xrd4j.rest.converter.XMLToJSONConverter;
-import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ConsumerEndpoint;
-import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
-import com.pkrete.xrd4j.tools.rest_gateway.util.ConsumerGatewayUtil;
+import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
+import com.pkrete.restgateway.util.Constants;
+import com.pkrete.restgateway.util.ConsumerGatewayUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -48,7 +48,7 @@ public class ConsumerGateway extends HttpServlet {
 
     private Properties props;
     private Map<String, ConsumerEndpoint> endpoints;
-    private final static Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
     private boolean serviceCallsByXRdServiceId;
 
     @Override

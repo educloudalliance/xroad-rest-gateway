@@ -1,10 +1,12 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
+import com.pkrete.restgateway.util.Constants;
+import com.pkrete.restgateway.util.ProviderGatewayUtil;
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
 import com.pkrete.xrd4j.common.message.ServiceRequest;
-import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ProviderEndpoint;
+import com.pkrete.restgateway.endpoint.ProviderEndpoint;
 import java.util.Map;
 import java.util.Properties;
 import junit.framework.TestCase;

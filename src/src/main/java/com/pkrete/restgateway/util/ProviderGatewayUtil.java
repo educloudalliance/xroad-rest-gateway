@@ -1,9 +1,9 @@
-package com.pkrete.xrd4j.tools.rest_gateway.util;
+package com.pkrete.restgateway.util;
 
 import com.pkrete.xrd4j.common.message.ServiceRequest;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.rest.converter.JSONToXMLConverter;
-import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ProviderEndpoint;
+import com.pkrete.restgateway.endpoint.ProviderEndpoint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +21,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ProviderGatewayUtil {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProviderGatewayUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderGatewayUtil.class);
+
+    /**
+     * This a utility class providing only static methods which is why it should
+     * not be initiated.
+     */
+    private ProviderGatewayUtil() {
+
+    }
 
     /**
      * Goes through the given properties and extracts all the defined provider
@@ -74,79 +82,79 @@ public class ProviderGatewayUtil {
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_VERB);
                 endpoint.setHttpVerb(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_VERB, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
             }
             // Content-Type HTTP header
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_CONTENT_TYPE);
                 endpoint.setContentType(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_CONTENT_TYPE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_CONTENT_TYPE, value);
             }
             // Accept HTTP header
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ACCEPT)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ACCEPT);
                 endpoint.setAccept(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_ACCEPT, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ACCEPT, value);
             }
             // Attachment
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_ATTACHMENT);
                 endpoint.setAttachment(MessageHelper.strToBool(value));
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_ATTACHMENT, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_ATTACHMENT, value);
             }
             // X-Road headers
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS);
                 endpoint.setSendXrdHeaders(MessageHelper.strToBool(value));
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
             }
             // Wrapper processing
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
                 endpoint.setProcessingWrappers(MessageHelper.strToBool(value));
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_WRAPPERS, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_WRAPPERS, value);
             }
             // ServiceRequest namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE);
                 endpoint.setNamespaceDeserialize(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, value);
             }
             // ServiceResponse namespace
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
                 endpoint.setNamespaceSerialize(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, value);
             }
             // ServiceResponse namespace prefix
             if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE)) {
                 String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
                 endpoint.setPrefix(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
             }
             // Request parameter name filter condition
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION);
                 endpoint.setReqParamNameFilterCondition(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION, value);
             }
             // Request parameter name filter operation
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION);
                 endpoint.setReqParamNameFilterOperation(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_OPERATION, value);
             }
             // Request parameter value filter condition
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION);
                 endpoint.setReqParamValueFilterCondition(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_CONDITION, value);
             }
             // Request parameter value filter operation
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION);
                 endpoint.setReqParamValueFilterOperation(value);
-                logger.info("\"{}\" setting found. Value : \"{}\".", Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION, value);
+                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_REQUEST_PARAM_VALUE_FILTER_OPERATION, value);
             }
             results.put(id, endpoint);
 
@@ -175,22 +183,22 @@ public class ProviderGatewayUtil {
             headers.put(Constants.XRD_HEADER_CLIENT, request.getConsumer().toString());
             headers.put(Constants.XRD_HEADER_SERVICE, request.getProducer().toString());
             headers.put(Constants.XRD_HEADER_MESSAGE_ID, request.getId());
-            logger.debug("{} : {}", Constants.XRD_HEADER_CLIENT, request.getConsumer().toString());
-            logger.debug("{} : {}", Constants.XRD_HEADER_SERVICE, request.getProducer().toString());
-            logger.debug("{} : {}", Constants.XRD_HEADER_MESSAGE_ID, request.getId());
+            logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.XRD_HEADER_CLIENT, request.getConsumer().toString());
+            logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.XRD_HEADER_SERVICE, request.getProducer().toString());
+            logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.XRD_HEADER_MESSAGE_ID, request.getId());
             if (request.getUserId() != null && !request.getUserId().isEmpty()) {
-                logger.debug("{} : {}", Constants.XRD_HEADER_USER_ID, request.getUserId());
+                logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.XRD_HEADER_USER_ID, request.getUserId());
                 headers.put(Constants.XRD_HEADER_USER_ID, request.getUserId());
             }
         } else {
             logger.debug("Generation of X-Road specific headers is disabled.");
         }
         if (endpoint.getContentType() != null && !endpoint.getContentType().isEmpty()) {
-            logger.debug("{} : {}", Constants.HTTP_HEADER_CONTENT_TYPE, endpoint.getContentType());
+            logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.HTTP_HEADER_CONTENT_TYPE, endpoint.getContentType());
             headers.put(Constants.HTTP_HEADER_CONTENT_TYPE, endpoint.getContentType());
         }
         if (endpoint.getAccept() != null && !endpoint.getAccept().isEmpty()) {
-            logger.debug("{} : {}", Constants.HTTP_HEADER_ACCEPT, endpoint.getAccept());
+            logger.debug(Constants.LOG_STRING_FOR_HEADERS, Constants.HTTP_HEADER_ACCEPT, endpoint.getAccept());
             headers.put(Constants.HTTP_HEADER_ACCEPT, endpoint.getAccept());
         }
         logger.info("HTTP headers were succesfully generated.");
@@ -199,11 +207,11 @@ public class ProviderGatewayUtil {
 
     /**
      * Converts JSON string to XML string. XML string is wrapped inside
-     * \<response\> wrapper element. The wrapper must be added, because otherwise
-     * it's not possible to convert the XML to SOAP element. JSON string does
-     * not likely have a root element that SOAP requires. \<response\> is used as
-     * a temporary root element and will be omitted by ProviderGateway when SOAP
-     * response is serialized as XML.
+     * \<response\> wrapper element. The wrapper must be added, because
+     * otherwise it's not possible to convert the XML to SOAP element. JSON
+     * string does not likely have a root element that SOAP requires.
+     * \<response\> is used as a temporary root element and will be omitted by
+     * ProviderGateway when SOAP response is serialized as XML.
      *
      * @param data JSON string to be converted
      * @return XML string

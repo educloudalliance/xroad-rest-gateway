@@ -2,14 +2,14 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <servlet>
         <servlet-name>ProviderGateway</servlet-name>
-        <servlet-class>com.pkrete.xrd4j.tools.rest_gateway.ProviderGateway</servlet-class>
+        <servlet-class>com.pkrete.restgateway.ProviderGateway</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
         <servlet-name>ConsumerGateway</servlet-name>
-        <servlet-class>com.pkrete.xrd4j.tools.rest_gateway.ConsumerGateway</servlet-class>
+        <servlet-class>com.pkrete.restgateway.ConsumerGateway</servlet-class>
         <load-on-startup>1</load-on-startup>
-    </servlet>
+</servlet>
     <servlet-mapping>
         <servlet-name>ProviderGateway</servlet-name>
         <url-pattern>/Provider</url-pattern>
@@ -28,7 +28,7 @@
     </welcome-file-list>
     <filter>
         <filter-name>consumerURIFilter</filter-name>
-        <filter-class>com.pkrete.xrd4j.tools.rest_gateway.filter.ConsumerURIFilter</filter-class>
+        <filter-class>com.pkrete.restgateway.filter.ConsumerURIFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>consumerURIFilter</filter-name>

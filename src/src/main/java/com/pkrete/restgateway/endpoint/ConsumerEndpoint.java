@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway.endpoint;
+package com.pkrete.restgateway.endpoint;
 
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;

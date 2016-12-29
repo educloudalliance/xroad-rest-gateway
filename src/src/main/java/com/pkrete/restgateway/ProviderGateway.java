@@ -1,4 +1,4 @@
-package com.pkrete.xrd4j.tools.rest_gateway;
+package com.pkrete.restgateway;
 
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.message.ErrorMessage;
@@ -14,10 +14,10 @@ import com.pkrete.xrd4j.server.deserializer.AbstractCustomRequestDeserializer;
 import com.pkrete.xrd4j.server.deserializer.CustomRequestDeserializer;
 import com.pkrete.xrd4j.server.serializer.AbstractServiceResponseSerializer;
 import com.pkrete.xrd4j.server.serializer.ServiceResponseSerializer;
-import com.pkrete.xrd4j.tools.rest_gateway.endpoint.ProviderEndpoint;
-import com.pkrete.xrd4j.tools.rest_gateway.util.Constants;
-import com.pkrete.xrd4j.tools.rest_gateway.util.ProviderGatewayUtil;
-import com.pkrete.xrd4j.tools.rest_gateway.util.RESTGatewayUtil;
+import com.pkrete.restgateway.endpoint.ProviderEndpoint;
+import com.pkrete.restgateway.util.Constants;
+import com.pkrete.restgateway.util.ProviderGatewayUtil;
+import com.pkrete.restgateway.util.RESTGatewayUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
 
     private Properties props;
     private Map<String, ProviderEndpoint> endpoints;
-    private final static Logger logger = LoggerFactory.getLogger(ProviderGateway.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProviderGateway.class);
 
     @Override
     public void init() {
@@ -138,9 +138,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 // of the client that's returned
                 RESTClient restClient = RESTClientFactory.createRESTClient(endpoint.getHttpVerb());
                 // Get request body
-                String requestBody = ProviderGatewayUtil.getRequestBody(((Map<String, List<String>>) request.getRequestData()));
+                String requestBody = ProviderGatewayUtil.getRequestBody((Map<String, List<String>>) request.getRequestData());
                 // Send request to the service endpoint
-                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, ((Map<String, List<String>>) request.getRequestData()), headers);
+                ClientResponse restResponse = restClient.send(endpoint.getUrl(), requestBody, (Map<String, List<String>>) request.getRequestData(), headers);
                 logger.debug("...done!");
 
                 String data = restResponse.getData();
