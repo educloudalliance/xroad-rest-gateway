@@ -1,7 +1,5 @@
 package com.pkrete.restgateway.util;
 
-import com.pkrete.restgateway.util.Constants;
-import com.pkrete.restgateway.util.ProviderGatewayUtil;
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.member.ConsumerMember;
 import com.pkrete.xrd4j.common.member.ProducerMember;
