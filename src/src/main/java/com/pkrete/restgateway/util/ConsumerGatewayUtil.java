@@ -57,10 +57,9 @@ public class ConsumerGatewayUtil {
             String serviceId = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_ID);
             String path = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_PATH);
 
-            if (serviceId == null || serviceId.isEmpty() || path == null || path.isEmpty()) {
+            if (RESTGatewayUtil.isNullOrEmpty(serviceId) || RESTGatewayUtil.isNullOrEmpty(path)) {
                 logger.warn("ID or path is null or empty. Consumer endpoint skipped.");
-                i++;
-                key = Integer.toString(i);
+                key = Integer.toString(++i);
                 continue;
             }
             // Path must end with "/"
@@ -70,26 +69,9 @@ public class ConsumerGatewayUtil {
 
             logger.info("New consumer endpoint found. ID : \"{}\", path : \"{}\".", serviceId, path);
 
+            // Create a new ConsumerEndpoint and set default values
             ConsumerEndpoint endpoint = new ConsumerEndpoint(serviceId, clientId, path);
-
-            // Create ProducerMember object
-            if (!ConsumerGatewayUtil.setProducerMember(endpoint)) {
-                logger.warn("Creating producer member failed. Consumer endpoint skipped.");
-                i++;
-                key = Integer.toString(i);
-                continue;
-            }
-
-            // Initialize endpoint properties to those defined in gateway properties
-            endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
-            endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
-            endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
-            if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
-                endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
-            }
-
-            // Set default HTTP verb
-            endpoint.setHttpVerb("GET");
+            setDefaultValues(endpoint, gatewayProperties);
 
             // Set more specific endpoint properties
             // Client id
@@ -117,28 +99,43 @@ public class ConsumerGatewayUtil {
             // ServiceResponse namespace, ServiceResponse namespace prefix
             RESTGatewayUtil.extractEndpoints(key, endpoints, endpoint);
 
-            // Create ConsumerMember object
-            if (!ConsumerGatewayUtil.setConsumerMember(endpoint)) {
+            // Create ProducerMember object
+            if (!ConsumerGatewayUtil.setProducerMember(endpoint)) {
+                logger.warn("Creating producer member failed. Consumer endpoint skipped.");
+            } // Create ConsumerMember object
+            else if (!ConsumerGatewayUtil.setConsumerMember(endpoint)) {
                 logger.warn("Creating consumer member failed. Consumer endpoint skipped.");
-                i++;
-                key = Integer.toString(i);
-                continue;
+            } else {
+                // Set namespaces
+                endpoint.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
+                endpoint.getProducer().setNamespacePrefix(endpoint.getPrefix());
+                results.put(endpoint.getHttpVerb() + " " + path, endpoint);
             }
-
-            // Set namespaces
-            endpoint.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
-            endpoint.getProducer().setNamespacePrefix(endpoint.getPrefix());
-
-            results.put(endpoint.getHttpVerb() + " " + path, endpoint);
-
-            // Increase counter by one
-            i++;
-            // Update keyD
-            key = Integer.toString(i);
+            // Increase counter by one and update key
+            key = Integer.toString(++i);
         }
 
         logger.info("{} consumer endpoints extracted from properties.", results.size());
         return ((TreeMap) results).descendingMap();
+    }
+
+    /**
+     * Sets default values to the given endpoint.
+     *
+     * @param endpoint ConsumerEndpoint to be modified
+     * @param gatewayProperties REST Consumer Gateway general properties
+     */
+    private static void setDefaultValues(ConsumerEndpoint endpoint, Properties gatewayProperties) {
+        // Initialize endpoint properties to those defined in gateway properties
+        endpoint.setNamespaceDeserialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
+        endpoint.setNamespaceSerialize(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
+        endpoint.setPrefix(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+        if (gatewayProperties.containsKey(Constants.ENDPOINT_PROPS_WRAPPERS)) {
+            endpoint.setProcessingWrappers(MessageHelper.strToBool(gatewayProperties.getProperty(Constants.ENDPOINT_PROPS_WRAPPERS)));
+        }
+
+        // Set default HTTP verb
+        endpoint.setHttpVerb("GET");
     }
 
     /**
@@ -162,22 +159,38 @@ public class ConsumerGatewayUtil {
             if (serviceId.matches(keyMod)) {
                 logger.debug("Found partial match by service id. Request value : \"{}\", matching value : \"{}\".", serviceId, key);
                 ConsumerEndpoint endpoint = entry.getValue();
-                int index = key.indexOf('{');
-                if (index != -1) {
-                    // Get the resource id - starts from the first "{"
-                    String resourceId = serviceId.substring(index);
-                    // If the last character is "/", remove it
-                    if (resourceId.endsWith("/")) {
-                        resourceId = resourceId.substring(0, resourceId.length() - 1);
-                    }
-                    endpoint.setResourceId(resourceId);
-                    logger.trace("Set resource id : \"{}\"", resourceId);
-                }
+                // Parse resource id and set it to endpoint
+                parseResourceId(key, endpoint, serviceId);
                 return endpoint;
             }
         }
         logger.debug("No match by service id was found. Service id : \"{}\".", serviceId);
         return null;
+    }
+
+    /**
+     * Parses the resource id from the given service id and sets endpoint's
+     * resource id variable. E.g. key is "GET /myhost.com/service/{resourceId}"
+     * and service id is "GET /myhost.com/service/123". Based on these two
+     * strings we can parse the resource id "123" from the service id.
+     *
+     * @param key service identifier as a String from properties
+     * @param endpoint Endpoint object representing the identifier
+     * @param serviceId service identifier as a String that has been called
+     */
+    private static void parseResourceId(String key, ConsumerEndpoint endpoint, String serviceId) {
+        // Get the index of '{' character
+        int index = key.indexOf('{');
+        if (index != -1) {
+            // Get the resource id - starts from the first "{"
+            String resourceId = serviceId.substring(index);
+            // If the last character is "/", remove it
+            if (resourceId.endsWith("/")) {
+                resourceId = resourceId.substring(0, resourceId.length() - 1);
+            }
+            endpoint.setResourceId(resourceId);
+            logger.trace("Set resource id : \"{}\"", resourceId);
+        }
     }
 
     /**
