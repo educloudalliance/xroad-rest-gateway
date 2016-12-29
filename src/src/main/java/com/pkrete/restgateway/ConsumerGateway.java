@@ -234,8 +234,9 @@ public class ConsumerGateway extends HttpServlet {
     private String processMessageId(String messageId) {
         // Set messageId if null
         if (messageId == null) {
-            logger.debug("\"{}\" header is null. Use auto-generated id \"{}\" instead.", Constants.XRD_HEADER_MESSAGE_ID, messageId);
-            return MessageHelper.generateId();
+            String id = MessageHelper.generateId();
+            logger.debug("\"{}\" header is null. Use auto-generated id \"{}\" instead.", Constants.XRD_HEADER_MESSAGE_ID, id);
+            return id;
         }
         return messageId;
 
