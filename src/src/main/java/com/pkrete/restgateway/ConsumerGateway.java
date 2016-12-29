@@ -273,12 +273,12 @@ public class ConsumerGateway extends HttpServlet {
         // Accept header must be "text/xml" or "application/json"
         logger.debug("Incoming accept header value : \"{}\"", accept);
         if (!accept.startsWith(Constants.TEXT_XML) && !accept.startsWith(Constants.APPLICATION_JSON)) {
-            accept = Constants.TEXT_XML + "; " + Constants.CHARSET_UTF8;
             logger.trace("Accept header value set to \"{}\".", Constants.TEXT_XML);
+            return Constants.TEXT_XML + "; " + Constants.CHARSET_UTF8;
         }
         // Character set must be added to the accept header, if it's missing
         if (!accept.endsWith("8")) {
-            accept += "; " + Constants.CHARSET_UTF8;
+            return accept + "; " + Constants.CHARSET_UTF8;
         }
         return accept;
     }
