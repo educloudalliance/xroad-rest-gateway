@@ -18,8 +18,6 @@ import junit.framework.TestCase;
  */
 public class ProviderGatewayUtilTest extends TestCase {
 
-    private Properties props;
-    private Properties endpoints;
     private Map<String, ProviderEndpoint> map;
 
     /**
@@ -29,38 +27,38 @@ public class ProviderGatewayUtilTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.props = new Properties();
-        this.endpoints = new Properties();
+        Properties props = new Properties();
+        Properties endpoints = new Properties();
         // Set up default properties
-        this.props.put("wsdl.path", "provider-gateway.wsdl");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "ts1");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com");
+        props.put("wsdl.path", "provider-gateway.wsdl");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "ts1");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com");
         // Set up endpoints
-        this.endpoints.put("0." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganizationList.v1");
-        this.endpoints.put("0." + Constants.PROVIDER_PROPS_URL, "http://www.hel.fi/palvelukarttaws/rest/v2/organization/");
+        endpoints.put("0." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganizationList.v1");
+        endpoints.put("0." + Constants.PROVIDER_PROPS_URL, "http://www.hel.fi/palvelukarttaws/rest/v2/organization/");
 
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getOrganization.v1");
-        this.endpoints.put("1." + Constants.PROVIDER_PROPS_URL, "http://www.hel.fi/palvelukarttaws/rest/v2/organization/");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_VERB, "post");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com/custom");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "test");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com/custom");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getOrganization.v1");
+        endpoints.put("1." + Constants.PROVIDER_PROPS_URL, "http://www.hel.fi/palvelukarttaws/rest/v2/organization/");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_VERB, "post");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com/custom");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "test");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com/custom");
 
-        this.endpoints.put("2." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getWeather.v1");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_URL, "http://weather.com/");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_ACCEPT, "application/json");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_ATTACHMENT, "true");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_CONTENT_TYPE, "application/json");
-        this.endpoints.put("2." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, "false");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getWeather.v1");
+        endpoints.put("2." + Constants.PROVIDER_PROPS_URL, "http://weather.com/");
+        endpoints.put("2." + Constants.PROVIDER_PROPS_ACCEPT, Constants.APPLICATION_JSON);
+        endpoints.put("2." + Constants.PROVIDER_PROPS_ATTACHMENT, "true");
+        endpoints.put("2." + Constants.PROVIDER_PROPS_CONTENT_TYPE, Constants.APPLICATION_JSON);
+        endpoints.put("2." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, "false");
 
-        this.endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getWeather");
-        this.endpoints.put("3." + Constants.PROVIDER_PROPS_URL, "");
+        endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getWeather");
+        endpoints.put("3." + Constants.PROVIDER_PROPS_URL, "");
 
-        this.endpoints.put("4." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.testService.v1");
+        endpoints.put("4." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.testService.v1");
 
         // Extract endpoints
-        this.map = ProviderGatewayUtil.extractProviders(endpoints, this.props);
+        this.map = ProviderGatewayUtil.extractProviders(endpoints, props);
     }
 
     /**
@@ -114,8 +112,8 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
-        assertEquals("application/json", temp.getAccept());
-        assertEquals("application/json", temp.getContentType());
+        assertEquals(Constants.APPLICATION_JSON, temp.getAccept());
+        assertEquals(Constants.APPLICATION_JSON, temp.getContentType());
         assertEquals(true, temp.isAttachment());
         assertEquals(false, temp.isSendXrdHeaders());
     }
@@ -140,6 +138,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * Test generation of HTTP headers. Only X-Road headers.
+     * @throws com.pkrete.xrd4j.common.exception.XRd4JException
      */
     public void testGenerateHtmlHeaders1() throws XRd4JException {
         ConsumerMember consumer = new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService");
@@ -157,6 +156,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * Test generation of HTTP headers. No X-Road headers.
+     * @throws com.pkrete.xrd4j.common.exception.XRd4JException
      */
     public void testGenerateHtmlHeaders2() throws XRd4JException {
         ConsumerMember consumer = new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService");
@@ -168,7 +168,7 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(null, headers.get(Constants.XRD_HEADER_SERVICE));
         assertEquals(null, headers.get(Constants.XRD_HEADER_MESSAGE_ID));
         assertEquals(null, headers.get(Constants.XRD_HEADER_USER_ID));
-        assertEquals("application/json", headers.get(Constants.HTTP_HEADER_CONTENT_TYPE));
-        assertEquals("application/json", headers.get(Constants.HTTP_HEADER_ACCEPT));
+        assertEquals(Constants.APPLICATION_JSON, headers.get(Constants.HTTP_HEADER_CONTENT_TYPE));
+        assertEquals(Constants.APPLICATION_JSON, headers.get(Constants.HTTP_HEADER_ACCEPT));
     }
 }

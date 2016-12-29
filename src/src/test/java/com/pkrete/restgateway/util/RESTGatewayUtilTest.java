@@ -1,6 +1,5 @@
 package com.pkrete.restgateway.util;
 
-import com.pkrete.restgateway.util.RESTGatewayUtil;
 import junit.framework.TestCase;
 
 /**

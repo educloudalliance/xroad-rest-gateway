@@ -26,8 +26,6 @@ import junit.framework.TestCase;
 public class ConsumerGatewayUtilTest extends TestCase {
 
     private String servletUrl;
-    private Properties props;
-    private Properties endpoints;
     private Map<String, ConsumerEndpoint> map;
 
     /**
@@ -39,42 +37,42 @@ public class ConsumerGatewayUtilTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         this.servletUrl = "http://localhost:8080/RESTGateway/Consumer/";
-        this.props = new Properties();
-        this.endpoints = new Properties();
+        Properties props = new Properties();
+        Properties endpoints = new Properties();
         // Set up default properties
-        this.props.put(Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV.0245437-2.ConsumerService");
-        this.props.put(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL, "http://localhost:8080/RESTGateway/Provider");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "ts1");
-        this.props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com");
+        props.put(Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV.0245437-2.ConsumerService");
+        props.put(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL, "http://localhost:8080/RESTGateway/Provider");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "ts1");
+        props.put(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com");
         // Set up endpoints
-        this.endpoints.put("0." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganizationList.v1");
-        this.endpoints.put("0." + Constants.ENDPOINT_PROPS_VERB, "get");
-        this.endpoints.put("0." + Constants.CONSUMER_PROPS_PATH, "/www.hel.fi/palvelukarttaws/rest/v2/organization/");
+        endpoints.put("0." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganizationList.v1");
+        endpoints.put("0." + Constants.ENDPOINT_PROPS_VERB, "get");
+        endpoints.put("0." + Constants.CONSUMER_PROPS_PATH, "/www.hel.fi/palvelukarttaws/rest/v2/organization/");
 
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganization.v1");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_VERB, "get");
-        this.endpoints.put("1." + Constants.CONSUMER_PROPS_PATH, "/www.hel.fi/palvelukarttaws/rest/v2/organization/{resourceId}");
-        this.endpoints.put("1." + Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV.0245437-2.TestService");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com/custom");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "test");
-        this.endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com/custom");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getOrganization.v1");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_VERB, "get");
+        endpoints.put("1." + Constants.CONSUMER_PROPS_PATH, "/www.hel.fi/palvelukarttaws/rest/v2/organization/{resourceId}");
+        endpoints.put("1." + Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV.0245437-2.TestService");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, "http://serialize.com/custom");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, "test");
+        endpoints.put("1." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, "http://deserialize.com/custom");
 
-        this.endpoints.put("2." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getCompany.v1");
-        this.endpoints.put("2." + Constants.ENDPOINT_PROPS_VERB, "get");
-        this.endpoints.put("2." + Constants.CONSUMER_PROPS_PATH, "/avoindata.prh.fi/opendata/bis/v1/{resourceId}");
-        this.endpoints.put("2." + Constants.CONSUMER_PROPS_MOD_URL, "true");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.getCompany.v1");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_VERB, "get");
+        endpoints.put("2." + Constants.CONSUMER_PROPS_PATH, "/avoindata.prh.fi/opendata/bis/v1/{resourceId}");
+        endpoints.put("2." + Constants.CONSUMER_PROPS_MOD_URL, "true");
 
-        this.endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.testApi.v1");
-        this.endpoints.put("3." + Constants.ENDPOINT_PROPS_VERB, "get");
-        this.endpoints.put("3." + Constants.CONSUMER_PROPS_PATH, "/test.com/api");
+        endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.testApi.v1");
+        endpoints.put("3." + Constants.ENDPOINT_PROPS_VERB, "get");
+        endpoints.put("3." + Constants.CONSUMER_PROPS_PATH, "/test.com/api");
 
-        this.endpoints.put("4." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.exampleApi.v1");
-        this.endpoints.put("4." + Constants.ENDPOINT_PROPS_VERB, "get");
-        this.endpoints.put("4." + Constants.CONSUMER_PROPS_PATH, "/example.com/api");
-        this.endpoints.put("4." + Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV0245437-2");
+        endpoints.put("4." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.Demo2Service.exampleApi.v1");
+        endpoints.put("4." + Constants.ENDPOINT_PROPS_VERB, "get");
+        endpoints.put("4." + Constants.CONSUMER_PROPS_PATH, "/example.com/api");
+        endpoints.put("4." + Constants.CONSUMER_PROPS_ID_CLIENT, "FI_PILOT.GOV0245437-2");
         // Extract endpoints
-        this.map = ConsumerGatewayUtil.extractConsumers(this.endpoints, this.props);
+        this.map = ConsumerGatewayUtil.extractConsumers(endpoints, props);
     }
 
     /**
