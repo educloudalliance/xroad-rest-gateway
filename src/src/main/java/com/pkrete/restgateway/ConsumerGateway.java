@@ -136,129 +136,167 @@ public class ConsumerGateway extends HttpServlet {
         response.addHeader(Constants.XRD_HEADER_USER_ID, userId);
         response.addHeader(Constants.XRD_HEADER_MESSAGE_ID, messageId);
 
-        if (resourcePath != null) {
-            // Build the service id for the incoming request
-            String serviceId = request.getMethod() + " " + resourcePath;
-            logger.debug("Incoming service id to be looked for : \"{}\"", serviceId);
-            // Try to find a configured endpoint matching the request's
-            // service id
-            ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
-
-            // If endpoint is null, try to use resourcePath as service id
-            if (endpoint == null) {
-                if (this.serviceCallsByXRdServiceId) {
-                    logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
-                    endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);
-                } else {
-                    logger.info("Endpoint is null and service calls by X-Road service id are disabled. Nothing to do here.");
-                }
-            }
-
-            // If endpoint was found, process it; otherwise return an error
-            if (endpoint != null) {
-                // Set namespace received from header, if not null or empty
-                if (namespace != null && !namespace.isEmpty()) {
-                    endpoint.getProducer().setNamespaceUrl(namespace);
-                    logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, namespace);
-                }
-                // Set prefix received from header, if not null or empty
-                if (prefix != null && !prefix.isEmpty()) {
-                    endpoint.getProducer().setNamespacePrefix(prefix);
-                    logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
-                }
-                logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
-                try {
-                    // Create ServiceRequest object
-                    ServiceRequest<Map<String, String[]>> serviceRequest = new ServiceRequest<>(endpoint.getConsumer(), endpoint.getProducer(), messageId);
-                    // Set userId
-                    serviceRequest.setUserId(userId);
-                    // Set HTTP request parameters as request data
-                    serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
-                    // Set request wrapper processing
-                    if (endpoint.isProcessingWrappers() != null) {
-                        serviceRequest.setProcessingWrappers(endpoint.isProcessingWrappers());
-                    }
-                    // String get request body
-                    String requestBody = this.readRequestBody(request);
-                    // Serializer that converts the request to SOAP
-                    ServiceRequestSerializer serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
-                    // Deserializer that converts the response from SOAP to XML string
-                    ServiceResponseDeserializer deserializer = new ResponseDeserializer(omitNamespace);
-                    // SOAP client that makes the service call
-                    SOAPClient client = new SOAPClientImpl();
-                    logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
-                    // Make the service call that returns the service response
-                    ServiceResponse serviceResponse = client.send(serviceRequest, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL), serializer, deserializer);
-                    logger.info("Received response ({}) from the security server.", messageId);
-                    // Set response wrapper processing
-                    if (endpoint.isProcessingWrappers() != null) {
-                        serviceResponse.setProcessingWrappers(endpoint.isProcessingWrappers());
-                    }
-                    // Check that response doesn't contain SOAP fault
-                    if (!serviceResponse.hasError()) {
-                        // Get the response that's now XML string
-                        responseStr = (String) serviceResponse.getResponseData();
-                    } else {
-                        // Error message detected
-                        logger.debug("Received response contains SOAP fault.");
-                        responseStr = this.generateFault(serviceResponse.getErrorMessage());
-                    }
-                    // SOAP message doesn't have attachments
-                    if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
-                        // If content type is JSON and the SOAP message doesn't have
-                        // attachments, the response must be converted
-                        if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
-                            logger.debug("Convert response from XML to JSON.");
-                            // Remove response tag and its namespace prefixes 
-                            responseStr = ConsumerGatewayUtil.removeResponseTag(responseStr);
-                            responseStr = new XMLToJSONConverter().convert(responseStr);
-                        } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
-                            // Remove response tag and its namespace prefixes
-                            String responseStrTemp = ConsumerGatewayUtil.removeResponseTag(responseStr);
-                            // Try to convert modified response to SOAP element
-                            if (SOAPHelper.xmlStrToSOAPElement(responseStrTemp) != null) {
-                                // If conversion succeeded response tag was only
-                                // a wrapper that can be removed
-                                responseStr = responseStrTemp;
-                                logger.debug("Response tag was removed from the response string.");
-                            } else {
-                                logger.debug("Response tag is the root element and cannot be removed.");
-                            }
-                        }
-                    } else {
-                        // SOAP message has attachments. Use attachment's
-                        // content type
-                        String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
-                        response.setContentType(attContentType);
-                        logger.debug("Use SOAP attachment as response message.");
-                    }
-                    // Check if the URLs in the response should be rewritten
-                    // to point this servlet
-                    if (endpoint.isModifyUrl()) {
-                        // Get ConsumerGateway URL
-                        String servletUrl = this.getServletUrl(request);
-                        // Modify the response
-                        responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
-                    }
-                    logger.info("Processing \"{}\" service successfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
-                } catch (Exception ex) {
-                    logger.error(ex.getMessage(), ex);
-                    logger.error("Processing \"{}\" service failed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
-                    // Internal server error -> return 500
-                    responseStr = this.generateError(Constants.ERROR_500, accept);
-                    response.setStatus(500);
-                }
-            } else {
-                // No endpoint was found -> return 404
-                responseStr = this.generateError(Constants.ERROR_404, accept);
-                response.setStatus(404);
-            }
-        } else {
+        if (resourcePath == null) {
             // No resource path was defined -> return 404
             responseStr = this.generateError(Constants.ERROR_404, accept);
             response.setStatus(404);
+            // Send response
+            this.writeResponse(response, responseStr);
+            // Quit processing
+            return;
         }
 
+        // Build the service id for the incoming request
+        String serviceId = request.getMethod() + " " + resourcePath;
+        logger.debug("Incoming service id to be looked for : \"{}\"", serviceId);
+        // Try to find a configured endpoint matching the request's
+        // service id
+        ConsumerEndpoint endpoint = ConsumerGatewayUtil.findMatch(serviceId, endpoints);
+
+        // If endpoint is null, try to use resourcePath as service id
+        if (endpoint == null) {
+            if (this.serviceCallsByXRdServiceId) {
+                logger.info("Endpoint is null, use resource path as service id. Resource path : \"{}\"", resourcePath);
+                endpoint = ConsumerGatewayUtil.createUnconfiguredEndpoint(this.props, resourcePath);
+            } else {
+                logger.info("Endpoint is null and service calls by X-Road service id are disabled. Nothing to do here.");
+            }
+        }
+        // If endpoint is still null, return error message
+        if (endpoint == null) {
+            // No endpoint was found -> return 404
+            responseStr = this.generateError(Constants.ERROR_404, accept);
+            response.setStatus(404);
+            // Send response
+            this.writeResponse(response, responseStr);
+            // Quit processing
+            return;
+        }
+
+        // Endpoint was found, so process it
+        // Set namespace received from header, if not null or empty
+        if (namespace != null && !namespace.isEmpty()) {
+            endpoint.getProducer().setNamespaceUrl(namespace);
+            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_SERIALIZE, namespace);
+        }
+        // Set prefix received from header, if not null or empty
+        if (prefix != null && !prefix.isEmpty()) {
+            endpoint.getProducer().setNamespacePrefix(prefix);
+            logger.debug("\"{}\" HTTP header found. Value : \"{}\".", Constants.XRD_HEADER_NAMESPACE_PREFIX_SERIALIZE, prefix);
+        }
+        logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+        try {
+            // Create ServiceRequest object
+            ServiceRequest<Map<String, String[]>> serviceRequest = new ServiceRequest<>(endpoint.getConsumer(), endpoint.getProducer(), messageId);
+            // Set userId
+            serviceRequest.setUserId(userId);
+            // Set HTTP request parameters as request data
+            serviceRequest.setRequestData(this.filterRequestParameters(request.getParameterMap()));
+            // Set request wrapper processing
+            if (endpoint.isProcessingWrappers() != null) {
+                serviceRequest.setProcessingWrappers(endpoint.isProcessingWrappers());
+            }
+            // String get request body
+            String requestBody = this.readRequestBody(request);
+            // Serializer that converts the request to SOAP
+            ServiceRequestSerializer serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
+            // Deserializer that converts the response from SOAP to XML string
+            ServiceResponseDeserializer deserializer = new ResponseDeserializer(omitNamespace);
+            // SOAP client that makes the service call
+            SOAPClient client = new SOAPClientImpl();
+            logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
+            // Make the service call that returns the service response
+            ServiceResponse serviceResponse = client.send(serviceRequest, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL), serializer, deserializer);
+            logger.info("Received response ({}) from the security server.", messageId);
+            // Set response wrapper processing
+            if (endpoint.isProcessingWrappers() != null) {
+                serviceResponse.setProcessingWrappers(endpoint.isProcessingWrappers());
+            }
+            // Check that response doesn't contain SOAP fault
+            if (!serviceResponse.hasError()) {
+                // Get the response that's now XML string. If the response has
+                // attachments, the first attachment is returned. In case
+                // of attachment, the response might not be XML. This is
+                // handled later.
+                responseStr = (String) serviceResponse.getResponseData();
+            } else {
+                // Error message detected
+                logger.debug("Received response contains SOAP fault.");
+                responseStr = this.generateFault(serviceResponse.getErrorMessage());
+            }
+            // SOAP message doesn't have attachments
+            if (!SOAPHelper.hasAttachments(serviceResponse.getSoapMessage())) {
+                // Convert the response acconding to content type and remove
+                // response tag if possible
+                responseStr = handleResponseBody(response, responseStr);
+            } else {
+                // SOAP message has attachments. Use attachment's
+                // content type.
+                String attContentType = SOAPHelper.getAttachmentContentType(serviceResponse.getSoapMessage());
+                response.setContentType(attContentType);
+                logger.debug("Use SOAP attachment as response message.");
+            }
+            // Check if the URLs in the response should be rewritten
+            // to point this servlet
+            if (endpoint.isModifyUrl()) {
+                // Get ConsumerGateway URL
+                String servletUrl = this.getServletUrl(request);
+                // Modify the response
+                responseStr = ConsumerGatewayUtil.rewriteUrl(servletUrl, resourcePath, responseStr);
+            }
+            logger.info("Processing \"{}\" service successfully completed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            logger.error("Processing \"{}\" service failed. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
+            // Internal server error -> return 500
+            responseStr = this.generateError(Constants.ERROR_500, accept);
+            response.setStatus(500);
+        }
+
+        // Send response
+        this.writeResponse(response, responseStr);
+    }
+
+    /**
+     * Checks the content type and tries to convert the response accordingly. In
+     * addition, the method tries to remove the response tag and its namespace
+     * prefixes from the response string.
+     *
+     * @param response HttpServletResponse object
+     * @param responseStr response message as a String
+     * @return modified response message as a String
+     */
+    private String handleResponseBody(HttpServletResponse response, String responseStr) {
+        // If content type is JSON and the SOAP message doesn't have
+        // attachments, the response must be converted
+        if (response.getContentType().startsWith(Constants.APPLICATION_JSON)) {
+            logger.debug("Convert response from XML to JSON.");
+            // Remove response tag and its namespace prefixes 
+            String tmp = ConsumerGatewayUtil.removeResponseTag(responseStr);
+            return new XMLToJSONConverter().convert(tmp);
+        } else if (response.getContentType().startsWith(Constants.TEXT_XML)) {
+            // Remove response tag and its namespace prefixes
+            String responseStrTemp = ConsumerGatewayUtil.removeResponseTag(responseStr);
+            // Try to convert modified response to SOAP element
+            if (SOAPHelper.xmlStrToSOAPElement(responseStrTemp) != null) {
+                logger.debug("Response tag was removed from the response string.");
+                // If conversion succeeded response tag was only
+                // a wrapper that can be removed
+                return responseStrTemp;
+            } else {
+                logger.debug("Response tag is the root element and cannot be removed.");
+            }
+        }
+        return responseStr;
+    }
+
+    /**
+     * Sends the response to the requester.
+     *
+     * @param response HttpServletResponse object
+     * @param responseStr response payload as a String
+     */
+    private void writeResponse(HttpServletResponse response, String responseStr) {
         PrintWriter out = null;
         try {
             logger.debug("Send response.");
