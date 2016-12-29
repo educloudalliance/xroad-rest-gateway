@@ -108,30 +108,9 @@ public class ProviderGatewayUtil {
                 endpoint.setSendXrdHeaders(MessageHelper.strToBool(value));
                 logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, value);
             }
-            // Wrapper processing
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_WRAPPERS);
-                endpoint.setProcessingWrappers(MessageHelper.strToBool(value));
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_WRAPPERS, value);
-            }
-            // ServiceRequest namespace
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE);
-                endpoint.setNamespaceDeserialize(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE, value);
-            }
-            // ServiceResponse namespace
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE);
-                endpoint.setNamespaceSerialize(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE, value);
-            }
-            // ServiceResponse namespace prefix
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE);
-                endpoint.setPrefix(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE, value);
-            }
+            // Wrapper processing, ServiceRequest namespace,
+            // ServiceResponse namespace, ServiceResponse namespace prefix
+            RESTGatewayUtil.extractEndpoints(key, endpoints, endpoint);
             // Request parameter name filter condition
             if (endpoints.containsKey(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION)) {
                 String value = endpoints.getProperty(key + "." + Constants.PROVIDER_PROPS_REQUEST_PARAM_NAME_FILTER_CONDITION);

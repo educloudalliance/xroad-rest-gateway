@@ -169,7 +169,7 @@ public class ConsumerGateway extends HttpServlet {
                 logger.info("Starting to process \"{}\" service. X-Road id : \"{}\". Message id : \"{}\".", serviceId, endpoint.getServiceId(), messageId);
                 try {
                     // Create ServiceRequest object
-                    ServiceRequest<Map<String, String[]>> serviceRequest = new ServiceRequest<Map<String, String[]>>(endpoint.getConsumer(), endpoint.getProducer(), messageId);
+                    ServiceRequest<Map<String, String[]>> serviceRequest = new ServiceRequest<>(endpoint.getConsumer(), endpoint.getProducer(), messageId);
                     // Set userId
                     serviceRequest.setUserId(userId);
                     // Set HTTP request parameters as request data
