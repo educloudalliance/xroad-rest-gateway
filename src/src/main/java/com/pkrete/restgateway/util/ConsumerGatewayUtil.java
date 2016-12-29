@@ -73,39 +73,14 @@ public class ConsumerGatewayUtil {
             ConsumerEndpoint endpoint = new ConsumerEndpoint(serviceId, clientId, path);
             setDefaultValues(endpoint, gatewayProperties);
 
-            // Set more specific endpoint properties
-            // Client id
-            if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
-                String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT);
-                endpoint.setClientId(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_ID_CLIENT, value);
-            }
-            // HTTP verb
-            if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
-                String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_VERB);
-                if (value != null) {
-                    value = value.toUpperCase();
-                }
-                endpoint.setHttpVerb(value);
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
-            }
-            // Modify URLs
-            if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_MOD_URL)) {
-                String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_MOD_URL);
-                endpoint.setModifyUrl(MessageHelper.strToBool(value));
-                logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_MOD_URL, value);
-            }
+            // Client id, HTTP verb, modify URL's
+            extractEndpoints(key, endpoints, endpoint);
             // Wrapper processing, ServiceRequest namespace,
             // ServiceResponse namespace, ServiceResponse namespace prefix
             RESTGatewayUtil.extractEndpoints(key, endpoints, endpoint);
 
-            // Create ProducerMember object
-            if (!ConsumerGatewayUtil.setProducerMember(endpoint)) {
-                logger.warn("Creating producer member failed. Consumer endpoint skipped.");
-            } // Create ConsumerMember object
-            else if (!ConsumerGatewayUtil.setConsumerMember(endpoint)) {
-                logger.warn("Creating consumer member failed. Consumer endpoint skipped.");
-            } else {
+            // Create Consumer and ProducerMember objects
+            if (ConsumerGatewayUtil.setConsumerAndProducer(endpoint)) {
                 // Set namespaces
                 endpoint.getProducer().setNamespaceUrl(endpoint.getNamespaceSerialize());
                 endpoint.getProducer().setNamespacePrefix(endpoint.getPrefix());
@@ -117,6 +92,63 @@ public class ConsumerGatewayUtil {
 
         logger.info("{} consumer endpoints extracted from properties.", results.size());
         return ((TreeMap) results).descendingMap();
+    }
+
+    /**
+     * Extracts properties common for consumer endpoints from the given
+     * properties.
+     *
+     * @param key property key
+     * @param endpoints list of configured endpoints read from properties
+     * @param endpoint the endpoint object that's being initialized
+     */
+    public static void extractEndpoints(String key, Properties endpoints, ConsumerEndpoint endpoint) {
+        // Set more specific endpoint properties
+        // Client id
+        if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT)) {
+            String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_ID_CLIENT);
+            endpoint.setClientId(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_ID_CLIENT, value);
+        }
+        // HTTP verb
+        if (endpoints.containsKey(key + "." + Constants.ENDPOINT_PROPS_VERB)) {
+            String value = endpoints.getProperty(key + "." + Constants.ENDPOINT_PROPS_VERB);
+            if (value != null) {
+                value = value.toUpperCase();
+            }
+            endpoint.setHttpVerb(value);
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.ENDPOINT_PROPS_VERB, value);
+        }
+        // Modify URLs
+        if (endpoints.containsKey(key + "." + Constants.CONSUMER_PROPS_MOD_URL)) {
+            String value = endpoints.getProperty(key + "." + Constants.CONSUMER_PROPS_MOD_URL);
+            endpoint.setModifyUrl(MessageHelper.strToBool(value));
+            logger.info(Constants.LOG_STRING_FOR_SETTINGS, Constants.CONSUMER_PROPS_MOD_URL, value);
+        }
+    }
+
+    /**
+     * Constructs and initializes a ConsumerMember object and a ProducerMember
+     * object related to the given ConsumerEndpoint. The ConsumerMember is
+     * constructed according to the value of the clientId variable. The
+     * ProducerMember is constructed according to the value of the serviceId
+     * variable.
+     *
+     * @param endpoint ConsumerEndpoint object
+     * @return true if and only if creating ConsumerMember object and
+     * ProducerMember objects succeeded; otherwise false
+     */
+    protected static boolean setConsumerAndProducer(ConsumerEndpoint endpoint) {
+        // Create ProducerMember object
+        if (!ConsumerGatewayUtil.setProducerMember(endpoint)) {
+            logger.warn("Creating producer member failed. Consumer endpoint skipped.");
+            return false;
+        } // Create ConsumerMember object
+        if (!ConsumerGatewayUtil.setConsumerMember(endpoint)) {
+            logger.warn("Creating consumer member failed. Consumer endpoint skipped.");
+            return false;
+        }
+        return true;
     }
 
     /**
