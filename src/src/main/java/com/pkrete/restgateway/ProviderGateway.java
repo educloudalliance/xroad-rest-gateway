@@ -118,9 +118,6 @@ public class ProviderGateway extends AbstractAdapterServlet {
         response.getProducer().setNamespacePrefix(endpoint.getPrefix());
         logger.debug("Do message processing...");
 
-        // Filter request parameters
-        ProviderGatewayUtil.filterRequestParameters(request, endpoint);
-
         // Return an error message if request data is missing
         if (request.getRequestData() == null) {
             logger.warn("No request data was found. Return a non-techinal error message.");
@@ -129,6 +126,9 @@ public class ProviderGateway extends AbstractAdapterServlet {
             serializer.serialize(response, request);
             return response;
         }
+
+        // Filter request parameters
+        ProviderGatewayUtil.filterRequestParameters(request, endpoint);
 
         // Get HTTP headers for the request
         Map<String, String> headers = ProviderGatewayUtil.generateHttpHeaders(request, endpoint);
