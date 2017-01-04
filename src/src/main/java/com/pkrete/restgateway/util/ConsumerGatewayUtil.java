@@ -376,4 +376,41 @@ public class ConsumerGatewayUtil {
         }
         return response;
     }
+
+    /**
+     * Checks and validates the properties related to encryption. The method
+     * checks that all the necessary private and public keys exist and are
+     * accessible. If everything is OK, true is returned. If there's a problem
+     * with one or more keys, false is returned.
+     *
+     * @param props general properties
+     * @param endpoints list of configured endpoints
+     * @return true if everything is OK. False if there's a problem with one or
+     * more keys.
+     */
+    public static boolean checkEncryptionProperties(Properties props, Map<String, ConsumerEndpoint> endpoints) {
+        logger.info("Check encryption properties.");
+        boolean privateKeyChecked = false;
+        boolean result = true;
+        // Loop through all the endpoints
+        for (Map.Entry<String, ConsumerEndpoint> entry : endpoints.entrySet()) {
+            ConsumerEndpoint endpoint = entry.getValue();
+            // If request is encrypted, encryption is done using the public
+            // key of the receiver, so it must be possible to access it.
+            if (endpoint.isRequestEncrypted() && RESTGatewayUtil.checkPublicKey(props, endpoint.getProducer().toString()) == null) {
+                logger.error("The endpoint \"{}\" does not support encryption of request messages.", endpoint.getProducer().toString());
+                result = false;
+            }
+            // If response is encrypted, decryption is done using the private
+            // key, so it must be possible to access it. It's enough to 
+            // check the private key once.
+            if (!privateKeyChecked && endpoint.isResponseEncrypted() && RESTGatewayUtil.checkPrivateKey(props) == null) {
+                logger.error("None of the endpoints support deccryption of response messages.");
+                privateKeyChecked = true;
+                result = false;
+            }
+        }
+        logger.info("Encryption properties checked.");
+        return result;
+    }
 }

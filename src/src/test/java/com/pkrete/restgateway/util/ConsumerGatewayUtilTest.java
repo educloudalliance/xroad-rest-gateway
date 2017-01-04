@@ -60,6 +60,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         endpoints.put("2." + Constants.ENDPOINT_PROPS_VERB, "get");
         endpoints.put("2." + Constants.CONSUMER_PROPS_PATH, "/avoindata.prh.fi/opendata/bis/v1/{resourceId}");
         endpoints.put("2." + Constants.CONSUMER_PROPS_MOD_URL, "true");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_REQUEST_ENCRYPTED, "true");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_RESPONSE_ENCRYPTED, "true");
 
         endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.testApi.v1");
         endpoints.put("3." + Constants.ENDPOINT_PROPS_VERB, "get");
@@ -266,6 +268,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
+        assertEquals(false, temp.isRequestEncrypted());
+        assertEquals(false, temp.isResponseEncrypted());
         assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
         assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getOrganizationList", "v1").toString(), temp.getProducer().toString());
     }
@@ -286,6 +290,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com/custom", temp.getNamespaceSerialize());
         assertEquals("test", temp.getPrefix());
         assertEquals("http://deserialize.com/custom", temp.getNamespaceDeserialize());
+        assertEquals(false, temp.isRequestEncrypted());
+        assertEquals(false, temp.isResponseEncrypted());
         assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "TestService").toString(), temp.getConsumer().toString());
         assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getOrganization", "v1").toString(), temp.getProducer().toString());
     }
@@ -306,6 +312,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
+        assertEquals(true, temp.isRequestEncrypted());
+        assertEquals(true, temp.isResponseEncrypted());
         assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
         assertEquals(new ProducerMember("FI_PILOT", "GOV", "1019125-0", "Demo2Service", "getCompany", "v1").toString(), temp.getProducer().toString());
     }
@@ -327,6 +335,8 @@ public class ConsumerGatewayUtilTest extends TestCase {
         assertEquals("http://serialize.com", temp.getNamespaceSerialize());
         assertEquals("ts1", temp.getPrefix());
         assertEquals("http://deserialize.com", temp.getNamespaceDeserialize());
+        assertEquals(false, temp.isRequestEncrypted());
+        assertEquals(false, temp.isResponseEncrypted());
         assertEquals(new ConsumerMember("FI_PILOT", "GOV", "0245437-2", "ConsumerService").toString(), temp.getConsumer().toString());
         ProducerMember producer = new ProducerMember("FI_PILOT", "GOV", "1019125-0", "null", "testApi", "v1");
         producer.setSubsystemCode(null);

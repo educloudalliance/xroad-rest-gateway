@@ -4,6 +4,7 @@ import com.pkrete.xrd4j.common.message.ServiceRequest;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.xrd4j.rest.converter.JSONToXMLConverter;
 import com.pkrete.restgateway.endpoint.ProviderEndpoint;
+import com.pkrete.xrd4j.common.security.Decrypter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -334,5 +335,45 @@ public class ProviderGatewayUtil {
             // Add modified key - value list pair
             ((Map<String, List<String>>) request.getRequestData()).put(key, values);
         }
+    }
+
+    /**
+     * Checks and validates the properties related to the private key. If
+     * everything is OK, true is returned. If there's a problem with the private
+     * key, false is returned.
+     *
+     * @param props general properties
+     * @param endpoints list of configured endpoints
+     * @return true if everything is OK. False if there's a problem with the
+     * private key
+     */
+    public static boolean checkPrivateKeyProperties(Properties props, Map<String, ProviderEndpoint> endpoints) {
+        logger.info("Check private key encryption properties.");
+        // Loop through all the endpoints
+        for (Map.Entry<String, ProviderEndpoint> entry : endpoints.entrySet()) {
+            ProviderEndpoint endpoint = entry.getValue();
+            // If request is encrypted, decryption is done using the private
+            // key, so it must be possible to access it. It's enough to 
+            // check the private key once.
+            if (endpoint.isRequestEncrypted()) {
+                Decrypter decrypter = RESTGatewayUtil.checkPrivateKey(props);
+                if (decrypter != null) {
+                    // Private key props are OK
+                    return true;
+                } else {
+                    logger.error("None of the services support deccryption of request messages.");
+                    return false;
+                }
+
+            }
+        }
+        // If response is encrypted, encryption is done using the public
+        // key of the receiver, so it must be possible to access it. However,
+        // it's not possible to check the public keys, because we don't know
+        // the ID's of the service consumers
+
+        logger.info("Private key encryption properties checked.");
+        // Private key is not needed so everything is OK
+        return true;
     }
 }

@@ -18,6 +18,9 @@ import com.pkrete.restgateway.endpoint.ProviderEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ProviderGatewayUtil;
 import com.pkrete.restgateway.util.RESTGatewayUtil;
+import com.pkrete.xrd4j.common.security.Decrypter;
+import com.pkrete.xrd4j.common.security.Encrypter;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,10 @@ public class ProviderGateway extends AbstractAdapterServlet {
     private Properties props;
     private Map<String, ProviderEndpoint> endpoints;
     private static final Logger logger = LoggerFactory.getLogger(ProviderGateway.class);
+    private Decrypter asymmetricDecrypter;
+    private int keyLength;
+    private String publicKeyFile;
+    private String publicKeyFilePassword;
 
     @Override
     public void init() {
@@ -63,8 +70,18 @@ public class ProviderGateway extends AbstractAdapterServlet {
         logger.debug("Default namespace for incoming ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_DESERIALIZE));
         logger.debug("Default namespace for outgoing ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
         logger.debug("Default namespace prefix for outgoing ServiceResponses : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
+        this.publicKeyFile = props.getProperty(Constants.ENCRYPTION_PROPS_PUBLIC_KEY_FILE);
+        this.publicKeyFilePassword = props.getProperty(Constants.ENCRYPTION_PROPS_PUBLIC_KEY_FILE_PASSWORD);
+        this.keyLength = RESTGatewayUtil.getKeyLength(props);
+        logger.debug("Symmetric key length : \"{}\".", this.keyLength);
         logger.debug("Setting Provider and ProviderGateway properties");
         this.endpoints = ProviderGatewayUtil.extractProviders(endpointProps, this.props);
+        // Check encryption properties
+        if (!ProviderGatewayUtil.checkPrivateKeyProperties(props, endpoints)) {
+            logger.warn("There's a problem with private key encryption properties. Check the logs for additional information.");
+        } else {
+            this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
+        }
         logger.debug("Provider REST Gateway initialized.");
     }
 
@@ -90,7 +107,6 @@ public class ProviderGateway extends AbstractAdapterServlet {
      */
     @Override
     protected ServiceResponse handleRequest(ServiceRequest request) throws SOAPException, XRd4JException {
-        ServiceResponseSerializer serializer = new XMLServiceResponseSerializer();
         ServiceResponse response = new ServiceResponse<>(request.getConsumer(), request.getProducer(), request.getId());
         String serviceId = request.getProducer().toString();
 
@@ -110,7 +126,18 @@ public class ProviderGateway extends AbstractAdapterServlet {
             response.setProcessingWrappers(endpoint.isProcessingWrappers());
         }
         // Deserialize the request
-        CustomRequestDeserializer customDeserializer = new ReqToMapRequestDeserializerImpl();
+        CustomRequestDeserializer customDeserializer;
+        // Check is the request encrypted and create deserializer accordingly
+        if (endpoint.isRequestEncrypted()) {
+            // If asymmetric decrypter is null, there's nothing to do
+            if (this.asymmetricDecrypter == null) {
+                throw new XRd4JException("No private key available when decryption is required.");
+            }
+            customDeserializer = new DecryptingReqToMapRequestDeserializerImpl(asymmetricDecrypter);
+        } else {
+            customDeserializer = new ReqToMapRequestDeserializerImpl();
+        }
+        // Deserialize the request
         customDeserializer.deserialize(request, endpoint.getNamespaceDeserialize());
 
         // Set producer namespace URI and prefix before processing
@@ -118,7 +145,19 @@ public class ProviderGateway extends AbstractAdapterServlet {
         response.getProducer().setNamespacePrefix(endpoint.getPrefix());
         logger.debug("Do message processing...");
 
-        // Return an error message if request data is missing
+        // Create response serializer
+        ServiceResponseSerializer serializer;
+        if (endpoint.isResponseEncrypted()) {
+            logger.debug("Endpoint requires that response is encrypted.");
+            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, request.getConsumer().toString());
+            if (asymmetricEncrypter == null) {
+                throw new XRd4JException("No public key found when encryption is required.");
+            }
+            serializer = new EncryptingXMLServiceResponseSerializer(asymmetricEncrypter, this.keyLength);
+        } else {
+            serializer = new XMLServiceResponseSerializer();
+        }
+
         if (request.getRequestData() == null) {
             logger.warn("No request data was found. Return a non-techinal error message.");
             ErrorMessage error = new ErrorMessage("422", Constants.ERROR_422);
@@ -166,8 +205,12 @@ public class ProviderGateway extends AbstractAdapterServlet {
             // Data will be put as attachment - no modifications
             // needed
             response.setResponseData(data);
-            // Create new serializer if we need to handle attachments
-            serializer = new AttachmentServiceResponseSerializer(contentType);
+            // Set serializer's content type because we need to handle attachments
+            if (endpoint.isResponseEncrypted()) {
+                ((EncryptingXMLServiceResponseSerializer) serializer).setContentType(contentType);
+            } else {
+                ((XMLServiceResponseSerializer) serializer).setContentType(contentType);
+            }
         } else {
             // If data is not XML, it must be converted
             if (!RESTGatewayUtil.isXml(contentType)) {
@@ -207,13 +250,69 @@ public class ProviderGateway extends AbstractAdapterServlet {
             Map map = SOAPHelper.nodesToMultiMap(requestNode.getChildNodes());
             // If message has attachments, use the first attachment as
             // request body
+            processAttachment(map, message);
+            return map;
+        }
+
+        protected boolean processAttachment(Map map, SOAPMessage message) {
+            // If message has attachments, use the first attachment as
+            // request body
             if (message.countAttachments() > 0 && map.containsKey(Constants.PARAM_REQUEST_BODY)) {
                 logger.debug("SOAP attachment detected. Use attachment as request body.", Constants.PARAM_REQUEST_BODY);
                 List<String> values = new ArrayList<>();
                 values.add(SOAPHelper.toString((AttachmentPart) message.getAttachments().next()));
                 map.put(Constants.PARAM_REQUEST_BODY, values);
+                return true;
             } else {
                 map.remove(Constants.PARAM_REQUEST_BODY);
+                return false;
+            }
+        }
+    }
+
+    private class DecryptingReqToMapRequestDeserializerImpl extends ReqToMapRequestDeserializerImpl {
+
+        private final Decrypter asymmetricDecrypter;
+
+        public DecryptingReqToMapRequestDeserializerImpl(Decrypter asymmetricDecrypter) {
+            this.asymmetricDecrypter = asymmetricDecrypter;
+            logger.debug("New DecryptingReqToMapRequestDeserializerImpl created.");
+        }
+
+        @Override
+        protected Map deserializeRequest(Node requestNode, SOAPMessage message) throws SOAPException {
+            if (requestNode == null) {
+                logger.warn("\"requestNode\" is null. Null is returned.");
+                return null;
+            }
+            Map<String, String> nodes = SOAPHelper.nodesToMap(requestNode.getChildNodes());
+
+            // Decrypt session key using the private key
+            Decrypter symmetricDecrypter = RESTGatewayUtil.getSymmetricDecrypter(this.asymmetricDecrypter, nodes.get(Constants.PARAM_KEY), nodes.get(Constants.PARAM_IV));
+            // Decrypt the data
+            String decrypted = symmetricDecrypter.decrypt(nodes.get(Constants.PARAM_ENCRYPTED));
+            // Convert decrypted data to SOAP element
+            SOAPElement soapData = SOAPHelper.xmlStrToSOAPElement(decrypted);
+
+            // Convert all the elements under request to key - value list pairs.
+            // Each key can have multiple values
+            Map map = SOAPHelper.nodesToMultiMap(soapData.getChildNodes());
+            // If message has attachments, use the first attachment as
+            // request body
+            processAttachment(map, message);
+            // If the message has attachment, it has to be decrypted too
+            if (map.containsKey(Constants.PARAM_REQUEST_BODY)) {
+                // Get attachment value by fixed parameter name. The map
+                // contains key - value list so we must get the whole list.
+                List<String> values = (List<String>) map.get(Constants.PARAM_REQUEST_BODY);
+                // Only the first attachment is handled
+                String encryptedValue = values.get(0);
+                // Create new list that's added to the results
+                List<String> newValues = new ArrayList<>();
+                // Add decrypted attachment to the new list
+                newValues.add(symmetricDecrypter.decrypt(encryptedValue));
+                // Replace the old value with the new one
+                map.put(Constants.PARAM_REQUEST_BODY, newValues);
             }
             return map;
         }
@@ -225,39 +324,96 @@ public class ProviderGateway extends AbstractAdapterServlet {
      */
     private class XMLServiceResponseSerializer extends AbstractServiceResponseSerializer {
 
+        protected String contentType;
+
         @Override
         public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
+            if (this.contentType == null) {
+                handleBody(response, soapResponse, envelope);
+            } else {
+                handleAttachment(response, soapResponse, envelope);
+            }
+        }
+
+        public void setContentType(String contentType) {
+            this.contentType = contentType;
+        }
+
+        protected void handleBody(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
             SOAPElement responseElem = (SOAPElement) response.getResponseData();
             if ("response".equals(responseElem.getLocalName())) {
                 logger.debug("Additional \"response\" wrapper detected. Remove the wrapper.");
                 for (int i = 0; i < responseElem.getChildNodes().getLength(); i++) {
-                    Node importNode = (Node) envelope.getBody().getOwnerDocument().importNode(responseElem.getChildNodes().item(i), true);
+                    Node importNode = (Node) soapResponse.getOwnerDocument().importNode(responseElem.getChildNodes().item(i), true);
                     soapResponse.appendChild(importNode);
                 }
             } else {
                 soapResponse.addChildElement((SOAPElement) response.getResponseData());
             }
         }
-    }
 
-    /**
-     * This private class serializes ServiceResponses as SOAP attachments.
-     */
-    private class AttachmentServiceResponseSerializer extends AbstractServiceResponseSerializer {
-
-        private final String contentType;
-
-        public AttachmentServiceResponseSerializer(String contentType) {
-            this.contentType = contentType;
-        }
-
-        @Override
-        public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
+        protected void handleAttachment(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
             SOAPElement data = soapResponse.addChildElement(envelope.createName("data"));
             data.addAttribute(envelope.createName("href"), "response_data");
             AttachmentPart attachPart = response.getSoapMessage().createAttachmentPart(response.getResponseData(), contentType);
             attachPart.setContentId("response_data");
             response.getSoapMessage().addAttachmentPart(attachPart);
         }
+    }
+
+    private class EncryptingXMLServiceResponseSerializer extends XMLServiceResponseSerializer {
+
+        private final Encrypter asymmetricEncrypter;
+        private final int keyLength;
+
+        public EncryptingXMLServiceResponseSerializer(Encrypter asymmetricEncrypter, int keyLength) {
+            this.asymmetricEncrypter = asymmetricEncrypter;
+            this.keyLength = keyLength;
+            logger.debug("New EncryptingXMLServiceResponseSerializer created.");
+        }
+
+        @Override
+        public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
+            SOAPElement soapResponseOrg = soapResponse;
+            // Create wrapper for the response data
+            soapResponse = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
+            try {
+                // Create new symmetric encrypter of defined key length
+                Encrypter symmetricEncrypter = RESTGatewayUtil.createSymmetricEncrypter(this.keyLength);
+                // If content type is null, there are now attachments
+                if (this.contentType == null) {
+                    // Add response under the wrapper
+                    handleBody(response, soapResponse, envelope);
+                } else {
+                    // Get response data that will be put as attachment
+                    String plainText = (String) response.getResponseData();
+                    // Encrypt response
+                    response.setResponseData(symmetricEncrypter.encrypt(plainText));
+                    // Process attachment - this will add new element to body too
+                    handleAttachment(response, soapResponse, envelope);
+                }
+                logger.info("{}", SOAPHelper.toString(soapResponse).hashCode());
+                /**
+                 * N.B.! If signature is required (A: sign then encrypt), this
+                 * is the place to do it. The string to be signed is accessed
+                 * like this: SOAPHelper.toString(soapResponse)
+                 */
+                // Encrypt message with symmetric AES encryption
+                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(soapResponse));
+                /**
+                 * N.B.! If signature is required (B: encrypt then sign), this
+                 * is the place to do it. The encryptedData variable must be
+                 * signed.
+                 */
+                logger.info("{}", encryptedData.hashCode());
+                // Build message body that includes enrypted data,
+                // encrypted session key and IV
+                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapResponseOrg, encryptedData);
+            } catch (NoSuchAlgorithmException ex) {
+                logger.error(ex.getMessage(), ex);
+                throw new SOAPException("Encrypting SOAP request failed.", ex);
+            }
+        }
+
     }
 }

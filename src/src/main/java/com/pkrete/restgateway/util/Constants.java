@@ -24,6 +24,8 @@ public class Constants {
     public static final String ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE = "namespace.serialize";
     public static final String ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE = "namespace.prefix.serialize";
     public static final String ENDPOINT_PROPS_WRAPPERS = "wrappers";
+    public static final String ENDPOINT_PROPS_REQUEST_ENCRYPTED = "request.encrypted";
+    public static final String ENDPOINT_PROPS_RESPONSE_ENCRYPTED = "response.encrypted";
     /**
      * Provider properties
      */
@@ -63,6 +65,10 @@ public class Constants {
      */
     public static final String PARAM_REQUEST_BODY = "RESTGatewayRequestBody";
     public static final String PARAM_RESOURCE_ID = "resourceId";
+    public static final String PARAM_ENCRYPTION_WRAPPER = "encryptionWrapper";
+    public static final String PARAM_ENCRYPTED = "encrypted";
+    public static final String PARAM_IV = "iv";
+    public static final String PARAM_KEY = "key";
     /**
      * Parameter names
      */
@@ -95,6 +101,16 @@ public class Constants {
      */
     public static final String LOG_STRING_FOR_SETTINGS = "\"{}\" setting found. Value : \"{}\".";
     public static final String LOG_STRING_FOR_HEADERS = "{} : {}";
+    /**
+     * Constants related to encryption
+     */
+    public static final String ENCRYPTION_PROPS_KEY_LENGTH = "keyLength";
+    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE = "publicKeyFile";
+    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE_PASSWORD = "publicKeyFilePassword";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE = "privateKeyFile";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE_PASSWORD = "privateKeyFilePassword";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_ALIAS = "privateKeyAlias";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_PASSWORD = "privateKeyPassword";
 
     /**
      * Constructs and initializes a new Constants object. Should never be used.

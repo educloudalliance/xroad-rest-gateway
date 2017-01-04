@@ -20,6 +20,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * Initializes instance variables for test cases.
+     *
      * @throws Exception
      */
     @Override
@@ -49,6 +50,8 @@ public class ProviderGatewayUtilTest extends TestCase {
         endpoints.put("2." + Constants.PROVIDER_PROPS_ATTACHMENT, "true");
         endpoints.put("2." + Constants.PROVIDER_PROPS_CONTENT_TYPE, Constants.APPLICATION_JSON);
         endpoints.put("2." + Constants.PROVIDER_PROPS_SEND_XRD_HEADERS, "false");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_REQUEST_ENCRYPTED, "true");
+        endpoints.put("2." + Constants.ENDPOINT_PROPS_RESPONSE_ENCRYPTED, "true");
 
         endpoints.put("3." + Constants.ENDPOINT_PROPS_ID, "FI_PILOT.GOV.1019125-0.getWeather");
         endpoints.put("3." + Constants.PROVIDER_PROPS_URL, "");
@@ -61,6 +64,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * The first endpoint on the list. No overridden properties.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer0() throws XRd4JException {
@@ -76,10 +80,13 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(null, temp.getContentType());
         assertEquals(false, temp.isAttachment());
         assertEquals(true, temp.isSendXrdHeaders());
+        assertEquals(false, temp.isRequestEncrypted());
+        assertEquals(false, temp.isResponseEncrypted());
     }
 
     /**
      * The second endpoint on the list. Namespace properties overridden.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer1() throws XRd4JException {
@@ -95,10 +102,13 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(null, temp.getContentType());
         assertEquals(false, temp.isAttachment());
         assertEquals(true, temp.isSendXrdHeaders());
+        assertEquals(false, temp.isRequestEncrypted());
+        assertEquals(false, temp.isResponseEncrypted());
     }
 
     /**
      * The third endpoint on the list. All the properties set.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer3() throws XRd4JException {
@@ -114,10 +124,13 @@ public class ProviderGatewayUtilTest extends TestCase {
         assertEquals(Constants.APPLICATION_JSON, temp.getContentType());
         assertEquals(true, temp.isAttachment());
         assertEquals(false, temp.isSendXrdHeaders());
+        assertEquals(true, temp.isRequestEncrypted());
+        assertEquals(true, temp.isResponseEncrypted());
     }
 
     /**
      * The fourth endpoint on the list. URL is empty -> endpoint not loaded.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer4() throws XRd4JException {
@@ -127,6 +140,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * The fourth endpoint on the list. URL is null -> endpoint not loaded.
+     *
      * @throws XRd4JException if there's a XRd4J error
      */
     public void testExtractConsumer5() throws XRd4JException {
@@ -136,6 +150,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * Test generation of HTTP headers. Only X-Road headers.
+     *
      * @throws com.pkrete.xrd4j.common.exception.XRd4JException
      */
     public void testGenerateHtmlHeaders1() throws XRd4JException {
@@ -154,6 +169,7 @@ public class ProviderGatewayUtilTest extends TestCase {
 
     /**
      * Test generation of HTTP headers. No X-Road headers.
+     *
      * @throws com.pkrete.xrd4j.common.exception.XRd4JException
      */
     public void testGenerateHtmlHeaders2() throws XRd4JException {

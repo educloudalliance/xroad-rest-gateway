@@ -17,9 +17,13 @@ import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ConsumerGatewayUtil;
 import com.pkrete.restgateway.util.RESTGatewayUtil;
+import com.pkrete.xrd4j.common.security.Decrypter;
+import com.pkrete.xrd4j.common.security.Encrypter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,6 +55,10 @@ public class ConsumerGateway extends HttpServlet {
     private Map<String, ConsumerEndpoint> endpoints;
     private static final Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
     private boolean serviceCallsByXRdServiceId;
+    private Decrypter asymmetricDecrypter;
+    private String publicKeyFile;
+    private String publicKeyFilePassword;
+    private int keyLength;
 
     @Override
     public void init() throws ServletException {
@@ -75,8 +83,18 @@ public class ConsumerGateway extends HttpServlet {
         logger.debug("Default namespace for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_SERIALIZE));
         logger.debug("Default namespace prefix for outgoing ServiceRequests : \"{}\".", this.props.getProperty(Constants.ENDPOINT_PROPS_SERVICE_NAMESPACE_PREFIX_SERIALIZE));
         logger.debug("Service calls by X-Road service id are enabled : {}.", this.serviceCallsByXRdServiceId);
+        this.publicKeyFile = props.getProperty(Constants.ENCRYPTION_PROPS_PUBLIC_KEY_FILE);
+        this.publicKeyFilePassword = props.getProperty(Constants.ENCRYPTION_PROPS_PUBLIC_KEY_FILE_PASSWORD);
+        this.keyLength = RESTGatewayUtil.getKeyLength(props);
+        logger.debug("Symmetric key length : \"{}\".", this.keyLength);
         logger.debug("Extracting individual consumers from properties");
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
+        // Check encryption properties
+        if (!ConsumerGatewayUtil.checkEncryptionProperties(props, endpoints)) {
+            logger.warn("There's a problem with encryption properties. Check the logs for additional information.");
+        }
+        this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
+
         logger.debug("Consumer REST Gateway initialized.");
     }
 
@@ -170,9 +188,31 @@ public class ConsumerGateway extends HttpServlet {
             // String get request body
             String requestBody = this.readRequestBody(request);
             // Serializer that converts the request to SOAP
-            ServiceRequestSerializer serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
-            // Deserializer that converts the response from SOAP to XML string
-            ServiceResponseDeserializer deserializer = new ResponseDeserializer(omitNamespace);
+            ServiceRequestSerializer serializer;
+            // Type of the serializer depends on the encryption
+            if (endpoint.isRequestEncrypted()) {
+                logger.debug("Endpoint requires that request is encrypted.");
+                Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, endpoint.getProducer().toString());
+                if (asymmetricEncrypter == null) {
+                    throw new Exception("No public key found when encryption is required.");
+                }
+                serializer = new EncryptingRequestSerializer(endpoint.getResourceId(), requestBody, contentType, asymmetricEncrypter, this.keyLength);
+            } else {
+                serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
+            }
+            // Deserializer that converts the response from SOAP to XML/JSON
+            ServiceResponseDeserializer deserializer;
+            // Type of the serializer depends on the encryption
+            if (endpoint.isResponseEncrypted()) {
+                // If asymmetric decrypter is null, there's nothing to do
+                if (this.asymmetricDecrypter == null) {
+                    throw new Exception("No private key available when decryption is required.");
+                }
+                deserializer = new EncryptingResponseDeserializer(omitNamespace, this.asymmetricDecrypter);
+            } else {
+                // Deserializer that converts the response from SOAP to XML/JSON string
+                deserializer = new ResponseDeserializer(omitNamespace);
+            }
             // SOAP client that makes the service call
             SOAPClient client = new SOAPClientImpl();
             logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
@@ -553,18 +593,26 @@ public class ConsumerGateway extends HttpServlet {
      */
     private class RequestSerializer extends AbstractServiceRequestSerializer {
 
-        private final String resourceId;
-        private final String requestBody;
-        private final String contentType;
+        protected final String resourceId;
+        protected final String requestBody;
+        protected final String contentType;
 
         public RequestSerializer(String resourceId, String requestBody, String contentType) {
             this.resourceId = resourceId;
             this.requestBody = requestBody;
             this.contentType = contentType;
+            logger.debug("New RequestSerializer created.");
         }
 
         @Override
         protected void serializeRequest(ServiceRequest request, SOAPElement soapRequest, SOAPEnvelope envelope) throws SOAPException {
+            handleBody(request, soapRequest);
+            if (this.requestBody != null && !this.requestBody.isEmpty()) {
+                handleAttachment(request, soapRequest, envelope, this.requestBody);
+            }
+        }
+
+        protected void handleBody(ServiceRequest request, SOAPElement soapRequest) throws SOAPException {
             if (this.resourceId != null && !this.resourceId.isEmpty()) {
                 logger.debug("Add resourceId : \"{}\".", this.resourceId);
                 soapRequest.addChildElement("resourceId").addTextNode(this.resourceId);
@@ -578,13 +626,52 @@ public class ConsumerGateway extends HttpServlet {
                     soapRequest.addChildElement(key).addTextNode(value);
                 }
             }
-            if (this.requestBody != null && !this.requestBody.isEmpty()) {
-                logger.debug("Request body was found from the request. Add request body as SOAP attachment. Content type is \"{}\".", this.contentType);
-                SOAPElement data = soapRequest.addChildElement(envelope.createName(Constants.PARAM_REQUEST_BODY));
-                data.addAttribute(envelope.createName("href"), Constants.PARAM_REQUEST_BODY);
-                AttachmentPart attachPart = request.getSoapMessage().createAttachmentPart(this.requestBody, this.contentType);
-                attachPart.setContentId(Constants.PARAM_REQUEST_BODY);
-                request.getSoapMessage().addAttachmentPart(attachPart);
+        }
+
+        protected void handleAttachment(ServiceRequest request, SOAPElement soapRequest, SOAPEnvelope envelope, String attachmentData) throws SOAPException {
+            logger.debug("Request body was found from the request. Add request body as SOAP attachment. Content type is \"{}\".", this.contentType);
+            SOAPElement data = soapRequest.addChildElement(envelope.createName(Constants.PARAM_REQUEST_BODY));
+            data.addAttribute(envelope.createName("href"), Constants.PARAM_REQUEST_BODY);
+            AttachmentPart attachPart = request.getSoapMessage().createAttachmentPart(attachmentData, this.contentType);
+            attachPart.setContentId(Constants.PARAM_REQUEST_BODY);
+            request.getSoapMessage().addAttachmentPart(attachPart);
+
+        }
+    }
+
+    private class EncryptingRequestSerializer extends RequestSerializer {
+
+        private final Encrypter asymmetricEncrypter;
+        private final int keyLength;
+
+        public EncryptingRequestSerializer(String resourceId, String requestBody, String contentType, Encrypter asymmetricEncrypter, int keyLength) {
+            super(resourceId, requestBody, contentType);
+            this.asymmetricEncrypter = asymmetricEncrypter;
+            this.keyLength = keyLength;
+            logger.debug("New EncryptingRequestSerializer created.");
+        }
+
+        @Override
+        protected void serializeRequest(ServiceRequest request, SOAPElement soapRequest, SOAPEnvelope envelope) throws SOAPException {
+            SOAPElement soapRequestOrg = soapRequest;
+            soapRequest = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
+            try {
+                // Create new symmetric encrypter using of defined key length
+                Encrypter symmetricEncrypter = RESTGatewayUtil.createSymmetricEncrypter(this.keyLength);
+                // Process request parameters
+                handleBody(request, soapRequest);
+                // Process request body 
+                if (this.requestBody != null && !this.requestBody.isEmpty()) {
+                    handleAttachment(request, soapRequest, envelope, symmetricEncrypter.encrypt(this.requestBody));
+                }
+                // Encrypt message with symmetric AES encryption
+                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(soapRequest));
+                // Build message body that includes enrypted data,
+                // encrypted session key and IV
+                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapRequestOrg, encryptedData);
+            } catch (NoSuchAlgorithmException ex) {
+                logger.error(ex.getMessage(), ex);
+                throw new SOAPException("Encrypting SOAP request failed.", ex);
             }
         }
     }
@@ -594,7 +681,7 @@ public class ConsumerGateway extends HttpServlet {
      */
     private class ResponseDeserializer extends AbstractResponseDeserializer<Map, String> {
 
-        private boolean omitNamespace;
+        protected boolean omitNamespace;
 
         public ResponseDeserializer(boolean omitNamespace) {
             this.omitNamespace = omitNamespace;
@@ -607,10 +694,9 @@ public class ConsumerGateway extends HttpServlet {
 
         @Override
         protected String deserializeResponseData(Node responseNode, SOAPMessage message) throws SOAPException {
-            if (this.omitNamespace) {
-                logger.debug("Remove namespaces from response.");
-                SOAPHelper.removeNamespace(responseNode);
-            }
+            // Remove namespace if it's required
+            handleNamespace(responseNode);
+
             // If message has attachments, return the first attachment
             if (message.countAttachments() > 0) {
                 logger.debug("SOAP attachment detected. Use attachment as response data.");
@@ -618,6 +704,85 @@ public class ConsumerGateway extends HttpServlet {
             }
             // Convert response to string
             return SOAPHelper.toString(responseNode);
+        }
+
+        protected void handleNamespace(Node responseNode) {
+            if (this.omitNamespace) {
+                logger.debug("Remove namespaces from response.");
+                SOAPHelper.removeNamespace(responseNode);
+            }
+        }
+    }
+
+    /**
+     * Deserializes SOAP responses to String.
+     */
+    private class EncryptingResponseDeserializer extends ResponseDeserializer {
+
+        private final Decrypter asymmetricDecrypter;
+
+        public EncryptingResponseDeserializer(boolean omitNamespace, Decrypter asymmetricDecrypter) {
+            super(omitNamespace);
+            this.asymmetricDecrypter = asymmetricDecrypter;
+            logger.debug("New EncryptingResponseDeserializer created.");
+        }
+
+        @Override
+        protected Map deserializeRequestData(Node requestNode) throws SOAPException {
+            return null;
+        }
+
+        @Override
+        protected String deserializeResponseData(Node responseNode, SOAPMessage message) throws SOAPException {
+            // Put all the response nodes to map so that we can easily access them
+            Map<String, String> nodes = SOAPHelper.nodesToMap(responseNode.getChildNodes());
+
+            /**
+             * N.B.! If signature is present (B: encrypt then sign) and we want
+             * to verify it before going ahead with processing, this is the
+             * place to do it. The signed part of the message is accessed:
+             * nodes.get(Constants.PARAM_ENCRYPTED)
+             */
+            // Decrypt session key using the private key
+            Decrypter symmetricDecrypter = RESTGatewayUtil.getSymmetricDecrypter(this.asymmetricDecrypter, nodes.get(Constants.PARAM_KEY), nodes.get(Constants.PARAM_IV));
+
+            // If message has attachments, return the first attachment
+            if (message.countAttachments() > 0) {
+                logger.debug("SOAP attachment detected. Use attachment as response data.");
+                // Return decrypted data
+                return symmetricDecrypter.decrypt(SOAPHelper.toString((AttachmentPart) message.getAttachments().next()));
+            }
+            /**
+             * N.B.! If signature is present (A: sign then encrypt) and we want
+             * to verify it before going ahead with processing, this is the
+             * place to do it. The signed part of the message is accessed:
+             * symmetricDecrypter.decrypt(nodes.get(Constants.PARAM_ENCRYPTED))
+             * UTF-8 String wrapper must left out from signature verification.
+             */
+
+            // Decrypt the response. UTF-8 characters are not showing correctly
+            // if we don't wrap the decrypted data into a new string and
+            // explicitly tell that it's UTF-8 even if encrypter and
+            // decrypter handle strings as UTF-8.
+            String decryptedResponse = new String(symmetricDecrypter.decrypt(nodes.get(Constants.PARAM_ENCRYPTED)).getBytes(StandardCharsets.UTF_8));
+            // Convert encrypted response to SOAP
+            SOAPElement encryptionWrapper = SOAPHelper.xmlStrToSOAPElement(decryptedResponse);
+            // Remove all the children under response node
+            SOAPHelper.removeAllChildren(responseNode);
+            // Remove the extra <encryptionWrapper> element between response node
+            // and the actual response. After the modification all the response
+            // elements are directly under response.
+            SOAPHelper.moveChildren(encryptionWrapper, (SOAPElement) responseNode, !this.omitNamespace);
+            // Clone response node because removing namespace from the original 
+            // node causes null pointer exception in AbstractResponseDeserializer 
+            // when wrappers are not used. Cloning the original node, removing
+            // namespace from the clone and returning the clone prevents the
+            // problem to occur.
+            Node modifiedResponseNode = (Node) responseNode.cloneNode(true);
+            // Remove namespace if it's required
+            handleNamespace(modifiedResponseNode);
+            // Return the response
+            return SOAPHelper.toString(modifiedResponseNode);
         }
     }
 }
