@@ -1,6 +1,5 @@
 package com.pkrete.restgateway;
 
-import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.message.ErrorMessage;
 import com.pkrete.xrd4j.common.message.ServiceRequest;
@@ -19,8 +18,6 @@ import com.pkrete.restgateway.endpoint.ProviderEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ProviderGatewayUtil;
 import com.pkrete.restgateway.util.RESTGatewayUtil;
-import com.pkrete.xrd4j.client.deserializer.ServiceResponseDeserializer;
-import com.pkrete.xrd4j.client.serializer.ServiceRequestSerializer;
 import com.pkrete.xrd4j.common.security.Decrypter;
 import com.pkrete.xrd4j.common.security.Encrypter;
 import java.security.NoSuchAlgorithmException;
