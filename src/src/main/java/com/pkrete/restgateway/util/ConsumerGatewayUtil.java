@@ -5,7 +5,6 @@ import com.pkrete.xrd4j.common.member.ProducerMember;
 import com.pkrete.xrd4j.common.util.ConfigurationHelper;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
-import com.pkrete.xrd4j.common.security.Decrypter;
 import com.pkrete.xrd4j.common.security.Encrypter;
 import java.util.Map;
 import java.util.Properties;
