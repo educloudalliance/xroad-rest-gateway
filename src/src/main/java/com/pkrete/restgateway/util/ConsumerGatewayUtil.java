@@ -5,6 +5,7 @@ import com.pkrete.xrd4j.common.member.ProducerMember;
 import com.pkrete.xrd4j.common.util.ConfigurationHelper;
 import com.pkrete.xrd4j.common.util.MessageHelper;
 import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
+import com.pkrete.xrd4j.common.security.Decrypter;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -381,17 +382,19 @@ public class ConsumerGatewayUtil {
      * Checks and validates the properties related to encryption. The method
      * checks that all the necessary private and public keys exist and are
      * accessible. If everything is OK, true is returned. If there's a problem
-     * with one or more keys, false is returned.
+     * with one or more keys or if the private key has not been checked, false
+     * is returned. None of the keys is not checked if the are not needed.
      *
      * @param props general properties
      * @param endpoints list of configured endpoints
      * @return true if everything is OK. False if there's a problem with one or
-     * more keys.
+     * more keys or if the private key has not been checked.
      */
     public static boolean checkEncryptionProperties(Properties props, Map<String, ConsumerEndpoint> endpoints) {
         logger.info("Check encryption properties.");
         boolean privateKeyChecked = false;
         boolean result = true;
+        Decrypter decrypter = null;
         // Loop through all the endpoints
         for (Map.Entry<String, ConsumerEndpoint> entry : endpoints.entrySet()) {
             ConsumerEndpoint endpoint = entry.getValue();
@@ -404,13 +407,16 @@ public class ConsumerGatewayUtil {
             // If response is encrypted, decryption is done using the private
             // key, so it must be possible to access it. It's enough to 
             // check the private key once.
-            if (!privateKeyChecked && endpoint.isResponseEncrypted() && RESTGatewayUtil.checkPrivateKey(props) == null) {
-                logger.error("None of the endpoints support deccryption of response messages.");
-                privateKeyChecked = true;
-                result = false;
+            if (!privateKeyChecked && endpoint.isResponseEncrypted()) {
+                decrypter = RESTGatewayUtil.checkPrivateKey(props);
+                if (decrypter == null) {
+                    logger.error("None of the endpoints support deccryption of response messages.");
+                    privateKeyChecked = true;
+                    result = false;
+                }
             }
         }
         logger.info("Encryption properties checked.");
-        return result;
+        return (result && decrypter != null);
     }
 }

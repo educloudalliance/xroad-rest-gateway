@@ -77,9 +77,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
         logger.debug("Setting Provider and ProviderGateway properties");
         this.endpoints = ProviderGatewayUtil.extractProviders(endpointProps, this.props);
         // Check encryption properties
-        if (!ProviderGatewayUtil.checkPrivateKeyProperties(props, endpoints)) {
-            logger.warn("There's a problem with private key encryption properties. Check the logs for additional information.");
-        } else {
+        if (ProviderGatewayUtil.checkPrivateKeyProperties(props, endpoints)) {
             this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
         }
         logger.debug("Provider REST Gateway initialized.");
@@ -417,7 +415,6 @@ public class ProviderGateway extends AbstractAdapterServlet {
                     // Process attachment - this will add new element to body too
                     handleAttachment(response, payload, envelope);
                 }
-                logger.info("{}", SOAPHelper.toString(payload).hashCode());
                 /**
                  * N.B.! If signature is required (A: sign then encrypt), this
                  * is the place to do it. The string to be signed is accessed
@@ -430,7 +427,6 @@ public class ProviderGateway extends AbstractAdapterServlet {
                  * is the place to do it. The encryptedData variable must be
                  * signed.
                  */
-                logger.info("{}", encryptedData.hashCode());
                 // Build message body that includes enrypted data,
                 // encrypted session key and IV
                 RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapResponse, encryptedData);

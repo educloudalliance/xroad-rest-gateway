@@ -345,7 +345,7 @@ public class ProviderGatewayUtil {
      * @param props general properties
      * @param endpoints list of configured endpoints
      * @return true if everything is OK. False if there's a problem with the
-     * private key
+     * private key or the private key is not needed
      */
     public static boolean checkPrivateKeyProperties(Properties props, Map<String, ProviderEndpoint> endpoints) {
         logger.info("Check private key encryption properties.");
@@ -373,7 +373,7 @@ public class ProviderGatewayUtil {
         // the ID's of the service consumers
 
         logger.info("Private key encryption properties checked.");
-        // Private key is not needed so everything is OK
-        return true;
+        // Private key is not needed so return false
+        return false;
     }
 }

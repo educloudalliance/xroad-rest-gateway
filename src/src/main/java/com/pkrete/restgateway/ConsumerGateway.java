@@ -91,11 +91,9 @@ public class ConsumerGateway extends HttpServlet {
         logger.debug("Extracting individual consumers from properties");
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
         // Check encryption properties
-        if (!ConsumerGatewayUtil.checkEncryptionProperties(props, endpoints)) {
-            logger.warn("There's a problem with encryption properties. Check the logs for additional information.");
+        if (ConsumerGatewayUtil.checkEncryptionProperties(props, endpoints)) {
+            this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
         }
-        this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
-
         logger.debug("Consumer REST Gateway initialized.");
     }
 
