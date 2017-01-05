@@ -364,7 +364,6 @@ public class ProviderGatewayUtil {
                     logger.error("None of the services support deccryption of request messages.");
                     return false;
                 }
-
             }
         }
         // If response is encrypted, encryption is done using the public

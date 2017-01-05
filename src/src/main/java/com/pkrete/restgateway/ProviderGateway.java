@@ -22,6 +22,7 @@ import com.pkrete.xrd4j.common.security.Decrypter;
 import com.pkrete.xrd4j.common.security.Encrypter;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -49,6 +50,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
     private Map<String, ProviderEndpoint> endpoints;
     private static final Logger logger = LoggerFactory.getLogger(ProviderGateway.class);
     private Decrypter asymmetricDecrypter;
+    private final Map<String, Encrypter> asymmetricEncrypterCache = new HashMap<>();
     private int keyLength;
     private String publicKeyFile;
     private String publicKeyFilePassword;
@@ -247,7 +249,18 @@ public class ProviderGateway extends AbstractAdapterServlet {
     private ServiceResponseSerializer getResponseSerializer(ProviderEndpoint endpoint, String consumerIdentifier) throws XRd4JException {
         if (endpoint.isResponseEncrypted()) {
             logger.debug("Endpoint requires that response is encrypted.");
-            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, consumerIdentifier);
+            Encrypter asymmetricEncrypter;
+            // Check if encrypter already exists in cache
+            if (this.asymmetricEncrypterCache.containsKey(consumerIdentifier)) {
+                asymmetricEncrypter = this.asymmetricEncrypterCache.get(consumerIdentifier);
+                logger.trace("Asymmetric encrypter for consumer \"{}\" loaded from cache.", consumerIdentifier);
+            } else {
+                // Create new encrypter if it does not exist yet
+                asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, consumerIdentifier);
+                // Add new encrypter to the cache
+                this.asymmetricEncrypterCache.put(consumerIdentifier, asymmetricEncrypter);
+                logger.trace("Asymmetric encrypter for consumer \"{}\" not found from cache. New ecrypter created.", consumerIdentifier);
+            }
             if (asymmetricEncrypter == null) {
                 throw new XRd4JException("No public key found when encryption is required.");
             }

@@ -57,6 +57,7 @@ public class ConsumerGateway extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(ConsumerGateway.class);
     private boolean serviceCallsByXRdServiceId;
     private Decrypter asymmetricDecrypter;
+    private final Map<String, Encrypter> asymmetricEncrypterCache = new HashMap<>();
     private String publicKeyFile;
     private String publicKeyFilePassword;
     private int keyLength;
@@ -90,11 +91,11 @@ public class ConsumerGateway extends HttpServlet {
         logger.debug("Symmetric key length : \"{}\".", this.keyLength);
         logger.debug("Extracting individual consumers from properties");
         this.endpoints = ConsumerGatewayUtil.extractConsumers(endpointProps, this.props);
-        // Check encryption properties
-        if (ConsumerGatewayUtil.checkEncryptionProperties(props, endpoints)) {
+        // Check encryption properties. The method also sets the values of
+        // asymmetricEncrypterCache.
+        if (ConsumerGatewayUtil.checkEncryptionProperties(props, endpoints, this.asymmetricEncrypterCache)) {
             this.asymmetricDecrypter = RESTGatewayUtil.checkPrivateKey(props);
         }
-        logger.debug("Consumer REST Gateway initialized.");
     }
 
     /**
@@ -237,7 +238,20 @@ public class ConsumerGateway extends HttpServlet {
         // Type of the serializer depends on the encryption
         if (endpoint.isRequestEncrypted()) {
             logger.debug("Endpoint requires that request is encrypted.");
-            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, endpoint.getProducer().toString());
+            String providerId = endpoint.getProducer().toString();
+            Encrypter asymmetricEncrypter;
+            // Check if encrypter already exists in cache - it should as all
+            // the encrypters are loaded during start up
+            if (this.asymmetricEncrypterCache.containsKey(providerId)) {
+                asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, providerId);
+                logger.trace("Asymmetric encrypter for provider \"{}\" loaded from cache.", providerId);
+            } else {
+                // Create new encrypter if it does not exist already for some reason
+                asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, providerId);
+                // Add new encrypter to the cache
+                this.asymmetricEncrypterCache.put(providerId, asymmetricEncrypter);
+                logger.trace("Asymmetric encrypter for provider \"{}\" not found from cache. New ecrypter created.", providerId);
+            }
             if (asymmetricEncrypter == null) {
                 throw new XRd4JException("No public key found when encryption is required.");
             }
