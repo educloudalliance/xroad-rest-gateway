@@ -47,6 +47,16 @@ public class Constants {
     public static final String CONSUMER_PROPS_MOD_URL = "response.modurl";
     public static final String CONSUMER_PROPS_SVC_CALLS_BY_XRD_SVC_ID_ENABLED = "serviceCallsByXRdServiceId.enabled";
     /**
+     * Encryption properties
+     */
+    public static final String ENCRYPTION_PROPS_KEY_LENGTH = "keyLength";
+    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE = "publicKeyFile";
+    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE_PASSWORD = "publicKeyFilePassword";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE = "privateKeyFile";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE_PASSWORD = "privateKeyFilePassword";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_ALIAS = "privateKeyAlias";
+    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_PASSWORD = "privateKeyPassword";
+    /**
      * Standard HTTP headers
      */
     public static final String HTTP_HEADER_ACCEPT = "Accept";
@@ -101,16 +111,6 @@ public class Constants {
      */
     public static final String LOG_STRING_FOR_SETTINGS = "\"{}\" setting found. Value : \"{}\".";
     public static final String LOG_STRING_FOR_HEADERS = "{} : {}";
-    /**
-     * Constants related to encryption
-     */
-    public static final String ENCRYPTION_PROPS_KEY_LENGTH = "keyLength";
-    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE = "publicKeyFile";
-    public static final String ENCRYPTION_PROPS_PUBLIC_KEY_FILE_PASSWORD = "publicKeyFilePassword";
-    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE = "privateKeyFile";
-    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_FILE_PASSWORD = "privateKeyFilePassword";
-    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_ALIAS = "privateKeyAlias";
-    public static final String ENCRYPTION_PROPS_PRIVATE_KEY_PASSWORD = "privateKeyPassword";
 
     /**
      * Constructs and initializes a new Constants object. Should never be used.

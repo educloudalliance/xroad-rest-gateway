@@ -374,32 +374,31 @@ public class ProviderGateway extends AbstractAdapterServlet {
 
         @Override
         public void serializeResponse(ServiceResponse response, SOAPElement soapResponse, SOAPEnvelope envelope) throws SOAPException {
-            SOAPElement soapResponseOrg = soapResponse;
             // Create wrapper for the response data
-            soapResponse = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
+            SOAPElement payload = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
             try {
                 // Create new symmetric encrypter of defined key length
                 Encrypter symmetricEncrypter = RESTGatewayUtil.createSymmetricEncrypter(this.keyLength);
                 // If content type is null, there are now attachments
                 if (this.contentType == null) {
                     // Add response under the wrapper
-                    handleBody(response, soapResponse, envelope);
+                    handleBody(response, payload, envelope);
                 } else {
                     // Get response data that will be put as attachment
                     String plainText = (String) response.getResponseData();
                     // Encrypt response
                     response.setResponseData(symmetricEncrypter.encrypt(plainText));
                     // Process attachment - this will add new element to body too
-                    handleAttachment(response, soapResponse, envelope);
+                    handleAttachment(response, payload, envelope);
                 }
-                logger.info("{}", SOAPHelper.toString(soapResponse).hashCode());
+                logger.info("{}", SOAPHelper.toString(payload).hashCode());
                 /**
                  * N.B.! If signature is required (A: sign then encrypt), this
                  * is the place to do it. The string to be signed is accessed
                  * like this: SOAPHelper.toString(soapResponse)
                  */
                 // Encrypt message with symmetric AES encryption
-                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(soapResponse));
+                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(payload));
                 /**
                  * N.B.! If signature is required (B: encrypt then sign), this
                  * is the place to do it. The encryptedData variable must be
@@ -408,7 +407,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
                 logger.info("{}", encryptedData.hashCode());
                 // Build message body that includes enrypted data,
                 // encrypted session key and IV
-                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapResponseOrg, encryptedData);
+                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapResponse, encryptedData);
             } catch (NoSuchAlgorithmException ex) {
                 logger.error(ex.getMessage(), ex);
                 throw new SOAPException("Encrypting SOAP request failed.", ex);

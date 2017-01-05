@@ -205,6 +205,7 @@ public class RESTGatewayUtil {
             return null;
         } catch (java.lang.NullPointerException ex) {
             logger.error("No public key was found for the alias \"{}\".", serviceId);
+            logger.error(ex.getMessage(), ex);
             return null;
         }
     }

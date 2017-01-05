@@ -17,6 +17,7 @@ import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ConsumerGatewayUtil;
 import com.pkrete.restgateway.util.RESTGatewayUtil;
+import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.security.Decrypter;
 import com.pkrete.xrd4j.common.security.Encrypter;
 import java.io.BufferedReader;
@@ -194,7 +195,7 @@ public class ConsumerGateway extends HttpServlet {
                 logger.debug("Endpoint requires that request is encrypted.");
                 Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, endpoint.getProducer().toString());
                 if (asymmetricEncrypter == null) {
-                    throw new Exception("No public key found when encryption is required.");
+                    throw new XRd4JException("No public key found when encryption is required.");
                 }
                 serializer = new EncryptingRequestSerializer(endpoint.getResourceId(), requestBody, contentType, asymmetricEncrypter, this.keyLength);
             } else {
@@ -206,7 +207,7 @@ public class ConsumerGateway extends HttpServlet {
             if (endpoint.isResponseEncrypted()) {
                 // If asymmetric decrypter is null, there's nothing to do
                 if (this.asymmetricDecrypter == null) {
-                    throw new Exception("No private key available when decryption is required.");
+                    throw new XRd4JException("No private key available when decryption is required.");
                 }
                 deserializer = new EncryptingResponseDeserializer(omitNamespace, this.asymmetricDecrypter);
             } else {
@@ -653,22 +654,21 @@ public class ConsumerGateway extends HttpServlet {
 
         @Override
         protected void serializeRequest(ServiceRequest request, SOAPElement soapRequest, SOAPEnvelope envelope) throws SOAPException {
-            SOAPElement soapRequestOrg = soapRequest;
-            soapRequest = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
+            SOAPElement payload = SOAPHelper.xmlStrToSOAPElement("<" + Constants.PARAM_ENCRYPTION_WRAPPER + "/>");
             try {
                 // Create new symmetric encrypter using of defined key length
                 Encrypter symmetricEncrypter = RESTGatewayUtil.createSymmetricEncrypter(this.keyLength);
                 // Process request parameters
-                handleBody(request, soapRequest);
+                handleBody(request, payload);
                 // Process request body 
                 if (this.requestBody != null && !this.requestBody.isEmpty()) {
-                    handleAttachment(request, soapRequest, envelope, symmetricEncrypter.encrypt(this.requestBody));
+                    handleAttachment(request, payload, envelope, symmetricEncrypter.encrypt(this.requestBody));
                 }
                 // Encrypt message with symmetric AES encryption
-                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(soapRequest));
+                String encryptedData = symmetricEncrypter.encrypt(SOAPHelper.toString(payload));
                 // Build message body that includes enrypted data,
                 // encrypted session key and IV
-                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapRequestOrg, encryptedData);
+                RESTGatewayUtil.buildEncryptedBody(symmetricEncrypter, asymmetricEncrypter, soapRequest, encryptedData);
             } catch (NoSuchAlgorithmException ex) {
                 logger.error(ex.getMessage(), ex);
                 throw new SOAPException("Encrypting SOAP request failed.", ex);
