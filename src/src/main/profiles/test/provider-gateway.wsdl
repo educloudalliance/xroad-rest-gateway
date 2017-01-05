@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:tns="http://vrk-test.x-road.fi/producer" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:xrd="http://x-road.eu/xsd/xroad.xsd"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:id="http://x-road.eu/xsd/identifiers"
+                  name="provider-gateway" targetNamespace="http://vrk-test.x-road.fi/producer">
+    <wsdl:types>
+        <xsd:schema elementFormDefault="qualified" targetNamespace="http://vrk-test.x-road.fi/producer">
+            <!-- Import X-Road schema -->
+            <xsd:import id="xrd" namespace="http://x-road.eu/xsd/xroad.xsd" schemaLocation="http://x-road.eu/xsd/xroad.xsd"/>
+            
+            <xsd:element name="getOrganizationList" nillable="true">
+                <xsd:complexType />
+            </xsd:element>
+            <xsd:element name="getOrganizationListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request" />
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="results">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true" type="tns:organization" />
+                                            </xsd:sequence>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getOrganization">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" type="xsd:int" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getOrganizationResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" nillable="true" type="xsd:int"/>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element maxOccurs="unbounded" minOccurs="0" name="result" nillable="true" type="tns:organization" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getLibrary">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="city.name" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getLibraryResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="city.name" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="searchCompany">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="totalResults" type="xsd:boolean" />
+                                    <xsd:element name="maxResults" type="xsd:string" />
+                                    <xsd:element name="resultsFrom" type="xsd:string" />
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="registeredOffice" type="xsd:string" />
+                                    <xsd:element name="businessLine" type="xsd:string" />
+                                    <xsd:element name="businessLineCode" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationFrom" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationTo" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="searchCompanyResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="totalResults" type="xsd:boolean" />
+                                    <xsd:element name="maxResults" type="xsd:string" />
+                                    <xsd:element name="resultsFrom" type="xsd:string" />
+                                    <xsd:element name="name" type="xsd:string" />
+                                    <xsd:element name="registeredOffice" type="xsd:string" />
+                                    <xsd:element name="businessLine" type="xsd:string" />
+                                    <xsd:element name="businessLineCode" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationFrom" type="xsd:string" />
+                                    <xsd:element name="companyRegistrationTo" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getCompany">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="businessId" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getCompanyResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="businessId" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="fintoService">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="vocab" type="xsd:string" />
+                                    <xsd:element name="query" type="xsd:string" />
+                                    <xsd:element name="lang" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="fintoServiceResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="vocab" type="xsd:string" />
+                                    <xsd:element name="query" type="xsd:string" />
+                                    <xsd:element name="lang" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="data" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getPTVOrganizationList" nillable="true">
+                <xsd:complexType />
+            </xsd:element>
+            <xsd:element name="getPTVOrganizationListResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request" />
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getPTVOrganization">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" type="xsd:string" />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getPTVOrganizationResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="resourceId" nillable="true" type="xsd:string"/>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>               
+            <xsd:element name="getFinnaRecord">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="getFinnaRecordResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="response">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:any />
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>                                        
+            <complexType name="organization">
+                <all>
+                    <element name="id" type="xsd:int" />
+                    <element name="name_fi" type="xsd:string" />
+                    <element name="name_sv" type="xsd:string" />
+                    <element name="name_en" type="xsd:string" />
+                    <element name="data_source_url" type="xsd:string" />
+                </all>
+            </complexType>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="requestheader">
+        <wsdl:part name="client" element="xrd:client" />
+        <wsdl:part name="service" element="xrd:service" />
+        <wsdl:part name="userId" element="xrd:userId" />
+        <wsdl:part name="id" element="xrd:id" />
+        <wsdl:part name="issue" element="xrd:issue" />
+        <wsdl:part name="protocolVersion" element="xrd:protocolVersion" />
+    </wsdl:message>
+
+    <wsdl:message name="getOrganizationList">
+        <wsdl:part name="body" element="tns:getOrganizationList"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganizationListResponse">
+        <wsdl:part name="body" element="tns:getOrganizationListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganization">
+        <wsdl:part name="body" element="tns:getOrganization"/>
+    </wsdl:message>
+    <wsdl:message name="getOrganizationResponse">
+        <wsdl:part name="body" element="tns:getOrganizationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getLibrary">
+        <wsdl:part name="body" element="getLibrary"/>
+    </wsdl:message>
+    <wsdl:message name="getLibraryResponse">
+        <wsdl:part name="body" element="tns:getLibraryResponse"/>
+    </wsdl:message>
+    <wsdl:message name="searchCompany">
+        <wsdl:part name="body" element="tns:searchCompany"/>
+    </wsdl:message>
+    <wsdl:message name="searchCompanyResponse">
+        <wsdl:part name="body" element="tns:searchCompanyResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getCompany">
+        <wsdl:part name="body" element="tns:getCompany"/>
+    </wsdl:message>
+    <wsdl:message name="getCompanyResponse">
+        <wsdl:part name="body" element="tns:getCompanyResponse"/>
+    </wsdl:message>
+    <wsdl:message name="fintoService">
+        <wsdl:part name="body" element="tns:fintoService"/>
+    </wsdl:message>
+    <wsdl:message name="fintoServiceResponse">
+        <wsdl:part name="body" element="tns:fintoServiceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getPTVOrganizationList">
+        <wsdl:part name="body" element="tns:getPTVOrganizationList"/>
+    </wsdl:message>
+    <wsdl:message name="getPTVOrganizationListResponse">
+        <wsdl:part name="body" element="tns:getPTVOrganizationListResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getPTVOrganization">
+        <wsdl:part name="body" element="tns:getPTVOrganization"/>
+    </wsdl:message>
+    <wsdl:message name="getPTVOrganizationResponse">
+        <wsdl:part name="body" element="tns:getPTVOrganizationResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getFinnaRecord">
+        <wsdl:part name="body" element="tns:getFinnaRecord"/>
+    </wsdl:message>
+    <wsdl:message name="getFinnaRecordResponse">
+        <wsdl:part name="body" element="tns:getFinnaRecordResponse"/>
+    </wsdl:message>
+
+    <wsdl:portType name="xRoadPortType">
+        <wsdl:operation name="getOrganizationList">
+            <wsdl:input message="tns:getOrganizationList"/>
+            <wsdl:output message="tns:getOrganizationListResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getOrganization">
+            <wsdl:input message="tns:getOrganization"/>
+            <wsdl:output message="tns:getOrganizationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getLibrary">
+            <wsdl:input message="tns:getLibrary"/>
+            <wsdl:output message="tns:getLibraryResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="searchCompany">
+            <wsdl:input message="tns:searchCompany"/>
+            <wsdl:output message="tns:searchCompanyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getCompany">
+            <wsdl:input message="tns:getCompany"/>
+            <wsdl:output message="tns:getCompanyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="fintoService">
+            <wsdl:input message="tns:fintoService"/>
+            <wsdl:output message="tns:fintoServiceResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getPTVOrganizationList">
+            <wsdl:input message="tns:getPTVOrganizationList"/>
+            <wsdl:output message="tns:getPTVOrganizationListResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getPTVOrganization">
+            <wsdl:input message="tns:getPTVOrganization"/>
+            <wsdl:output message="tns:getPTVOrganizationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getFinnaRecord">
+            <wsdl:input message="tns:getFinnaRecord"/>
+            <wsdl:output message="tns:getFinnaRecordResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="xRoadBinding" type="tns:xRoadPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="getOrganizationList">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getOrganization">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getLibrary">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="searchCompany">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getCompany">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="fintoService">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getPTVOrganizationList">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getPTVOrganization">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getFinnaRecord">
+            <soap:operation soapAction="" style="document"/>
+            <id:version>v1</id:version>
+            <wsdl:input>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body parts="body" use="literal"/>
+                <soap:header message="tns:requestheader" part="client" use="literal"/>
+                <soap:header message="tns:requestheader" part="service" use="literal"/>
+                <soap:header message="tns:requestheader" part="userId" use="literal"/>
+                <soap:header message="tns:requestheader" part="id" use="literal"/>
+                <soap:header message="tns:requestheader" part="issue" use="literal"/>
+                <soap:header message="tns:requestheader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="provider-gateway">
+        <wsdl:port binding="tns:xRoadBinding" name="xRoadServicePort">
+            <soap:address location="http://localhost:8080/${project.build.finalName}/Provider"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

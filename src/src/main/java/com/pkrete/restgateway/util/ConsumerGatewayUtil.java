@@ -417,6 +417,6 @@ public class ConsumerGatewayUtil {
             }
         }
         logger.info("Encryption properties checked.");
-        return (result && decrypter != null);
+        return result && decrypter != null;
     }
 }
