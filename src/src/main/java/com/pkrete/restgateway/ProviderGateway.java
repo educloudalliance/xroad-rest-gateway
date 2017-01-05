@@ -1,5 +1,6 @@
 package com.pkrete.restgateway;
 
+import com.pkrete.restgateway.endpoint.ConsumerEndpoint;
 import com.pkrete.xrd4j.common.exception.XRd4JException;
 import com.pkrete.xrd4j.common.message.ErrorMessage;
 import com.pkrete.xrd4j.common.message.ServiceRequest;
@@ -18,6 +19,8 @@ import com.pkrete.restgateway.endpoint.ProviderEndpoint;
 import com.pkrete.restgateway.util.Constants;
 import com.pkrete.restgateway.util.ProviderGatewayUtil;
 import com.pkrete.restgateway.util.RESTGatewayUtil;
+import com.pkrete.xrd4j.client.deserializer.ServiceResponseDeserializer;
+import com.pkrete.xrd4j.client.serializer.ServiceRequestSerializer;
 import com.pkrete.xrd4j.common.security.Decrypter;
 import com.pkrete.xrd4j.common.security.Encrypter;
 import java.security.NoSuchAlgorithmException;
@@ -126,17 +129,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
             response.setProcessingWrappers(endpoint.isProcessingWrappers());
         }
         // Deserialize the request
-        CustomRequestDeserializer customDeserializer;
-        // Check is the request encrypted and create deserializer accordingly
-        if (endpoint.isRequestEncrypted()) {
-            // If asymmetric decrypter is null, there's nothing to do
-            if (this.asymmetricDecrypter == null) {
-                throw new XRd4JException("No private key available when decryption is required.");
-            }
-            customDeserializer = new DecryptingReqToMapRequestDeserializerImpl(asymmetricDecrypter);
-        } else {
-            customDeserializer = new ReqToMapRequestDeserializerImpl();
-        }
+        CustomRequestDeserializer customDeserializer = getRequestDeserializer(endpoint);
         // Deserialize the request
         customDeserializer.deserialize(request, endpoint.getNamespaceDeserialize());
 
@@ -146,17 +139,7 @@ public class ProviderGateway extends AbstractAdapterServlet {
         logger.debug("Do message processing...");
 
         // Create response serializer
-        ServiceResponseSerializer serializer;
-        if (endpoint.isResponseEncrypted()) {
-            logger.debug("Endpoint requires that response is encrypted.");
-            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, request.getConsumer().toString());
-            if (asymmetricEncrypter == null) {
-                throw new XRd4JException("No public key found when encryption is required.");
-            }
-            serializer = new EncryptingXMLServiceResponseSerializer(asymmetricEncrypter, this.keyLength);
-        } else {
-            serializer = new XMLServiceResponseSerializer();
-        }
+        ServiceResponseSerializer serializer = getResponseSerializer(endpoint, request.getConsumer().toString());
 
         if (request.getRequestData() == null) {
             logger.warn("No request data was found. Return a non-techinal error message.");
@@ -231,6 +214,52 @@ public class ProviderGateway extends AbstractAdapterServlet {
         serializer.serialize(response, request);
         return response;
 
+    }
+
+    /**
+     * Returns a new CustomRequestDeserializer that converts the request from
+     * SOAP to ServiceRequest object. The implementation of the
+     * CustomRequestDeserializer is decided based on the given parameters.
+     *
+     * @param endpoint ProviderEndpoint that's processed using the deserializer
+     * @return new CustomRequestDeserializer object
+     * @throws XRd4JException
+     */
+    private CustomRequestDeserializer getRequestDeserializer(ProviderEndpoint endpoint) throws XRd4JException {
+        // Check is the request encrypted and create deserializer accordingly
+        if (endpoint.isRequestEncrypted()) {
+            // If asymmetric decrypter is null, there's nothing to do
+            if (this.asymmetricDecrypter == null) {
+                throw new XRd4JException("No private key available when decryption is required.");
+            }
+            return new DecryptingReqToMapRequestDeserializerImpl(asymmetricDecrypter);
+        } else {
+            return new ReqToMapRequestDeserializerImpl();
+        }
+    }
+
+    /**
+     * Returns a new ServiceResponseSerializer that converts the response object
+     * to SOAP. The implementation of the ServiceResponseSerializer is decided
+     * based on the given parameters.
+     *
+     * @param endpoint ProviderEndpoint that's processed using the serializer
+     * @param consumerIdentifier string that identifies the consumer which
+     * response is being processed
+     * @return new ServiceResponseSerializer object
+     * @throws XRd4JException
+     */
+    private ServiceResponseSerializer getResponseSerializer(ProviderEndpoint endpoint, String consumerIdentifier) throws XRd4JException {
+        if (endpoint.isResponseEncrypted()) {
+            logger.debug("Endpoint requires that response is encrypted.");
+            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, consumerIdentifier);
+            if (asymmetricEncrypter == null) {
+                throw new XRd4JException("No public key found when encryption is required.");
+            }
+            return new EncryptingXMLServiceResponseSerializer(asymmetricEncrypter, this.keyLength);
+        } else {
+            return new XMLServiceResponseSerializer();
+        }
     }
 
     /**

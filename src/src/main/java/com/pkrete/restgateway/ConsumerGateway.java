@@ -186,34 +186,10 @@ public class ConsumerGateway extends HttpServlet {
             if (endpoint.isProcessingWrappers() != null) {
                 serviceRequest.setProcessingWrappers(endpoint.isProcessingWrappers());
             }
-            // String get request body
-            String requestBody = this.readRequestBody(request);
             // Serializer that converts the request to SOAP
-            ServiceRequestSerializer serializer;
-            // Type of the serializer depends on the encryption
-            if (endpoint.isRequestEncrypted()) {
-                logger.debug("Endpoint requires that request is encrypted.");
-                Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, endpoint.getProducer().toString());
-                if (asymmetricEncrypter == null) {
-                    throw new XRd4JException("No public key found when encryption is required.");
-                }
-                serializer = new EncryptingRequestSerializer(endpoint.getResourceId(), requestBody, contentType, asymmetricEncrypter, this.keyLength);
-            } else {
-                serializer = new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
-            }
+            ServiceRequestSerializer serializer = getRequestSerializer(endpoint, this.readRequestBody(request), contentType);
             // Deserializer that converts the response from SOAP to XML/JSON
-            ServiceResponseDeserializer deserializer;
-            // Type of the serializer depends on the encryption
-            if (endpoint.isResponseEncrypted()) {
-                // If asymmetric decrypter is null, there's nothing to do
-                if (this.asymmetricDecrypter == null) {
-                    throw new XRd4JException("No private key available when decryption is required.");
-                }
-                deserializer = new EncryptingResponseDeserializer(omitNamespace, this.asymmetricDecrypter);
-            } else {
-                // Deserializer that converts the response from SOAP to XML/JSON string
-                deserializer = new ResponseDeserializer(omitNamespace);
-            }
+            ServiceResponseDeserializer deserializer = getResponseDeserializer(endpoint, omitNamespace);
             // SOAP client that makes the service call
             SOAPClient client = new SOAPClientImpl();
             logger.info("Send request ({}) to the security server. URL : \"{}\".", messageId, props.getProperty(Constants.CONSUMER_PROPS_SECURITY_SERVER_URL));
@@ -246,6 +222,56 @@ public class ConsumerGateway extends HttpServlet {
 
         // Send response
         this.writeResponse(response, responseStr);
+    }
+
+    /**
+     * Returns a new ServiceRequestSerializer that converts the request to SOAP.
+     * The implementation of the ServiceRequestSerializer is decided based on
+     * the given parameters.
+     *
+     * @param endpoint ConsumerEndpoint that's processed using the serializer
+     * @param requestBody request body that's being processed
+     * @param contentType content type of the request
+     * @return new ServiceRequestSerializer object
+     * @throws XRd4JException
+     */
+    private ServiceRequestSerializer getRequestSerializer(ConsumerEndpoint endpoint, String requestBody, String contentType) throws XRd4JException {
+        // Type of the serializer depends on the encryption
+        if (endpoint.isRequestEncrypted()) {
+            logger.debug("Endpoint requires that request is encrypted.");
+            Encrypter asymmetricEncrypter = RESTGatewayUtil.getEncrypter(this.publicKeyFile, this.publicKeyFilePassword, endpoint.getProducer().toString());
+            if (asymmetricEncrypter == null) {
+                throw new XRd4JException("No public key found when encryption is required.");
+            }
+            return new EncryptingRequestSerializer(endpoint.getResourceId(), requestBody, contentType, asymmetricEncrypter, this.keyLength);
+        } else {
+            return new RequestSerializer(endpoint.getResourceId(), requestBody, contentType);
+        }
+    }
+
+    /**
+     * Returns a new ServiceResponseDeserializer that converts the response from
+     * SOAP to XML/JSON. The implementation of the ServiceResponseDeserializer
+     * is decided based on the given parameters.
+     *
+     * @param endpoint ConsumerEndpoint that's processed using the deserializer
+     * @param omitNamespace boolean value that tells if the response namespace
+     * should be omitted by the deserializer
+     * @return new ServiceResponseDeserializer object
+     * @throws XRd4JException
+     */
+    private ServiceResponseDeserializer getResponseDeserializer(ConsumerEndpoint endpoint, boolean omitNamespace) throws XRd4JException {
+        // Type of the serializer depends on the encryption
+        if (endpoint.isResponseEncrypted()) {
+            // If asymmetric decrypter is null, there's nothing to do
+            if (this.asymmetricDecrypter == null) {
+                throw new XRd4JException("No private key available when decryption is required.");
+            }
+            return new EncryptingResponseDeserializer(omitNamespace, this.asymmetricDecrypter);
+        } else {
+            // Deserializer that converts the response from SOAP to XML/JSON string
+            return new ResponseDeserializer(omitNamespace);
+        }
     }
 
     /**
