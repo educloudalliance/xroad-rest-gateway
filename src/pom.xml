@@ -20,6 +20,7 @@
         <jdk.version>1.7</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <app.home>/var/lib/tomcat/webapps/rest-gateway/</app.home>
     </properties>
     <dependencies>
@@ -257,39 +258,98 @@
             </build>
         </profile>
         <profile>
-            <id>dev</id>
+            <id>encrypted</id>
             <build>
                 <resources>
                     <resource>
-                        <directory>src/main/profiles/dev</directory>
+                        <directory>src/main/profiles/encrypted</directory>
                         <filtering>true</filtering>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources-bin</directory>
+                        <filtering>false</filtering>
                     </resource>
                 </resources>
             </build>
         </profile>
         <profile>
-            <id>test</id>
+            <id>plaintext</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <resources>
                     <resource>
-                        <directory>src/main/profiles/test</directory>
+                        <directory>src/main/profiles/plaintext</directory>
                         <filtering>true</filtering>
                     </resource>
                 </resources>
             </build>
         </profile>        
         <profile>
-            <id>prod</id>
+            <id>integration-test</id>
             <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/profiles/prod</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
+                <plugins>                   
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <configuration>
+                            <argLine>-DconsumerPath=${project.build.finalName}</argLine>
+                            <systemProperties>
+                                <property>
+                                    <name>log4j.configuration</name>
+                                    <value>test-log4j.xml</value>
+                                </property>
+                            </systemProperties>
+                            <encoding>UTF-8</encoding>
+                            <inputEncoding>UTF-8</inputEncoding>
+                            <outputEncoding>UTF-8</outputEncoding>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.tomcat.maven</groupId>
+                        <artifactId>tomcat7-maven-plugin</artifactId>
+                        <version>2.0</version>
+                        <executions>
+                            <execution>
+                                <id>start-tomcat</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <fork>true</fork>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-tomcat</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>shutdown</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <path>/${project.build.finalName}</path>
+                            <charset>utf-8</charset>
+                        </configuration>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>
