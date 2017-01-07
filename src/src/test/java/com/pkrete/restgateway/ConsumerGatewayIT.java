@@ -18,8 +18,8 @@ import junit.framework.TestCase;
  */
 public class ConsumerGatewayIT extends TestCase {
 
-    private final static String CONTENT_TYPE_XML = Constants.TEXT_XML + ";" + Constants.CHARSET_UTF8;
-    private final static String CONTENT_TYPE_JSON = Constants.APPLICATION_JSON + ";" + Constants.CHARSET_UTF8;
+    private static final String CONTENT_TYPE_XML = Constants.TEXT_XML + ";" + Constants.CHARSET_UTF8;
+    private static final String CONTENT_TYPE_JSON = Constants.APPLICATION_JSON + ";" + Constants.CHARSET_UTF8;
     private final Map<Integer, String> urls = new HashMap<>();
     private final Map<Integer, Map<String, List<String>>> urlParams = new HashMap<>();
 
