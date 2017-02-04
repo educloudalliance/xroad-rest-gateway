@@ -35,7 +35,7 @@ http://localhost:8080/rest-gateway-0.0.9/Provider?wsdl
 Executable JAR version supports ```propertiesDirectory``` command line variable that makes it possible to load REST Gateway configuration files from defined directory outside of the JAR file. Otherwise the default configuration shipped with the JAR is used. For example
 
 ```
-java -jar rest-gateway.jar -DpropertiesDirectory=/my/custom/path
+java -jar -DpropertiesDirectory=/my/custom/path rest-gateway.jar
 ```
 
 More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.9#usage).
