@@ -5,7 +5,7 @@
     <groupId>com.pkrete.xrd4j.tools</groupId>
     <artifactId>rest-gateway</artifactId>
     <version>0.0.10-SNAPSHOT</version>
-    <name>XRd4J :: Tools :: REST Gateway</name>
+    <name>REST Gateway</name>
     <description>
         This is a REST Gateway component that sits between X-Road security
         server and a REST service. REST Gateway supports X-Road version
