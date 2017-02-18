@@ -68,6 +68,10 @@ The X-Road REST Gateway also builds RPMs for use with RHEL (or derivatives) and 
 
     $ mvn -f src/pom.xml -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true {clean,package}
 
+### Encryption of message content
+
+Starting from version 0.0.10 REST Gateway supports encryption/decryption of message content. More information and instructions for configuration can be found in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/Encryption).
+
 ### Links to material
 
 * [Data Exchange Layer X-Road](https://www.ria.ee/x-road/)
