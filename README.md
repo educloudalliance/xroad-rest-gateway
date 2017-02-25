@@ -18,18 +18,18 @@ In parallel with the technical development we will collect more use cases from F
 
 ## Try It Out
 
-The fastest and easiest way to try out the application is to [download](https://github.com/educloudalliance/xroad-rest-gateway/releases/download/v0.0.9/rest-gateway-0.0.9.jar) the executable jar version (```rest-gateway-0.0.9.jar```) and run it: ```java -jar rest-gateway-0.0.9.jar```. The application is accessible at:
+The fastest and easiest way to try out the application is to [download](https://github.com/educloudalliance/xroad-rest-gateway/releases/download/v0.0.10/rest-gateway-0.0.10.jar) the executable jar version (```rest-gateway-0.0.10.jar```) and run it: ```java -jar rest-gateway-0.0.10.jar```. The application is accessible at:
 
 ```
-http://localhost:8080/rest-gateway-0.0.9/Provider
+http://localhost:8080/rest-gateway-0.0.10/Provider
 
-http://localhost:8080/rest-gateway-0.0.9/Consumer
+http://localhost:8080/rest-gateway-0.0.10/Consumer
 ```
 
 The Provider WSDL description is accessible at:
 
 ```
-http://localhost:8080/rest-gateway-0.0.9/Provider?wsdl
+http://localhost:8080/rest-gateway-0.0.10/Provider?wsdl
 ```
 
 Executable JAR version supports ```propertiesDirectory``` command line variable that makes it possible to load REST Gateway configuration files from defined directory outside of the JAR file. Otherwise the default configuration shipped with the JAR is used. For example
@@ -38,7 +38,7 @@ Executable JAR version supports ```propertiesDirectory``` command line variable 
 java -jar -DpropertiesDirectory=/my/custom/path rest-gateway.jar
 ```
 
-More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.9#usage).
+More detailed usage examples are available in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/REST-Gateway-0.0.10#usage).
 
 ## Running the Docker Image
 
