@@ -54,6 +54,14 @@ If customized properties are used, the host directory containing the properties 
 docker run -p 8080:8080 -v /host/dir/conf:/my/conf -e "JAVA_OPTS=-DpropertiesDirectory=/my/conf"  petkivim/xroad-rest-gateway
 ```
 
+## Building the Docker Image
+
+While you are in the project root directory, build the image using the docker build command. The ```-t``` parameter gives your image a tag, so you can run it more easily later. Don’t forget the ```.``` command, which tells the docker build command to look in the current directory for a file called Dockerfile.
+
+```
+docker build -t xroad-rest-gateway .
+```
+
 ## Data Exchange Layer X-Road
 
 The X-Road was launched in 2001. The data exchange layer X-Road is a technical and organisational environment, which enables secure Internet-based data exchange between the state’s information systems.
