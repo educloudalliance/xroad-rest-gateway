@@ -14,7 +14,7 @@
     <url>https://github.com/educloudalliance/xroad-rest-gateway</url>
     <packaging>war</packaging>
     <properties>
-        <xrd4j.version>0.0.16</xrd4j.version>
+        <xrd4j.version>0.0.17</xrd4j.version>
         <slf4j.version>1.7.7</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <jdk.version>1.8</jdk.version>
