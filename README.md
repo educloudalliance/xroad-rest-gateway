@@ -72,7 +72,7 @@ The X-Road REST Gateway also builds RPMs for use with RHEL (or derivatives) and 
 
 Starting from version 0.0.10 REST Gateway supports encryption/decryption of message content. More information and instructions for configuration can be found in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/Encryption).
 
-By default plaintext configuration is enabled. The software can be built with encryption enabled using the command below.
+By default plaintext configuration is enabled. The software can be built with encryption configuration enabled using the command below.
 
 ```mvn clean install -P encrypted```
 
@@ -80,7 +80,7 @@ Running integration tests with plaintext configuration enabled:
 
 ```mvn clean install -P itest -P plaintext```
 
-Running integration tests with enryption enabled:
+Running integration tests with encryption configuration enabled:
 
 ```mvn clean install -P itest -P encrypted```
 
