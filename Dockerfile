@@ -1,5 +1,5 @@
-# Base java:7
-FROM java:7
+# Base java:8
+FROM java:8
 
 # Add Rest Gateway jar to container
 ADD src/target/rest-gateway-*.jar rest-gateway.jar

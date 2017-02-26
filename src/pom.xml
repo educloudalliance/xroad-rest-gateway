@@ -113,6 +113,7 @@
                             <directory>src/main/webapp</directory>
                             <includes>
                                 <include>**/META-INF/context.xml</include>
+                                <include>**/WEB-INF/classes/provider-gateway.wsdl</include>
                             </includes>
                         </resource>
                     </webResources>
