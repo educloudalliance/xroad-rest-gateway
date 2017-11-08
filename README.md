@@ -42,7 +42,7 @@ More detailed usage examples are available in [wiki](https://github.com/educloud
 
 ## Running the Docker Image
 
-REST Gatewat is available as Docker image. 
+REST Gateway is available as Docker image. 
 
 ```
 docker run -p 8080:8080 petkivim/xroad-rest-gateway
