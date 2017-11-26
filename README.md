@@ -1,3 +1,9 @@
+# Unmaintained Repository
+
+Unmaintained repository. Development moved to: https://github.com/vrk-kpa/REST-adapter-service
+
+X-Road REST Gateway will now be actively developed by The Finnish Population Register Centre (Väestörekisterikeskus, VRK). The original X-Road REST Gateway codebase here will be kept for archive purposes.
+
 # Joint X-Road REST Gateway development
 
 This repository will be the home for REST/JSON support solutions in X-Road. Mandate for joint development is based on [MoU which was signed by Katainen and Ansip](https://github.com/educloudalliance/xroad-rest-gateway/blob/master/MoU-Ansip-Katainen.md). The development and repository is shared between Estonia and Finland. Below is list of people who initiated the co-operation in Skype meeting which was held 18.12.2014. 
