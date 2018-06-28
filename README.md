@@ -76,13 +76,13 @@ The X-Road is not only a technical solution, the exchange of data with the datab
 
 Public and private sector enterprises and institutions can connect their information system with the X-Road. This enables them to use X-Road services in their own electronic environment or offer their e-services via the X-Road. Joining the X-Road enables institutions to save resources, since the data exchange layer already exists. This makes data exchange more effective both inside the state institutions as well as regarding the communication between a citizen and the state.
 
-### RPM Packaging
+## RPM Packaging
 
 The X-Road REST Gateway also builds RPMs for use with RHEL (or derivatives) and Apache Tomcat.
 
     $ mvn -f src/pom.xml -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true {clean,package}
 
-### Encryption of Message Content
+## Encryption of Message Content
 
 Starting from version 0.0.10 REST Gateway supports encryption/decryption of message content. More information and instructions for configuration can be found in [wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki/Encryption).
 
@@ -98,8 +98,13 @@ Running integration tests with encryption configuration enabled:
 
 ```mvn clean install -P itest -P encrypted```
 
-### Links to material
+## Configuration
 
+Configuration instructions can be found on the [Wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki). See [CRUD API Configuration](https://github.com/educloudalliance/xroad-rest-gateway/wiki/Example%3A-CRUD-API-Configuration) for example.
+
+## Links to material
+
+* [Wiki](https://github.com/educloudalliance/xroad-rest-gateway/wiki)
 * [Data Exchange Layer X-Road](https://www.ria.ee/x-road/)
 * [X-Road overview ](https://speakerdeck.com/educloudalliance/x-road-overview)
 * [X-Road regulations](https://speakerdeck.com/educloudalliance/x-road-regulations)
